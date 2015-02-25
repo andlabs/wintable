@@ -1,5 +1,5 @@
 // 19 october 2014
-#include "../wininclude_windows.h"
+#include "wininclude_windows.h"
 
 // #qo LIBS: user32 kernel32 gdi32 comctl32 uxtheme ole32 oleaut32 oleacc uuid msimg32
 

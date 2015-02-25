@@ -25,7 +25,21 @@ static const handlerfunc mouseLeaveHandlers[] = {
 	NULL,
 };
 
+// TODO which WM_xBUTTONDOWNs?
+// TODO move to focus.h
+HANDLER(mouseDownFocusHandler)
+{
+	// TODO other mouse buttons?
+	// don't check SetFocus()'s error (http://stackoverflow.com/questions/24073695/winapi-can-setfocus-return-null-without-an-error-because-thats-what-im-see)
+	// TODO NotifyWinEvent() here?
+	// TODO will this generate WM_SETFOCUS?
+	SetFocus(t->hwnd);
+	*lResult = 0;
+	return TRUE;
+}
+
 static const handlerfunc lbuttonDownHandlers[] = {
+	mouseDownFocusHandler,
 	mouseDownSelectHandler,
 	NULL,
 };

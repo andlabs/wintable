@@ -17,7 +17,7 @@ static struct scrollParams vscrollParams(struct table *t)
 	return p;
 }
 
-static void vscrollto(struct table *t, intptr_t pos)
+static void vscrollto(struct table *t, intmax_t pos)
 {
 	struct scrollParams p;
 
@@ -25,7 +25,7 @@ static void vscrollto(struct table *t, intptr_t pos)
 	scrollto(t, SB_VERT, &p, pos);
 }
 
-static void vscrollby(struct table *t, intptr_t delta)
+static void vscrollby(struct table *t, intmax_t delta)
 {
 	struct scrollParams p;
 

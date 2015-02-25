@@ -12,15 +12,15 @@ enum {
 	// lParam - column name as a Unicode string
 	tableAddColumn = WM_USER + 20,
 	// wParam - 0
-	// lParam - pointer to intptr_t containing new count
+	// lParam - pointer to intmax_t containing new count
 	tableSetRowCount,
-	// wParam - pointer to intptr_t where selected row will be stored
-	// lParam - pointer to intptr_t where selected column will be stored
+	// wParam - pointer to intmax_t where selected row will be stored
+	// lParam - pointer to intmax_t where selected column will be stored
 	// both will be -1 for no selection
 	// if either is NULL, that value is not written
 	tableGetSelection,
-	// wParam - pointer to intptr_t containing selected row
-	// lParam - pointer to intptr_t containing selected column
+	// wParam - pointer to intmax_t containing selected row
+	// lParam - pointer to intmax_t containing selected column
 	// if lParam is NULL, do not change selected column (selects column 0 if nothing previously selected; TODO explicitly document this?)
 	// TODO allow wParam to be NULL too; should both being NULL select nothing or keep the current selection?
 	// this WILL result in a selection changed notification (TODO work into the package ui Table)
@@ -61,10 +61,10 @@ typedef struct tableNM tableNM;
 
 struct tableNM {
 	NMHDR nmhdr;
-	intptr_t row;
-	intptr_t column;
+	intmax_t row;
+	intmax_t column;
 	int columnType;
-	uintptr_t data;
+	uintmax_t data;
 };
 
 // TODO have hInstance passed in

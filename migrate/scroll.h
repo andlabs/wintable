@@ -1,19 +1,19 @@
 // 9 december 2014
 
 struct scrollParams {
-	intptr_t *pos;
-	intptr_t pagesize;
-	intptr_t length;
-	intptr_t scale;
+	intmax_t *pos;
+	intmax_t pagesize;
+	intmax_t length;
+	intmax_t scale;
 	void (*post)(struct table *);
 	int *wheelCarry;
 };
 
-static void scrollto(struct table *t, int which, struct scrollParams *p, intptr_t pos)
+static void scrollto(struct table *t, int which, struct scrollParams *p, intmax_t pos)
 {
 	RECT scrollArea;
 	SCROLLINFO si;
-	intptr_t xamount, yamount;
+	intmax_t xamount, yamount;
 
 	if (pos < 0)
 		pos = 0;
@@ -63,14 +63,14 @@ static void scrollto(struct table *t, int which, struct scrollParams *p, intptr_
 	// TODO send state changes for all affected rows/cells?
 }
 
-static void scrollby(struct table *t, int which, struct scrollParams *p, intptr_t delta)
+static void scrollby(struct table *t, int which, struct scrollParams *p, intmax_t delta)
 {
 	scrollto(t, which, p, *(p->pos) + delta);
 }
 
 static void scroll(struct table *t, int which, struct scrollParams *p, WPARAM wParam, LPARAM lParam)
 {
-	intptr_t pos;
+	intmax_t pos;
 	SCROLLINFO si;
 
 	pos = *(p->pos);

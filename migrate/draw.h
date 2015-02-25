@@ -1,22 +1,22 @@
 // 8 december 2014
 
 // TODO move to api.h? definitely move somewhere
-static WCHAR *getCellText(struct table *t, intptr_t row, intptr_t column)
+static WCHAR *getCellText(struct table *t, intmax_t row, intmax_t column)
 {
 	return (WCHAR *) notify(t, tableNotificationGetCellData, row, column, 0);
 }
-static void returnCellData(struct table *t, intptr_t row, intptr_t column, void *what)
+static void returnCellData(struct table *t, intmax_t row, intmax_t column, void *what)
 {
-	notify(t, tableNotificationFinishedWithCellData, row, column, (uintptr_t) what);
+	notify(t, tableNotificationFinishedWithCellData, row, column, (uintmax_t) what);
 }
-static int isCheckboxChecked(struct table *t, intptr_t row, intptr_t column)
+static int isCheckboxChecked(struct table *t, intmax_t row, intmax_t column)
 {
 	return notify(t, tableNotificationGetCellData, row, column, 0) != 0;
 }
 
 struct drawCellParams {
-	intptr_t row;
-	intptr_t column;
+	intmax_t row;
+	intmax_t column;
 	LONG x;
 	LONG y;
 	LONG width;		// of column
@@ -153,7 +153,7 @@ static void drawCell(struct table *t, HDC dc, struct drawCellParams *p)
 // TODO use cliprect
 static void draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 {
-	intptr_t i, j;
+	intmax_t i, j;
 	HFONT prevfont, newfont;
 	struct drawCellParams p;
 

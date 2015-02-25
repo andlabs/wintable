@@ -12,8 +12,8 @@ HBITMAP mkbitmap(void);
 
 BOOL mainwinCreate(HWND hwnd, LPCREATESTRUCT lpcs)
 {
-	intptr_t c;
-	intptr_t row, col;
+	intmax_t c;
+	intmax_t row, col;
 
 	tablehwnd = CreateWindowExW(0,
 		tableWindowClass, L"Main Window",

@@ -17,7 +17,7 @@ static struct scrollParams hscrollParams(struct table *t)
 	return p;
 }
 
-static void hscrollto(struct table *t, intptr_t pos)
+static void hscrollto(struct table *t, intmax_t pos)
 {
 	struct scrollParams p;
 
@@ -25,7 +25,7 @@ static void hscrollto(struct table *t, intptr_t pos)
 	scrollto(t, SB_HORZ, &p, pos);
 }
 
-static void hscrollby(struct table *t, intptr_t delta)
+static void hscrollby(struct table *t, intmax_t delta)
 {
 	struct scrollParams p;
 

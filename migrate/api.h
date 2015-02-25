@@ -17,9 +17,9 @@ static void addColumn(struct table *t, WPARAM wParam, LPARAM lParam)
 }
 
 // TODO what happens if the currently selected row is lost?
-static void setRowCount(struct table *t, intptr_t rc)
+static void setRowCount(struct table *t, intmax_t rc)
 {
-	intptr_t old, i;
+	intmax_t old, i;
 
 	old = t->count;
 	t->count = rc;
@@ -38,8 +38,8 @@ static void setRowCount(struct table *t, intptr_t rc)
 
 HANDLER(apiHandlers)
 {
-	intptr_t *rcp;
-	intptr_t row;
+	intmax_t *rcp;
+	intmax_t row;
 
 	switch (uMsg) {
 	case WM_SETFONT:
@@ -61,24 +61,24 @@ HANDLER(apiHandlers)
 		*lResult = 0;
 		return TRUE;
 	case tableSetRowCount:
-		rcp = (intptr_t *) lParam;
+		rcp = (intmax_t *) lParam;
 		setRowCount(t, *rcp);
 		*lResult = 0;
 		return TRUE;
 	case tableGetSelection:
-		rcp = (intptr_t *) wParam;
+		rcp = (intmax_t *) wParam;
 		if (rcp != NULL)
 			*rcp = t->selectedRow;
-		rcp = (intptr_t *) lParam;
+		rcp = (intmax_t *) lParam;
 		if (rcp != NULL)
 			*rcp = t->selectedColumn;
 		*lResult = 0;
 		return TRUE;
 	case tableSetSelection:
 		// TODO does doselect() do validation?
-		rcp = (intptr_t *) wParam;
+		rcp = (intmax_t *) wParam;
 		row = *rcp;
-		rcp = (intptr_t *) lParam;
+		rcp = (intmax_t *) lParam;
 		if (rcp == NULL)
 			if (row == -1)
 				doselect(t, -1, -1);
@@ -92,7 +92,7 @@ HANDLER(apiHandlers)
 	return FALSE;
 }
 
-static LRESULT notify(struct table *t, UINT code, intptr_t row, intptr_t column, uintptr_t data)
+static LRESULT notify(struct table *t, UINT code, intmax_t row, intmax_t column, uintmax_t data)
 {
 	tableNM nm;
 

@@ -103,7 +103,7 @@ static void deselectFont(HDC dc, HFONT prevfont, HFONT newfont)
 
 // and back to other functions
 
-static LONG columnWidth(struct table *t, intptr_t n)
+static LONG columnWidth(struct table *t, intmax_t n)
 {
 	RECT r;
 

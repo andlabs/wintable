@@ -9,8 +9,8 @@
 static void update(struct table *t, BOOL redraw)
 {
 	RECT client;
-	intptr_t i;
-	intptr_t height;
+	intmax_t i;
+	intmax_t height;
 
 	// before we do anything we need the client rect
 	if (GetClientRect(t->hwnd, &client) == 0)

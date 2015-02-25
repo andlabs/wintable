@@ -1,15 +1,15 @@
 // 13 december 2014
 
 // damn winsock
-static void doselect(struct table *t, intptr_t row, intptr_t column)
+static void doselect(struct table *t, intmax_t row, intmax_t column)
 {
 	RECT r, client;
-	intptr_t oldrow;
+	intmax_t oldrow;
 	LONG width, height;
 	struct rowcol rc;
 	BOOL dovscroll;
-	intptr_t i;
-	intptr_t xpos;
+	intmax_t i;
+	intmax_t xpos;
 	LONG clientWidth;
 
 	// check existing selection to see if it's valid
@@ -174,8 +174,8 @@ TODO what happens if page up and page down are pressed with an item selected and
 
 HANDLER(keyDownSelectHandler)
 {
-	intptr_t row;
-	intptr_t column;
+	intmax_t row;
+	intmax_t column;
 
 	if (t->count == 0 || t->nColumns == 0)		// no items to select
 		return FALSE;

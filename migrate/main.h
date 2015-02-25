@@ -36,32 +36,32 @@ struct table {
 	HWND hwnd;
 	HWND header;
 	HFONT font;
-	intptr_t nColumns;
+	intmax_t nColumns;
 	int *columnTypes;
-	intptr_t width;
-	intptr_t headerHeight;
-	intptr_t hscrollpos;		// in logical units
-	intptr_t hpagesize;		// in logical units
-	intptr_t count;
-	intptr_t vscrollpos;		// in rows
-	intptr_t vpagesize;		// in rows
+	intmax_t width;
+	intmax_t headerHeight;
+	intmax_t hscrollpos;		// in logical units
+	intmax_t hpagesize;		// in logical units
+	intmax_t count;
+	intmax_t vscrollpos;		// in rows
+	intmax_t vpagesize;		// in rows
 	int hwheelCarry;
 	int vwheelCarry;
-	intptr_t selectedRow;
-	intptr_t selectedColumn;
+	intmax_t selectedRow;
+	intmax_t selectedColumn;
 	HTHEME theme;
 	int checkboxWidth;
 	int checkboxHeight;
 	BOOL checkboxMouseOverLast;
 	LPARAM checkboxMouseOverLastPoint;
 	BOOL checkboxMouseDown;
-	intptr_t checkboxMouseDownRow;
-	intptr_t checkboxMouseDownColumn;
+	intmax_t checkboxMouseDownRow;
+	intmax_t checkboxMouseDownColumn;
 	struct tableAcc *firstAcc;
 };
 
 // forward declaration (TODO needed?)
-static LRESULT notify(struct table *, UINT, intptr_t, intptr_t, uintptr_t);
+static LRESULT notify(struct table *, UINT, intmax_t, intmax_t, uintmax_t);
 
 // necessary forward declarations
 static void update(struct table *, BOOL);

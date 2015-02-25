@@ -36,8 +36,8 @@ typedef struct tableAccWhat tableAccWhat;
 
 struct tableAccWhat {
 	LONG role;
-	intptr_t row;
-	intptr_t column;
+	intmax_t row;
+	intmax_t column;
 };
 
 struct tableAcc {
@@ -75,7 +75,7 @@ void list(struct table *t)
 #endif
 
 // called after each allocation
-static struct tableAcc *newTableAcc(struct table *t, LONG role, intptr_t row, intptr_t column);
+static struct tableAcc *newTableAcc(struct table *t, LONG role, intmax_t row, intmax_t column);
 
 // common validation for accessibility functions that take varChild
 // also normalizes what as if varChild == CHILDID_SELF
@@ -97,7 +97,7 @@ static HRESULT normalizeWhat(struct tableAcc *ta, VARIANT varChild, tableAccWhat
 		if (cid >= ta->t->count)
 			return E_INVALIDARG;
 		what->role = ROLE_SYSTEM_ROW;
-		what->row = (intptr_t) cid;
+		what->row = (intmax_t) cid;
 		what->column = -1;
 		break;
 	case ROLE_SYSTEM_ROW:
@@ -729,8 +729,8 @@ static HRESULT STDMETHODCALLTYPE tableAccaccNavigate(IAccessible *this, long nav
 {
 	HRESULT hr;
 	tableAccWhat what;
-	intptr_t row = -1;
-	intptr_t column = -1;
+	intmax_t row = -1;
+	intmax_t column = -1;
 
 	if (pvarEndUpAt == NULL)
 		return E_POINTER;
@@ -1010,7 +1010,7 @@ static const IAccessibleVtbl tableAccVtbl = {
 	.put_accValue = tableAccput_accValue,
 };
 
-static struct tableAcc *newTableAcc(struct table *t, LONG role, intptr_t row, intptr_t column)
+static struct tableAcc *newTableAcc(struct table *t, LONG role, intmax_t row, intmax_t column)
 {
 	struct tableAcc *ta;
 	HRESULT hr;

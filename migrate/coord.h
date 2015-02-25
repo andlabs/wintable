@@ -47,15 +47,15 @@ static LONG rowHeight(struct table *t, HDC dc, BOOL select)
 #define rowht(t) rowHeight(t, NULL, TRUE)
 
 struct rowcol {
-	intptr_t row;
-	intptr_t column;
+	intmax_t row;
+	intmax_t column;
 };
 
 static struct rowcol clientCoordToRowColumn(struct table *t, POINT pt)
 {
 	RECT r;
 	struct rowcol rc;
-	intptr_t i;
+	intmax_t i;
 
 	if (GetClientRect(t->hwnd, &r) == 0)
 		panic("error getting Table client rect in clientCoordToRowColumn()");
@@ -112,8 +112,8 @@ static BOOL rowColumnToClientRect(struct table *t, struct rowcol rc, RECT *r)
 	RECT client;
 	RECT out;			// don't change r if we return FALSE
 	LONG height;
-	intptr_t xpos;
-	intptr_t i;
+	intmax_t xpos;
+	intmax_t i;
 
 	if (rc.row < t->vscrollpos)
 		return FALSE;
@@ -149,7 +149,7 @@ static BOOL rowColumnToClientRect(struct table *t, struct rowcol rc, RECT *r)
 
 // TODO idealCoordToRowColumn/rowColumnToIdealCoord?
 
-static void toCellContentRect(struct table *t, RECT *r, LRESULT xoff, intptr_t width, intptr_t height)
+static void toCellContentRect(struct table *t, RECT *r, LRESULT xoff, intmax_t width, intmax_t height)
 {
 	if (xoff == 0)
 		xoff = SendMessageW(t->header, HDM_GETBITMAPMARGIN, 0, 0);

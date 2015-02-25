@@ -47,7 +47,7 @@ HANDLER(eventHandlers)
 	switch (uMsg) {
 #define eventHandler(msg, array) \
 	case msg: \
-		return runHandlers(array, t, uMsg, wParam, lParam, lResult);
+		return runEventHandlers(array, t, uMsg, wParam, lParam, lResult);
 	eventHandler(WM_KEYDOWN, keyDownHandlers)
 	eventHandler(WM_KEYUP, keyUpHandlers)
 	eventHandler(WM_CHAR, charHandlers)

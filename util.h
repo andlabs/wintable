@@ -13,6 +13,19 @@ static BOOL runHandlers(const handlerfunc list[], struct table *t, UINT uMsg, WP
 	return FALSE;
 }
 
+// TODO move into events.h?
+static BOOL runEventHandlers(const handlerfunc list[], struct table *t, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT *lResult)
+{
+	const handlerfunc *p;
+	BOOL handled = FALSE;
+
+	// TODO make sure lResult is consistent
+	for (p = list; *p != NULL; p++)
+		if ((*(*p))(t, uMsg, wParam, lParam, lResult))
+			handled = TRUE;
+	return handled;
+}
+
 // memory allocation stuff
 // each of these functions do an implicit ZeroMemory()
 // these also make tableRealloc(NULL, ...)/tableFree(NULL) act like realloc(NULL, ...)/free(NULL) (that is, same as tableAlloc(...)/malloc(...) and a no-op, respectively)

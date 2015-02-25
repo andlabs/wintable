@@ -49,6 +49,10 @@ static const handlerfunc lbuttonUpHandlers[] = {
 	NULL,
 };
 
+static const handlerfunc captureChangedHandlers[] = {
+	NULL,
+};
+
 // TODO remove or something? depends on if we implement combobox and how
 static const handlerfunc mouseWheelHandlers[] = {
 	NULL,
@@ -69,6 +73,7 @@ HANDLER(eventHandlers)
 	eventHandler(WM_MOUSELEAVE, mouseLeaveHandlers)
 	eventHandler(WM_LBUTTONDOWN, lbuttonDownHandlers)
 	eventHandler(WM_LBUTTONUP, lbuttonUpHandlers)
+	eventHandler(WM_CAPTURECHANGED, captureChangedHandlers)
 	eventHandler(WM_MOUSEWHEEL, mouseWheelHandlers)
 #undef eventHandler
 	}

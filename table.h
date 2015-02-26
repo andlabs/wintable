@@ -1,9 +1,9 @@
 // 17 february 2015
 
-#ifndef __GO_UI_WINTABLE_INCLUDETHIS_H__
-#define __GO_UI_WINTABLE_INCLUDETHIS_H__
+#ifndef __WINTABLE_INCLUDETHIS_H__
+#define __WINTABLE_INCLUDETHIS_H__
 
-#define tableWindowClass L"gouitable"
+#define tableWindowClass L"andlabs_wintable"
 
 // start at WM_USER + 20 just in case for whatever reason we ever get the various dialog manager messages (see also http://blogs.msdn.com/b/oldnewthing/archive/2003/10/21/55384.aspx)
 // each of these returns nothing unless otherwise indicated
@@ -67,7 +67,6 @@ struct tableNM {
 	uintptr_t data;
 };
 
-// TODO have hInstance passed in
-extern void initTable(void (*panicfunc)(const char *msg, DWORD lastError));
+extern __declspec(dllexport) ATOM __stdcall tableInit(void);
 
 #endif

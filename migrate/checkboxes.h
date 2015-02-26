@@ -266,7 +266,7 @@ HANDLER(checkboxCaptureChangedHandler)
 	if (t->checkboxMouseOverLast)
 		redrawCheckboxRect(t, t->checkboxMouseOverLastPoint);
 	t->checkboxMouseDown = FALSE;
-	// DON'T call ReleaseCapture() here
+	// DON'T call ReleaseCapture() here; we've already lost the capture by this point (see http://stackoverflow.com/questions/28729808/do-i-have-the-right-idea-with-using-setcapture-for-a-windowless-checkbox#comment45750793_28731761)
 	*lResult = 0;
 	return TRUE;
 }

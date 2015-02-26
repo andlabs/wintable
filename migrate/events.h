@@ -20,11 +20,6 @@ static const handlerfunc mouseMoveHandlers[] = {
 	NULL,
 };
 
-static const handlerfunc mouseLeaveHandlers[] = {
-	checkboxMouseLeaveHandler,
-	NULL,
-};
-
 // TODO which WM_xBUTTONDOWNs?
 // TODO move to focus.h
 HANDLER(mouseDownFocusHandler)
@@ -50,6 +45,7 @@ static const handlerfunc lbuttonUpHandlers[] = {
 };
 
 static const handlerfunc captureChangedHandlers[] = {
+	checkboxCaptureChangedHandler,
 	NULL,
 };
 
@@ -70,7 +66,6 @@ HANDLER(eventHandlers)
 	eventHandler(WM_KEYUP, keyUpHandlers)
 	eventHandler(WM_CHAR, charHandlers)
 	eventHandler(WM_MOUSEMOVE, mouseMoveHandlers)
-	eventHandler(WM_MOUSELEAVE, mouseLeaveHandlers)
 	eventHandler(WM_LBUTTONDOWN, lbuttonDownHandlers)
 	eventHandler(WM_LBUTTONUP, lbuttonUpHandlers)
 	eventHandler(WM_CAPTURECHANGED, captureChangedHandlers)

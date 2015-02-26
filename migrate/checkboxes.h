@@ -146,26 +146,18 @@ static void redrawCheckboxRect(struct table *t, LPARAM lParam)
 
 HANDLER(checkboxMouseMoveHandler)
 {
+	// TODO make sure this function is even needed
+	// in particular, see http://stackoverflow.com/a/28731761/3408572
+
 	// don't actually check to see if the mouse is in the checkbox rect
 	// if there's scrolling without mouse movement, that will change
 	// instead, drawCell() will handle it
-	if (!t->checkboxMouseOverLast) {
+	if (!t->checkboxMouseOverLast)
 		t->checkboxMouseOverLast = TRUE;
-		retrack(t);
-	} else
+	else
 		redrawCheckboxRect(t, t->checkboxMouseOverLastPoint);
 	t->checkboxMouseOverLastPoint = lParam;
 	redrawCheckboxRect(t, t->checkboxMouseOverLastPoint);
-	*lResult = 0;
-	return TRUE;
-}
-
-HANDLER(checkboxMouseLeaveHandler)
-{
-	if (t->checkboxMouseOverLast)
-		redrawCheckboxRect(t, t->checkboxMouseOverLastPoint);
-	// TODO remember what I wanted to do here in the case of a held mouse button
-	t->checkboxMouseOverLast = FALSE;
 	*lResult = 0;
 	return TRUE;
 }
@@ -191,6 +183,7 @@ HANDLER(checkboxMouseDownHandler)
 	t->checkboxMouseDown = TRUE;
 	t->checkboxMouseDownRow = rc.row;
 	t->checkboxMouseDownColumn = rc.column;
+	SetCapture(t->hwnd);
 	// TODO redraw the whole cell?
 	if (InvalidateRect(t->hwnd, &r, TRUE) == 0)
 		panic("error redrawing Table checkbox after mouse down");
@@ -223,6 +216,9 @@ HANDLER(checkboxMouseUpHandler)
 		goto wrongUp;
 	notify(t, tableNotificationCellCheckboxToggled, rc.row, rc.column, 0);
 	t->checkboxMouseDown = FALSE;
+	// NOW ReleaseCapture() so we can ignore the WM_CAPTURECHANGED
+	if (ReleaseCapture() == 0)
+		panic("error releasing mouse capture on mouse up in TODO actually write this");
 	// TODO redraw the whole cell?
 	if (InvalidateRect(t->hwnd, &r, TRUE) == 0)
 		panic("error redrawing Table checkbox after mouse up");
@@ -243,5 +239,30 @@ wrongUp:
 	if (t->checkboxMouseOverLast)
 		redrawCheckboxRect(t, t->checkboxMouseOverLastPoint);
 	t->checkboxMouseDown = FALSE;
+	if (ReleaseCapture() == 0)
+		panic("error releasing mouse capture on aborted mouse up in TODO actually write this");
 	return FALSE;		// TODO really?
+}
+
+HANDLER(checkboxCaptureChangedHandler)
+{
+	if (!t->checkboxMouseDown)
+		return FALSE;
+	// abort without checking anything
+	// TODO merge with above
+	if (t->checkboxMouseDown) {
+		rc.row = t->checkboxMouseDownRow;
+		rc.column = t->checkboxMouseDownColumn;
+		if (rowColumnToClientRect(t, rc, &r))
+			// TODO only the checkbox rect?
+			if (InvalidateRect(t->hwnd, &r, TRUE) == 0)
+				panic("error redrawing Table checkbox rect for aborted mouse up event");
+	}
+	// if we landed on another checkbox, be sure to draw that one too
+	if (t->checkboxMouseOverLast)
+		redrawCheckboxRect(t, t->checkboxMouseOverLastPoint);
+	t->checkboxMouseDown = FALSE;
+	// DON'T call ReleaseCapture() here
+	*lResult = 0;
+	return TRUE;
 }

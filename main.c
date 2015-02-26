@@ -2,8 +2,8 @@
 
 #include "tablepriv.h"
 
+/* TODO
 static const handlerfunc handlers[] = {
-/*TODO
 	eventHandlers,
 	childrenHandlers,
 	resizeHandler,
@@ -12,9 +12,9 @@ static const handlerfunc handlers[] = {
 	hscrollHandler,
 	vscrollHandler,
 	accessibilityHandler,
-*/
 	NULL,
 };
+*/
 
 // TODO migrate this
 static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -30,6 +30,7 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 		if (uMsg == WM_CREATE) {
 			CREATESTRUCTW *cs = (CREATESTRUCTW *) lParam;
 
+/*TODO
 			t = (struct table *) tableAlloc(sizeof (struct table), "error allocating internal Table data structure");
 			t->hwnd = hwnd;
 			makeHeader(t, cs->hInstance);
@@ -37,21 +38,25 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 			t->selectedColumn = -1;
 			loadCheckboxThemeData(t);
 			SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR) t);
+*/
 		}
 		// even if we did the above, fall through
 		return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 	}
 	if (uMsg == WM_DESTROY) {
-printf("destroy\n");
+/*TODO
 		// TODO free appropriate (after figuring this part out) components of t
 		invalidateTableAccs(t);
 		freeCheckboxThemeData(t);
 		destroyHeader(t);
 		tableFree(t, "error allocating internal Table data structure");
+*/
 		return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 	}
+/*TODO
 	if (runHandlers(handlers, t, uMsg, wParam, lParam, &lResult))
 		return lResult;
+*/
 	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 }
 
@@ -59,6 +64,7 @@ printf("destroy\n");
 static HINSTANCE hInstance;
 
 // TODO WINAPI or some equivalent instead of __stdcall?
+// TODO initialize common controls here?
 __declspec(dllexport) ATOM __stdcall tableInit(void)
 {
 	WNDCLASSW wc;

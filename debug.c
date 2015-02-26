@@ -42,6 +42,7 @@ HRESULT panicHRESULT(const char *context, HRESULT hr)
 	int parenthesize = 0;
 
 	fprintf(stderr, "%s: ", context);
+	// this isn't technically documented, but everyone does it, including Microsoft (see the implementation of _com_error::ErrorMessage() in a copy of comdef.h that comes with the Windows DDK)
 	if (FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, (DWORD) hr, 0, (LPWSTR) (&msg), 0, NULL) != 0) {
 		fprintf(stderr, "%S (", msg);
 		// TODO check error

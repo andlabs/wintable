@@ -27,8 +27,6 @@ static void (*tablePanic)(const char *, DWORD) = NULL;
 #define panic(...) (*tablePanic)(__VA_ARGS__, GetLastError())
 #define abort $$$$		// prevent accidental use of abort()
 
-static BOOL (*WINAPI tableTrackMouseEvent)(LPTRACKMOUSEEVENT);
-
 // forward declaration
 struct tableAcc;
 
@@ -141,17 +139,13 @@ static void deftablePanic(const char *msg, DWORD lastError)
 }
 
 // TODO have hInstance passed in
-void initTable(void (*panicfunc)(const char *msg, DWORD lastError), BOOL (*WINAPI tme)(LPTRACKMOUSEEVENT))
+void initTable(void (*panicfunc)(const char *msg, DWORD lastError))
 {
 	WNDCLASSW wc;
 
 	tablePanic = panicfunc;
 	if (tablePanic == NULL)
 		tablePanic = deftablePanic;
-	if (tme == NULL)
-		// TODO errorless version
-		panic("must provide a TrackMouseEvent() to initTable()");
-	tableTrackMouseEvent = tme;
 	ZeroMemory(&wc, sizeof (WNDCLASSW));
 	wc.lpszClassName = tableWindowClass;
 	wc.lpfnWndProc = tableWndProc;

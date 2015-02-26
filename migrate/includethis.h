@@ -68,6 +68,6 @@ struct tableNM {
 };
 
 // TODO have hInstance passed in
-extern void initTable(void (*panicfunc)(const char *msg, DWORD lastError), BOOL (*WINAPI tme)(LPTRACKMOUSEEVENT));
+extern void initTable(void (*panicfunc)(const char *msg, DWORD lastError));
 
 #endif

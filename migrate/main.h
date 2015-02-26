@@ -59,7 +59,7 @@ struct table {
 };
 
 // forward declaration (TODO needed?)
-static LRESULT notify(struct table *, UINT, intmax_t, intmax_t, uintmax_t);
+static LRESULT notify(struct table *, UINT, intmax_t, intmax_t, uintptr_t);
 
 // necessary forward declarations
 static void update(struct table *, BOOL);

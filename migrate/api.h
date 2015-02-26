@@ -92,7 +92,7 @@ HANDLER(apiHandlers)
 	return FALSE;
 }
 
-static LRESULT notify(struct table *t, UINT code, intmax_t row, intmax_t column, uintmax_t data)
+static LRESULT notify(struct table *t, UINT code, intmax_t row, intmax_t column, uintptr_t data)
 {
 	tableNM nm;
 

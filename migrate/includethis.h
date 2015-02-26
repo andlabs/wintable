@@ -64,7 +64,7 @@ struct tableNM {
 	intmax_t row;
 	intmax_t column;
 	int columnType;
-	uintmax_t data;
+	uintptr_t data;
 };
 
 // TODO have hInstance passed in

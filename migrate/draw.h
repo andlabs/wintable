@@ -7,7 +7,7 @@ static WCHAR *getCellText(struct table *t, intmax_t row, intmax_t column)
 }
 static void returnCellData(struct table *t, intmax_t row, intmax_t column, void *what)
 {
-	notify(t, tableNotificationFinishedWithCellData, row, column, (uintmax_t) what);
+	notify(t, tableNotificationFinishedWithCellData, row, column, (uintptr_t) what);
 }
 static int isCheckboxChecked(struct table *t, intmax_t row, intmax_t column)
 {

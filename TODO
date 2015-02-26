@@ -1,0 +1,17 @@
+TODO
+- should tablePanic be CALLBACK or some other equivalent macro? and definitely export initTable somehow, but which alias macro to use?
+- make panic messages grammatically correct ("Table error: adding...")
+- make access to column widths consistent; see whether HDITEMW.cxy == (ITEMRECT.right - ITEMRECT.left)
+- make sure all uses of t->headerHeight are ADDED to RECT.top
+- WM_THEMECHANGED, etc.
+- see if vertical centering is really what we want or if we just want to offset by a few pixels or so
+- going right from column 0 to column 2 with the right arrow key deselects
+- make sure all error messages involving InvalidateRect() are consistent with regards to "redrawing" and "queueing for redraw"
+- collect all resize-related tasks in a single function (so things like adding columns will refresh everything, not just horizontal scrolls; also would fix initial coordinates)
+- checkbox columns don't clip to the column width
+- send standard notification codes
+- seriously figure out how we're going to update everything about the table in one place
+- redraw on focus change
+- draw themed WS_EX_CLIENTEDGE (and WS_EX_WINDOWEDGE?)
+- in-place tooltips for text columns
+- checkboxes: use capture instead of manual tracking logic? http://blogs.msdn.com/b/oldnewthing/archive/2015/02/25/10595729.aspx

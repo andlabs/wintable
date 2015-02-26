@@ -65,6 +65,7 @@ DWORD panicLastError(const char *reason)
 {
 	DWORD le;
 
+	// technically (I think? TODO) we don't need to do this, but let's do this anyway just to be safe
 	le = GetLastError();
 	SetLastError(le);
 	return le;

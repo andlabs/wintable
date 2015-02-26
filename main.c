@@ -1,87 +1,9 @@
 // 7 january 2015
 
-// TODO remove
-#include <stdio.h>
-
-// TODO
-// - should tablePanic be CALLBACK or some other equivalent macro? and definitely export initTable somehow, but which alias macro to use?
-// - make panic messages grammatically correct ("Table error: adding...")
-// - make access to column widths consistent; see whether HDITEMW.cxy == (ITEMRECT.right - ITEMRECT.left)
-// - make sure all uses of t->headerHeight are ADDED to RECT.top
-// - WM_THEMECHANGED, etc.
-// - see if vertical centering is really what we want or if we just want to offset by a few pixels or so
-// - going right from column 0 to column 2 with the right arrow key deselects
-// - make sure all error messages involving InvalidateRect() are consistent with regards to "redrawing" and "queueing for redraw"
-// - collect all resize-related tasks in a single function (so things like adding columns will refresh everything, not just horizontal scrolls; also would fix initial coordinates)
-// - checkbox columns don't clip to the column width
-// - send standard notification codes
-// - seriously figure out how we're going to update everything about the table in one place
-// - redraw on focus change
-// - draw themed WS_EX_CLIENTEDGE (and WS_EX_WINDOWEDGE?)
-// - in-place tooltips for text columns
-// - checkboxes: use capture instead of manual tracking logic? http://blogs.msdn.com/b/oldnewthing/archive/2015/02/25/10595729.aspx
-
-#include "includethis.h"
-
-static void (*tablePanic)(const char *, DWORD) = NULL;
-#define panic(...) (*tablePanic)(__VA_ARGS__, GetLastError())
-#define abort $$$$		// prevent accidental use of abort()
-
-// forward declaration
-struct tableAcc;
-
-struct table {
-	HWND hwnd;
-	HWND header;
-	HFONT font;
-	intmax_t nColumns;
-	int *columnTypes;
-	intmax_t width;
-	intmax_t headerHeight;
-	intmax_t hscrollpos;		// in logical units
-	intmax_t hpagesize;		// in logical units
-	intmax_t count;
-	intmax_t vscrollpos;		// in rows
-	intmax_t vpagesize;		// in rows
-	int hwheelCarry;
-	int vwheelCarry;
-	intmax_t selectedRow;
-	intmax_t selectedColumn;
-	HTHEME theme;
-	int checkboxWidth;
-	int checkboxHeight;
-	BOOL checkboxMouseOverLast;
-	LPARAM checkboxMouseOverLastPoint;
-	BOOL checkboxMouseDown;
-	intmax_t checkboxMouseDownRow;
-	intmax_t checkboxMouseDownColumn;
-	struct tableAcc *firstAcc;
-};
-
-// forward declaration (TODO needed?)
-static LRESULT notify(struct table *, UINT, intmax_t, intmax_t, uintptr_t);
-
-// necessary forward declarations
-static void update(struct table *, BOOL);
-static void updateAll(struct table *);
-
-#include "util.h"
-#include "coord.h"
-#include "scroll.h"
-#include "hscroll.h"
-#include "vscroll.h"
-#include "select.h"
-#include "checkboxes.h"
-#include "events.h"
-#include "header.h"
-#include "children.h"
-#include "resize.h"
-#include "draw.h"
-#include "api.h"
-#include "accessibility.h"
-#include "update.h"
+#include "tablepriv.h"
 
 static const handlerfunc handlers[] = {
+/*TODO
 	eventHandlers,
 	childrenHandlers,
 	resizeHandler,
@@ -90,9 +12,11 @@ static const handlerfunc handlers[] = {
 	hscrollHandler,
 	vscrollHandler,
 	accessibilityHandler,
+*/
 	NULL,
 };
 
+// TODO migrate this
 static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	struct table *t;
@@ -131,29 +55,53 @@ printf("destroy\n");
 	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 }
 
-static void deftablePanic(const char *msg, DWORD lastError)
-{
-	fprintf(stderr, "Table error: %s (last error %I32u)\n", msg, lastError);
-	fprintf(stderr, "This is the default Table error handler function; programs that use Table should provide their own instead.\nThe program will now break into the debugger.\n");
-	DebugBreak();
-}
+// TODO is this the best way to store the DLL hInstance?
+static HINSTANCE hInstance;
 
-// TODO have hInstance passed in
-void initTable(void (*panicfunc)(const char *msg, DWORD lastError))
+// TODO WINAPI or some equivalent instead of __stdcall?
+__declspec(dllexport) ATOM __stdcall tableInit(void)
 {
 	WNDCLASSW wc;
+	ATOM a;
 
-	tablePanic = panicfunc;
-	if (tablePanic == NULL)
-		tablePanic = deftablePanic;
 	ZeroMemory(&wc, sizeof (WNDCLASSW));
 	wc.lpszClassName = tableWindowClass;
 	wc.lpfnWndProc = tableWndProc;
 	wc.hCursor = LoadCursorW(NULL, IDC_ARROW);
+	if (wc.hCursor == NULL) {
+		panicLastError("error loading Table window class cursor");
+		return 0;		// pass last error up
+	}
 	wc.hIcon = LoadIconW(NULL, IDI_APPLICATION);
-	wc.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1);		// TODO correct?
+	if (wc.hIcon == NULL) {
+		panicLastError("error loading Table window class icon");
+		return 0;		// pass last error up
+	}
+	wc.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1);		// TODO correct? (check list view behavior on COLOR_WINDOW change)
 	wc.style = CS_HREDRAW | CS_VREDRAW;
-	wc.hInstance = GetModuleHandle(NULL);
-	if (RegisterClassW(&wc) == 0)
-		panic("error registering Table window class");
+	wc.hInstance = hInstance;
+	a = RegisterClassW(&wc);
+	if (a == 0)
+		panicLastError("error registering Table window class");
+	return a;		// pass last error up if a == 0
+}
+
+// TODO consider DisableThreadLibraryCalls() (will require removing ALL C runtime calls)
+// TODO make sure this is the correct name for C runtime initialization (CHECK MSDN OR THE HEADERS)
+// TODO can hinstDLL ever change? (see above about hInstance)
+// TODO handle DLL_PROCESS_DETACH?
+// TODO __declspec(dllexport)?
+BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
+{
+	if (fdwReason == DLL_PROCESS_ATTACH)
+		hInstance = hinstDLL;
+	return TRUE;
+}
+
+// this is solely for the test program's use and will be removed (TODO) when we're ready to split
+EXTERN_C IMAGE_DOS_HEADER __ImageBase;
+HINSTANCE tableTestProgramInit(void)
+{
+	hInstance = (HINSTANCE) (&__ImageBase);
+	return hInstance;
 }

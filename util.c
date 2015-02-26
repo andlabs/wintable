@@ -1,6 +1,6 @@
 // 4 december 2014
 
-static BOOL runHandlers(const handlerfunc list[], struct table *t, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT *lResult)
+BOOL runHandlers(const handlerfunc list[], struct table *t, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT *lResult)
 {
 	const handlerfunc *p;
 
@@ -11,7 +11,7 @@ static BOOL runHandlers(const handlerfunc list[], struct table *t, UINT uMsg, WP
 }
 
 // TODO move into events.h?
-static BOOL runEventHandlers(const handlerfunc list[], struct table *t, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT *lResult)
+BOOL runEventHandlers(const handlerfunc list[], struct table *t, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT *lResult)
 {
 	const handlerfunc *p;
 	BOOL handled = FALSE;
@@ -41,7 +41,7 @@ DWORD selectFont(struct table *t, HDC dc, HFONT *newfont, HFONT *prevFont)
 	return 0;
 }
 
-static DWORD deselectFont(HDC dc, HFONT prevfont, HFONT newfont)
+DWORD deselectFont(HDC dc, HFONT prevfont, HFONT newfont)
 {
 	if (SelectObject(dc, prevfont) != newfont)
 		return panicLastError("error deselecting Table font from Table DC");
@@ -52,7 +52,7 @@ static DWORD deselectFont(HDC dc, HFONT prevfont, HFONT newfont)
 // and back to other functions
 
 // TODO move to metrics.c
-static DWORD columnWidth(struct table *t, intmax_t n, LONG *width)
+DWORD columnWidth(struct table *t, intmax_t n, LONG *width)
 {
 	RECT r;
 

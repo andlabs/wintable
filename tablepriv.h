@@ -60,6 +60,9 @@ struct table {
 	struct tableAcc *firstAcc;
 };
 
+typedef BOOL (*handlerfunc)(struct table *, UINT, WPARAM, LPARAM, LRESULT *);
+#define HANDLER(name) BOOL name(struct table *t, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT *lResult)
+
 // TODO all forward declarations
 
 // debug.c

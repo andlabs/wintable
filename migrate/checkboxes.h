@@ -162,6 +162,7 @@ HANDLER(checkboxMouseMoveHandler)
 	return TRUE;
 }
 
+// TODO if we click on a partially invisible checkbox, should the mouse be moved up along with the scroll?
 HANDLER(checkboxMouseDownHandler)
 {
 	struct rowcol rc;
@@ -246,6 +247,9 @@ wrongUp:
 
 HANDLER(checkboxCaptureChangedHandler)
 {
+	struct rowcol rc;
+	RECT r;
+
 	if (!t->checkboxMouseDown)
 		return FALSE;
 	// abort without checking anything

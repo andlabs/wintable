@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
 	icc.dwICC = ICC_LISTVIEW_CLASSES;
 	if (InitCommonControlsEx(&icc) == 0)
 		panic("(test program) error initializing comctl32.dll");
-	initTable(NULL, _TrackMouseEvent);
+	initTable(NULL);
 	ZeroMemory(&wc, sizeof (WNDCLASSW));
 	wc.lpszClassName = L"mainwin";
 	wc.lpfnWndProc = mainwndproc;

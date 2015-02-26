@@ -1,9 +1,12 @@
 // 19 october 2014
-#include "wininclude_windows.h"
+// this is a shortcut for including the windows stuff; TODO remove
+#include "tablepriv.h"
 
 // #qo LIBS: user32 kernel32 gdi32 comctl32 uxtheme ole32 oleaut32 oleacc uuid msimg32
 
-#include "main.h"
+#include "table.h"
+
+#define panic(...) abort()
 
 HWND tablehwnd = NULL;
 BOOL msgfont = FALSE;
@@ -114,6 +117,8 @@ LRESULT CALLBACK mainwndproc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 }
 
+extern void tableTestProgramInit(void);
+
 int main(int argc, char *argv[])
 {
 	HWND mainwin;
@@ -128,7 +133,9 @@ int main(int argc, char *argv[])
 	icc.dwICC = ICC_LISTVIEW_CLASSES;
 	if (InitCommonControlsEx(&icc) == 0)
 		panic("(test program) error initializing comctl32.dll");
-	initTable(NULL);
+	tableTestProgramInit();
+	if (tableInit() == 0)
+		panic("(test program) error initializing Table");
 	ZeroMemory(&wc, sizeof (WNDCLASSW));
 	wc.lpszClassName = L"mainwin";
 	wc.lpfnWndProc = mainwndproc;

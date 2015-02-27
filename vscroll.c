@@ -1,7 +1,5 @@
 // 9 december 2014
-
-// forward declaration needed here
-static void repositionHeader(struct table *);
+#include "tablepriv.h"
 
 static struct scrollParams vscrollParams(struct table *t)
 {
@@ -17,38 +15,39 @@ static struct scrollParams vscrollParams(struct table *t)
 	return p;
 }
 
-static void vscrollto(struct table *t, intmax_t pos)
+DWORD vscrollto(struct table *t, intmax_t pos)
 {
 	struct scrollParams p;
 
 	p = vscrollParams(t);
-	scrollto(t, SB_VERT, &p, pos);
+	return scrollto(t, SB_VERT, &p, pos);
 }
 
-static void vscrollby(struct table *t, intmax_t delta)
+DWORD vscrollby(struct table *t, intmax_t delta)
 {
 	struct scrollParams p;
 
 	p = vscrollParams(t);
-	scrollby(t, SB_VERT, &p, delta);
+	return scrollby(t, SB_VERT, &p, delta);
 }
 
-static void vscroll(struct table *t, WPARAM wParam, LPARAM lParam)
+DWORD vscroll(struct table *t, WPARAM wParam, LPARAM lParam)
 {
 	struct scrollParams p;
 
 	p = vscrollParams(t);
-	scroll(t, SB_VERT, &p, wParam, lParam);
+	return scroll(t, SB_VERT, &p, wParam, lParam);
 }
 
-static void vwheelscroll(struct table *t, WPARAM wParam, LPARAM lParam)
+DWORD vwheelscroll(struct table *t, WPARAM wParam, LPARAM lParam)
 {
 	struct scrollParams p;
 
 	p = vscrollParams(t);
-	wheelscroll(t, SB_VERT, &p, wParam, lParam);
+	return wheelscroll(t, SB_VERT, &p, wParam, lParam);
 }
 
+// TODO what do we do if a function fails?
 HANDLER(vscrollHandler)
 {
 	switch (uMsg) {

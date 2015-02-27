@@ -114,3 +114,10 @@ extern DWORD scrollto(struct table *, int, struct scrollParams *, intmax_t);
 extern DWORD scrollby(struct table *, int, struct scrollParams *, intmax_t);
 extern DWORD scroll(struct table *, int, struct scrollParams *, WPARAM, LPARAM);
 extern DWORD wheelscroll(struct table *, int, struct scrollParams *, WPARAM, LPARAM);
+
+// vscroll.h
+extern DWORD vscrollto(struct table *, intmax_t);
+extern DWORD vscrollby(struct table *, intmax_t);
+extern DWORD vscroll(struct table *, WPARAM, LPARAM);
+extern DWORD vwheelscroll(struct table *, WPARAM, LPARAM);
+extern HANDLER(vscrollHandler);

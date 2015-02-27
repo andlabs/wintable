@@ -137,3 +137,7 @@ extern DWORD destroyHeader(struct table *);
 extern DWORD repositionHeader(struct table *);
 extern DWORD headerAddColumn(struct table *, WCHAR *);
 extern HANDLER(headerNotifyHandler);
+
+// events.c
+extern HANDLER(mouseDownFocusHandler);
+extern HANDLER(eventHandlers);

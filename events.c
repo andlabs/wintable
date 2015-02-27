@@ -1,4 +1,5 @@
 // 5 december 2014
+#include "tablepriv.h"
 
 // TODO handler functions don't work here because you can't have more than one for the mouse ones...
 
@@ -21,7 +22,7 @@ static const handlerfunc mouseMoveHandlers[] = {
 };
 
 // TODO which WM_xBUTTONDOWNs?
-// TODO move to focus.h
+// TODO move to focus.c
 HANDLER(mouseDownFocusHandler)
 {
 	// TODO other mouse buttons?

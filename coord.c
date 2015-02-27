@@ -1,11 +1,7 @@
 // 4 december 2014
 #include "tablepriv.h"
 
-// TODO move to tablepriv.h
-struct rowcol {
-	intmax_t row;
-	intmax_t column;
-};
+// TODO these functions rely on t->firstVisible being > 0; this causes problems for our drawing and scrolling logic, so that will have to change...
 
 // TODO call erroring functions before returning anything else?
 DWORD clientCoordToRowColumn(struct table *t, POINT pt, struct rowcol *rc)
@@ -128,7 +124,7 @@ invisible:
 
 // TODO idealCoordToRowColumn/rowColumnToIdealCoord?
 
-static void toCellContentRect(struct table *t, RECT *r, LRESULT xoff, intmax_t width, intmax_t height)
+void toCellContentRect(struct table *t, RECT *r, LRESULT xoff, intmax_t width, intmax_t height)
 {
 	if (xoff == 0)
 		xoff = SendMessageW(t->header, HDM_GETBITMAPMARGIN, 0, 0);
@@ -139,6 +135,3 @@ static void toCellContentRect(struct table *t, RECT *r, LRESULT xoff, intmax_t w
 		// TODO vertical center
 		r->bottom = r->top + height;
 }
-
-// TODO move to tablepriv.h
-#define toCheckboxRect(t, r, xoff) toCellContentRect(t, r, xoff, t->checkboxWidth, t->checkboxHeight)

@@ -89,3 +89,14 @@ extern DWORD textHeight(struct table *, HDC, BOOL, LONG *);
 #define tableImageHeight() GetSystemMetrics(SM_CYSMICON)
 extern DWORD rowHeight(struct table *, HDC, BOOL, LONG *);
 #define rowht(t, p) rowHeight(t, NULL, TRUE, p)
+
+// coord.c
+struct rowcol {
+	intmax_t row;
+	intmax_t column;
+};
+extern DWORD clientCoordToRowColumn(struct table *, POINT, struct rowcol *);
+extern DWORD lParamToRowColumn(struct table *, LPARAM, struct rowcol *);
+extern DWORD rowColumnToClientRect(struct table *, struct rowcol, RECT *, BOOL *);
+extern void toCellContentRect(struct table *, RECT *, LRESULT, intmax_t, intmax_t);
+#define toCheckboxRect(t, r, xoff) toCellContentRect(t, r, xoff, t->checkboxWidth, t->checkboxHeight)

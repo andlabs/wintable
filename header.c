@@ -1,8 +1,9 @@
 // 7 december 2014
+#include "tablepriv.h"
 
 // TODO verify header events (double-clicking on a divider, for example)
 
-static void makeHeader(struct table *t, HINSTANCE hInstance)
+DWORD makeHeader(struct table *t, HINSTANCE hInstance)
 {
 	t->header = CreateWindowExW(0,
 		WC_HEADERW, L"",
@@ -13,41 +14,44 @@ static void makeHeader(struct table *t, HINSTANCE hInstance)
 		0, 0, 0, 0,		// no initial size
 		t->hwnd, (HMENU) 100, hInstance, NULL);
 	if (t->header == NULL)
-		panic("error creating Table header");
+		return panicLastError("error creating Table header");
+	return 0;
 }
 
-static void destroyHeader(struct table *t)
+DWORD destroyHeader(struct table *t)
 {
 	if (DestroyWindow(t->header) == 0)
-		panic("error destroying Table header");
+		return panicLastError("error destroying Table header");
+	return 0;
 }
 
 // to avoid weird bugs, the only functions allowed to call this one are the horizontal scroll functions
 // when we need to reposition the header in a situation other than a user-initiated scroll, we use a dummy scroll (hscrollby(t, 0))
 // see update() in update.h
-static void repositionHeader(struct table *t)
+DWORD repositionHeader(struct table *t)
 {
 	RECT r;
 	WINDOWPOS wp;
 	HDLAYOUT l;
 
 	if (GetClientRect(t->hwnd, &r) == 0)
-		panic("error getting client rect for Table header repositioning");
+		return panicLastError("error getting client rect for Table header repositioning");
 	// we fake horizontal scrolling here by extending the client rect to the left by the scroll position
 	r.left -= t->hscrollpos;
 	l.prc = &r;
 	l.pwpos = &wp;
 	if (SendMessageW(t->header, HDM_LAYOUT, 0, (LPARAM) (&l)) == FALSE)
-		panic("error getting new Table header position");
+		return panicLastError("error getting new Table header position");
 	if (SetWindowPos(t->header, wp.hwndInsertAfter,
 		wp.x, wp.y, wp.cx, wp.cy,
 		// see above on showing the header here instead of in the CreateWindowExW() call
 		wp.flags | SWP_SHOWWINDOW) == 0)
-		panic("error repositioning Table header");
+		return panicLastError("error repositioning Table header");
 	t->headerHeight = wp.cy;
+	return 0;
 }
 
-static void headerAddColumn(struct table *t, WCHAR *name)
+DWORD headerAddColumn(struct table *t, WCHAR *name)
 {
 	HDITEMW item;
 
@@ -58,10 +62,11 @@ static void headerAddColumn(struct table *t, WCHAR *name)
 	item.fmt = HDF_LEFT | HDF_STRING;
 	// TODO replace 100 with (t->nColumns - 1)
 	if (SendMessage(t->header, HDM_INSERTITEM, (WPARAM) (100), (LPARAM) (&item)) == (LRESULT) (-1))
-		panic("error adding column to Table header");
+		return panicLastError("error adding column to Table header");
 }
 
 // TODO is this triggered if we programmatically move headers (for autosizing)?
+// TODO what happens if any of the functions here fail?
 HANDLER(headerNotifyHandler)
 {
 	NMHDR *nmhdr = (NMHDR *) lParam;

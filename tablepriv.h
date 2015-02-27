@@ -127,3 +127,13 @@ extern DWORD hscrollto(struct table *, intmax_t);
 extern DWORD hscrollby(struct table *, intmax_t);
 extern DWORD hscroll(struct table *, WPARAM, LPARAM);
 extern HANDLER(hscrollHandler);
+
+// children.c
+extern HANDLER(childrenHandlers);
+
+// header.c
+extern DWORD makeHeader(struct table *, HINSTANCE);
+extern DWORD destroyHeader(struct table *);
+extern DWORD repositionHeader(struct table *);
+extern DWORD headerAddColumn(struct table *, WCHAR *);
+extern HANDLER(headerNotifyHandler);

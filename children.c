@@ -1,4 +1,5 @@
 // 7 december 2014
+#include "tablepriv.h"
 
 static const handlerfunc commandHandlers[] = {
 	NULL,

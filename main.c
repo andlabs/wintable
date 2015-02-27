@@ -16,6 +16,7 @@ static const handlerfunc handlers[] = {
 */
 
 // TODO migrate this
+// TODO check all of these functions for failure
 static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	struct table *t;

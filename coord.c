@@ -1,32 +1,39 @@
 // 4 december 2014
+#include "tablepriv.h"
 
+// TODO move to tablepriv.h
 struct rowcol {
 	intmax_t row;
 	intmax_t column;
 };
 
-static struct rowcol clientCoordToRowColumn(struct table *t, POINT pt)
+// TODO call erroring functions before returning anything else?
+DWORD clientCoordToRowColumn(struct table *t, POINT pt, struct rowcol *rc)
 {
 	RECT r;
-	struct rowcol rc;
 	intmax_t i;
+	LONG height;
+	DWORD le;
 
 	if (GetClientRect(t->hwnd, &r) == 0)
-		panic("error getting Table client rect in clientCoordToRowColumn()");
+		return panicLastError("error getting Table client rect in clientCoordToRowColumn()");
 	r.top += t->headerHeight;
 	if (PtInRect(&r, pt) == 0)
 		goto outside;
 
 	// the row is easy
+	le = rowhtt(t, &height);
+	if (le != 0)
+		return le;
 	pt.y -= t->headerHeight;
-	rc.row = (pt.y / rowht(t)) + t->vscrollpos;
-	if (rc.row >= t->count)
+	rc->row = (pt.y / height) + t->vscrollpos;
+	if (rc->row >= t->count)
 		goto outside;
 
 	// the column... not so much
 	// we scroll p.x, then subtract column widths until we cross the left edge of the control
 	pt.x += t->hscrollpos;
-	rc.column = 0;
+	rc->column = 0;
 	for (i = 0; i < t->nColumns; i++) {
 		pt.x -= columnWidth(t, i);
 		// use <, not <=, here:
@@ -37,68 +44,86 @@ static struct rowcol clientCoordToRowColumn(struct table *t, POINT pt)
 		// pt.x == 100 (first pixel of col 1) -> p.x - 100 == 0 >= 0 -> next column
 		if (pt.x < r.left)
 			break;
-		rc.column++;
+		rc->column++;
 	}
-	if (rc.column >= t->nColumns)
+	if (rc->column >= t->nColumns)
 		goto outside;
 
-	return rc;
+	return 0;
 
 outside:
-	rc.row = -1;
-	rc.column = -1;
-	return rc;
+	rc->row = -1;
+	rc->column = -1;
+	return 0;
 }
 
 // same as client coordinates, but stored in a lParam (like the various mouse messages provide)
-static struct rowcol lParamToRowColumn(struct table *t, LPARAM lParam)
+DWORD lParamToRowColumn(struct table *t, LPARAM lParam, struct rowcol *rc)
 {
 	POINT pt;
 
 	pt.x = GET_X_LPARAM(lParam);
 	pt.y = GET_Y_LPARAM(lParam);
-	return clientCoordToRowColumn(t, pt);
+	return clientCoordToRowColumn(t, pt, rc);
 }
 
 // returns TRUE if the row is visible (even partially visible) and thus has a rectangle in the client area; FALSE otherwise
-static BOOL rowColumnToClientRect(struct table *t, struct rowcol rc, RECT *r)
+// TODO provide a way to intersect with the visible client rect area
+// TODO call erroring functions before returning anything else?
+DWORD rowColumnToClientRect(struct table *t, struct rowcol rc, RECT *r, BOOL *visible)
 {
 	RECT client;
 	RECT out;			// don't change r if we return FALSE
 	LONG height;
 	intmax_t xpos;
 	intmax_t i;
+	DWORD le;
+	intmax_t n;
 
 	if (rc.row < t->vscrollpos)
-		return FALSE;
+		goto invisible;
 	rc.row -= t->vscrollpos;		// align with client.top
 
 	if (GetClientRect(t->hwnd, &client) == 0)
-		panic("error getting Table client rect in rowColumnToClientRect()");
+		return panicLastError("error getting Table client rect in rowColumnToClientRect()");
 	client.top += t->headerHeight;
 
-	height = rowht(t);
+	le = rowht(t, &height);
+	if (le != 0)
+		return le;
 	out.top = client.top + (rc.row * height);
-	if (out.top >= client.bottom)		// >= because RECT.bottom is the first pixel outside the rectangle
-		return FALSE;
+	if (out.top >= client.bottom)			// >= because RECT.bottom is the first pixel outside the rectangle
+		goto invisible;
 	out.bottom = out.top + height;
 
 	// and again the columns are the hard part
 	// so we start with client.left - t->hscrollpos, then keep adding widths until we get to the column we want
 	xpos = client.left - t->hscrollpos;
-	for (i = 0; i < rc.column; i++)
-		xpos += columnWidth(t, i);
+	for (i = 0; i < rc.column; i++) {
+		le = columnWidth(t, i, &n);
+		if (le != 0)
+			return le;
+		xpos += n;
+	}
 	// did we stray too far to the right? if so it's not visible
 	if (xpos >= client.right)		// >= because RECT.right is the first pixel outside the rectangle
-		return FALSE;
+		goto invisible;
 	out.left = xpos;
-	out.right = xpos + columnWidth(t, rc.column);
+	le = columnWidth(t, rc.column, &n);
+	if (le != 0)
+		return le;
+	out.right = xpos + n;
 	// and is this too far to the left?
 	if (out.right < client.left)		// < because RECT.left is the first pixel inside the rect
-		return FALSE;
+		goto invisible;
 
 	*r = out;
-	return TRUE;
+	*visible = TRUE;
+	return 0;
+
+invisible:
+	*visible = FALSE;
+	return 0;
 }
 
 // TODO idealCoordToRowColumn/rowColumnToIdealCoord?
@@ -115,4 +140,5 @@ static void toCellContentRect(struct table *t, RECT *r, LRESULT xoff, intmax_t w
 		r->bottom = r->top + height;
 }
 
+// TODO move to tablepriv.h
 #define toCheckboxRect(t, r, xoff) toCellContentRect(t, r, xoff, t->checkboxWidth, t->checkboxHeight)

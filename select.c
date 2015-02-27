@@ -1,7 +1,15 @@
 // 13 december 2014
+#include "tablepriv.h"
+
+// TODO
+#define panic(...) abort()
+
+// TODO rewrite this messy file in general
 
 // damn winsock
-static void doselect(struct table *t, intmax_t row, intmax_t column)
+// TODO rewrite this to make error handling more sane
+// TODO should failure to scroll really be fatal to selection?
+DWORD doselect(struct table *t, intmax_t row, intmax_t column)
 {
 	RECT r, client;
 	intmax_t oldrow;
@@ -11,6 +19,8 @@ static void doselect(struct table *t, intmax_t row, intmax_t column)
 	intmax_t i;
 	intmax_t xpos;
 	LONG clientWidth;
+	DWORD le;
+	BOOL visible;
 
 	// check existing selection to see if it's valid
 	if (t->selectedRow == -1 && t->selectedColumn != -1)
@@ -38,7 +48,7 @@ static void doselect(struct table *t, intmax_t row, intmax_t column)
 
 	// do this even if we don't scroll before; noScroll depends on it
 	if (GetClientRect(t->hwnd, &client) == 0)
-		panic("error getting Table client rect in doselect()");
+		return panicLastError("error getting Table client rect in doselect()");
 	client.top += t->headerHeight;
 	height = rowht(t);
 
@@ -47,38 +57,53 @@ static void doselect(struct table *t, intmax_t row, intmax_t column)
 		goto noScroll;
 
 	// first vertically scroll to the new row to make it fully visible (or as visible as possible)
-	if (t->selectedRow < t->vscrollpos)
-		vscrollto(t, t->selectedRow);
-	else {
+	if (t->selectedRow < t->vscrollpos) {
+		le = vscrollto(t, t->selectedRow);
+		if (le != 0)
+			return le;
+	} else {
 		rc.row = t->selectedRow;
 		rc.column = t->selectedColumn;
 		// first assume entirely outside the client area
 		dovscroll = TRUE;
-		if (rowColumnToClientRect(t, rc, &r))
+		le = rowColumnToClientRect(t, rc, &r, &rctcr);
+		if (le != 0)
+			return le;
+		if (visible)
 			// partially outside the client area?
 			if (r.bottom <= client.bottom)		// <= here since we are comparing bottoms (which are the first pixels outside the rectangle)
 				dovscroll = FALSE;
-		if (dovscroll)
-			vscrollto(t, t->selectedRow - t->vpagesize + 1);		// + 1 because apparently just t->selectedRow - t->vpagesize results in no scrolling (t->selectedRow - t->vpagesize == t->vscrollpos)...
+		if (dovscroll) {
+			le = vscrollto(t, t->selectedRow - t->vpagesize + 1);			// + 1 because apparently just t->selectedRow - t->vpagesize results in no scrolling (t->selectedRow - t->vpagesize == t->vscrollpos)...
+			if (le != 0)
+				return le;
+		}
 	}
 
 	// now see if the cell we want is to the left of offscreen, in which case scroll to its x-position
 	xpos = 0;
 	for (i = 0; i < t->selectedColumn; i++)
 		xpos += columnWidth(t, i);
-	if (xpos < t->hscrollpos)
-		hscrollto(t, xpos);
-	else {
+	if (xpos < t->hscrollpos) {
+		le = hscrollto(t, xpos);
+		if (le != 0)
+			return le;
+	} else {
 		// if the full cell is not visible, scroll to the right just enough to make it fully visible (or as visible as possible)
 		width = columnWidth(t, t->selectedColumn);
 		clientWidth = client.right - client.left;
 		if (xpos + width > t->hscrollpos + clientWidth)			// > because both sides deal with the first pixel outside
 			// if the column is too wide, then just make it occupy the whole visible area (left-aligned)
-			if (width > clientWidth)			// TODO >= ?
-				hscrollto(t, xpos);
-			else
+			if (width > clientWidth) {			// TODO >= ?
+				le = hscrollto(t, xpos);
+				if (le != 0)
+					return le;
+			} else {
 				// TODO don't use t->hpagesize here? depends if other code uses it
-				hscrollto(t, (xpos + width) - t->hpagesize);
+				le = hscrollto(t, (xpos + width) - t->hpagesize);
+				if (le != 0)
+					return le;
+			}
 	}
 
 noScroll:
@@ -90,14 +115,14 @@ noScroll:
 		r.top = client.top + ((oldrow - t->vscrollpos) * height);
 		r.bottom = r.top + height;
 		if (InvalidateRect(t->hwnd, &r, TRUE) == 0)
-			panic("error queueing previously selected row for redraw in doselect()");
+			return panicLastError("error queueing previously selected row for redraw in doselect()");
 	}
 	// t->selectedRow must be visible by this point; we scrolled to it
 	if (t->selectedRow != -1 && t->selectedRow != oldrow) {
 		r.top = client.top + ((t->selectedRow - t->vscrollpos) * height);
 		r.bottom = r.top + height;
 		if (InvalidateRect(t->hwnd, &r, TRUE) == 0)
-			panic("error queueing newly selected row for redraw in doselect()");
+			return panicLastError("error queueing newly selected row for redraw in doselect()");
 	}
 
 	// TODO what about deselect/defocus?
@@ -110,10 +135,8 @@ noScroll:
 	notify(t, tableNotificationSelectionChanged, t->selectedRow, t->selectedColumn, 0);
 }
 
-// TODO make this needless
-HANDLER(checkboxMouseDownHandler);
-
 // TODO which WM_xBUTTONDOWNs?
+// TODO what if any of these functions fail?
 HANDLER(mouseDownSelectHandler)
 {
 	struct rowcol rc;
@@ -172,6 +195,7 @@ for left and right we will simulate up and down, respectively (so right selects 
 TODO what happens if page up and page down are pressed with an item selected and the scroll in a different position?
 */
 
+// TODO what if any of these functions fail
 HANDLER(keyDownSelectHandler)
 {
 	intmax_t row;

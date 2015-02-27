@@ -141,3 +141,8 @@ extern HANDLER(headerNotifyHandler);
 // events.c
 extern HANDLER(mouseDownFocusHandler);
 extern HANDLER(eventHandlers);
+
+// select.c
+extern DWORD doselect(struct table *, intmax_t, intmax_t);
+extern HANDLER(mouseDownSelectHandler);
+extern HANDLER(keyDownSelectHandler);

@@ -2,6 +2,7 @@
 #include "tablepriv.h"
 
 // TODO handler functions don't work here because you can't have more than one for the mouse ones...
+// TODO make these function names consistent
 
 static const handlerfunc keyDownHandlers[] = {
 	keyDownSelectHandler,

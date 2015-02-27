@@ -1,5 +1,4 @@
 // 7 january 2015
-
 #include "tablepriv.h"
 
 /* TODO

@@ -1,5 +1,4 @@
 // 25 february 2015
-
 #include "tablepriv.h"
 
 // uncomment the following line to enable debug messages

@@ -1,4 +1,5 @@
 // 4 december 2014
+#include "tablepriv.h"
 
 BOOL runHandlers(const handlerfunc list[], struct table *t, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT *lResult)
 {
@@ -25,7 +26,7 @@ BOOL runEventHandlers(const handlerfunc list[], struct table *t, UINT uMsg, WPAR
 
 // font selection
 
-DWORD selectFont(struct table *t, HDC dc, HFONT *newfont, HFONT *prevFont)
+DWORD selectFont(struct table *t, HDC dc, HFONT *newfont, HFONT *prevfont)
 {
 	// copy it in casse we get a WM_SETFONT before this call's respective deselectFont() call
 	*newfont = t->font;

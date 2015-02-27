@@ -1,6 +1,8 @@
 // 4 december 2014
+#include "tablepriv.h"
 
 // TODO migrate
+#define panic(...) abort()
 
 // each of these functions do an implicit ZeroMemory()
 // these also make tableRealloc(NULL, ...)/tableFree(NULL) act like realloc(NULL, ...)/free(NULL) (that is, same as tableAlloc(...)/malloc(...) and a no-op, respectively)

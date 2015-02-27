@@ -10,47 +10,61 @@ DWORD columnWidth(struct table *t, intmax_t n, LONG *width)
 	return 0;
 }
 
-static LONG textHeight(struct table *t, HDC dc, BOOL select)
+// TODO really return an error in the freeing process?
+DWORD textHeight(struct table *t, HDC dc, BOOL select, LONG *height)
 {
 	BOOL release;
 	HFONT prevfont, newfont;
 	TEXTMETRICW tm;
+	DWORD le;
 
 	release = FALSE;
 	if (dc == NULL) {
 		dc = GetDC(t->hwnd);
 		if (dc == NULL)
-			panic("error getting Table DC for rowHeight()");
+			return panicLastError("error getting Table DC for rowHeight()");
 		release = TRUE;
 	}
-	if (select)
-		prevfont = selectFont(t, dc, &newfont);
+	if (select) {
+		le = selectFont(t, dc, &newfont, &prevfont);
+		if (le != 0)
+			return le;
+	}
 	if (GetTextMetricsW(dc, &tm) == 0)
-		panic("error getting text metrics for rowHeight()");
-	if (select)
-		deselectFont(dc, prevfont, newfont);
+		return panicLastError("error getting text metrics for rowHeight()");
+	if (select) {
+		le = deselectFont(dc, prevfont, newfont);
+		if (le != 0)
+			return le;
+	}
 	if (release)
 		if (ReleaseDC(t->hwnd, dc) == 0)
-			panic("error releasing Table DC for rowHeight()");
-	return tm.tmHeight;
+			return panicLastError("error releasing Table DC for rowHeight()");
+	*height = tm.tmHeight;
+	return 0;
 }
 
+// TODO move to tablepriv.h
 #define tableImageWidth() GetSystemMetrics(SM_CXSMICON)
 #define tableImageHeight() GetSystemMetrics(SM_CYSMICON)
 
 // TODO omit column types that are not present?
-static LONG rowHeight(struct table *t, HDC dc, BOOL select)
+DWORD rowHeight(struct table *t, HDC dc, BOOL select, LONG *height)
 {
-	LONG height;
 	LONG tmHeight;
+	DWORD le;
 
-	height = tableImageHeight();		// start with this to avoid two function calls
-	tmHeight = textHeight(t, dc, select);
-	if (height < tmHeight)
-		height = tmHeight;
-	if (height < t->checkboxHeight)
-		height = t->checkboxHeight;
-	return height;
+	// do this first to avoid overwriting height before an error case
+	le = textHeight(t, dc, select, &tmHeight);
+	if (le != 0)
+		return le;
+	*height = tableImageHeight();		// start with this to avoid two function calls
+	if (*height < tmHeight)
+		*height = tmHeight;
+	if (*height < t->checkboxHeight)
+		*height = t->checkboxHeight;
+	return 0;
 }
 
-#define rowht(t) rowHeight(t, NULL, TRUE)
+// TODO move to tablepriv.h
+#define rowht(t, p) rowHeight(t, NULL, TRUE, p)

@@ -1,4 +1,5 @@
 // 4 december 2014
+#include "tablepriv.h"
 
 DWORD columnWidth(struct table *t, intmax_t n, LONG *width)
 {
@@ -44,10 +45,6 @@ DWORD textHeight(struct table *t, HDC dc, BOOL select, LONG *height)
 	return 0;
 }
 
-// TODO move to tablepriv.h
-#define tableImageWidth() GetSystemMetrics(SM_CXSMICON)
-#define tableImageHeight() GetSystemMetrics(SM_CYSMICON)
-
 // TODO omit column types that are not present?
 DWORD rowHeight(struct table *t, HDC dc, BOOL select, LONG *height)
 {
@@ -65,6 +62,3 @@ DWORD rowHeight(struct table *t, HDC dc, BOOL select, LONG *height)
 		*height = t->checkboxHeight;
 	return 0;
 }
-
-// TODO move to tablepriv.h
-#define rowht(t, p) rowHeight(t, NULL, TRUE, p)

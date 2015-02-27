@@ -81,3 +81,11 @@ extern BOOL runHandlers(const handlerfunc[], struct table *, UINT, WPARAM, LPARA
 extern BOOL runEventHandlers(const handlerfunc[], struct table *, UINT, WPARAM, LPARAM, LRESULT *);
 extern DWORD selectFont(struct table *, HDC, HFONT *, HFONT *);
 extern DWORD deselectFont(HDC, HFONT, HFONT);
+
+// metrics.c
+extern DWORD columnWidth(struct table *, intmax_t, LONG *);
+extern DWORD textHeight(struct table *, HDC, BOOL, LONG *);
+#define tableImageWidth() GetSystemMetrics(SM_CXSMICON)
+#define tableImageHeight() GetSystemMetrics(SM_CYSMICON)
+extern DWORD rowHeight(struct table *, HDC, BOOL, LONG *);
+#define rowht(t, p) rowHeight(t, NULL, TRUE, p)

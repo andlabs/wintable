@@ -70,6 +70,7 @@ typedef BOOL (*handlerfunc)(struct table *, UINT, WPARAM, LPARAM, LRESULT *);
 // debug.c
 extern DWORD panicLastError(const char *);
 extern HRESULT panicHRESULT(const char *, HRESULT);
+#define panicLastErrorAsHRESULT(s) HRESULT_FROM_WIN32(panicLastError(s))
 
 // alloc.c
 extern void *tableAlloc(size_t);
@@ -146,3 +147,12 @@ extern HANDLER(eventHandlers);
 extern DWORD doselect(struct table *, intmax_t, intmax_t);
 extern HANDLER(mouseDownSelectHandler);
 extern HANDLER(keyDownSelectHandler);
+
+// checkboxes.c
+enum {
+	checkboxStateChecked = 1 << 0,
+	checkboxStateHot = 1 << 1,
+	checkboxStatePushed = 1 << 2,
+	checkboxnStates = 1 << 3,
+};
+// TODO which ones?

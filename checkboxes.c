@@ -1,14 +1,5 @@
 // 16 august 2014
-
-enum {
-	checkboxStateChecked = 1 << 0,
-	checkboxStateHot = 1 << 1,
-	checkboxStatePushed = 1 << 2,
-	checkboxnStates = 1 << 3,
-};
-
-// TODO actually make this
-#define panichresult(a, b) panic(a)
+#include "tablepriv.h"
 
 static UINT dfcState(int cbstate)
 {
@@ -24,10 +15,11 @@ static UINT dfcState(int cbstate)
 	return ret;
 }
 
-static void drawFrameControlCheckbox(HDC dc, RECT *r, int cbState)
+static DWORD drawFrameControlCheckbox(HDC dc, RECT *r, int cbState)
 {
 	if (DrawFrameControl(dc, r, DFC_BUTTON, dfcState(cbState)) == 0)
-		panic("error drawing Table checkbox image with DrawFrameControl()");
+		return panicLastError("error drawing Table checkbox image with DrawFrameControl()");
+	return 0;
 }
 
 static void getFrameControlCheckboxSize(HDC dc, int *width, int *height)
@@ -49,101 +41,126 @@ static int themestates[checkboxnStates] = {
 	CBS_CHECKEDPRESSED,				// checked | hot | pushed
 };
 
-static SIZE getStateSize(HDC dc, int cbState, HTHEME theme)
+static HRESULT getStateSize(HDC dc, int cbState, HTHEME theme, SIZE *s)
 {
-	SIZE s;
+	// TODO rename this and all future instances to hr
 	HRESULT res;
 
-	res = GetThemePartSize(theme, dc, BP_CHECKBOX, themestates[cbState], NULL, TS_DRAW, &s);
+	res = GetThemePartSize(theme, dc, BP_CHECKBOX, themestates[cbState], NULL, TS_DRAW, s);
 	if (res != S_OK)
-		panichresult("error getting theme part size for Table checkboxes", res);
-	return s;
+		return panicHRESULT("error getting theme part size for Table checkboxes", res);
+	return res;
 }
 
-static void drawThemeCheckbox(HDC dc, RECT *r, int cbState, HTHEME theme)
+static HRESULT drawThemeCheckbox(HDC dc, RECT *r, int cbState, HTHEME theme)
 {
 	HRESULT res;
 
 	res = DrawThemeBackground(theme, dc, BP_CHECKBOX, themestates[cbState], r, NULL);
 	if (res != S_OK)
-		panichresult("error drawing Table checkbox image from theme", res);
+		return panicHRESULT("error drawing Table checkbox image from theme", res);
+	return res;
 }
 
-static void getThemeCheckboxSize(HDC dc, int *width, int *height, HTHEME theme)
+static HRESULT getThemeCheckboxSize(HDC dc, int *width, int *height, HTHEME theme)
 {
+	HRESULT res;
 	SIZE size;
 	int cbState;
 
-	size = getStateSize(dc, 0, theme);
+	res = getStateSize(dc, 0, theme, &size);
+	if (res != S_OK)
+		return res;
 	for (cbState = 1; cbState < checkboxnStates; cbState++) {
 		SIZE against;
 
-		against = getStateSize(dc, cbState, theme);
+		res = getStateSize(dc, cbState, theme, &res);
+		if (res != S_OK)
+			return res;
 		if (size.cx != against.cx || size.cy != against.cy)
-			// TODO make this use a no-information (or two ints) panic()
 			panic("size mismatch in Table checkbox states");
 	}
 	*width = (int) size.cx;
 	*height = (int) size.cy;
+	return S_OK;
 }
 
-static void drawCheckbox(struct table *t, HDC dc, RECT *r, int cbState)
+static HRESULT drawCheckbox(struct table *t, HDC dc, RECT *r, int cbState)
 {
-	if (t->theme != NULL) {
-		drawThemeCheckbox(dc, r, cbState, t->theme);
-		return;
-	}
-	drawFrameControlCheckbox(dc, r, cbState);
+	DWORD le;
+
+	if (t->theme != NULL)
+		return drawThemeCheckbox(dc, r, cbState, t->theme);
+	le = drawFrameControlCheckbox(dc, r, cbState);
+	if (le != 0)
+		return HRESULT_FROM_WIN32(le);
+	return S_OK;
 }
 
-static void freeCheckboxThemeData(struct table *t)
+// TODO really panic on failure?
+static HRESULT freeCheckboxThemeData(struct table *t)
 {
 	if (t->theme != NULL) {
 		HRESULT res;
 
 		res = CloseThemeData(t->theme);
 		if (res != S_OK)
-			panichresult("error closing Table checkbox theme", res);
+			return panicHRESULT("error closing Table checkbox theme", res);
 		t->theme = NULL;
 	}
+	return S_OK;
 }
 
-static void loadCheckboxThemeData(struct table *t)
+// TODO really panic on failure to ReleaseDC()?
+static HRESULT loadCheckboxThemeData(struct table *t)
 {
 	HDC dc;
+	HRESULT hr;
 
-	freeCheckboxThemeData(t);
+	hr = freeCheckboxThemeData(t);
+	if (hr != S_OK)
+		return hr;
 	dc = GetDC(t->hwnd);
 	if (dc == NULL)
-		panic("error getting Table DC for loading checkbox theme data");
+		return panicLastErrorAsHRESULT("error getting Table DC for loading checkbox theme data");
 	// ignore error; if it can't be done, we can fall back to DrawFrameControl()
 	if (t->theme == NULL)		// try to open the theme
 		t->theme = OpenThemeData(t->hwnd, L"button");
 	if (t->theme != NULL)		// use the theme
-		getThemeCheckboxSize(dc, &(t->checkboxWidth), &(t->checkboxHeight), t->theme);
+		hr = getThemeCheckboxSize(dc, &(t->checkboxWidth), &(t->checkboxHeight), t->theme);
 	else						// couldn't open; fall back
-		getFrameControlCheckboxSize(dc, &(t->checkboxWidth), &(t->checkboxHeight));
+		hr = getFrameControlCheckboxSize(dc, &(t->checkboxWidth), &(t->checkboxHeight));
+	if (hr != S_OK)
+		return hr;
 	if (ReleaseDC(t->hwnd, dc) == 0)
-		panic("error releasing Table DC for loading checkbox theme data");
+		return panicLastErrorAsHRESULT("error releasing Table DC for loading checkbox theme data");
+	return S_OK;
 }
 
-static void redrawCheckboxRect(struct table *t, LPARAM lParam)
+static DWORD redrawCheckboxRect(struct table *t, LPARAM lParam)
 {
 	struct rowcol rc;
 	RECT r;
+	DWORD le;
+	BOOL visible;
 
 	rc = lParamToRowColumn(t, lParam);
 	if (rc.row == -1 && rc.column == -1)
-		return;
+		return 0;
 	if (t->columnTypes[rc.column] != tableColumnCheckbox)
-		return;
-	if (!rowColumnToClientRect(t, rc, &r))
-		return;
+		return 0;
+	le = rowColumnToClientRect(t, rc, &r, &visible);
+	if (le != 0)
+		return le;
+	if (!visible)
+		return 0;
 	// TODO only the checkbox rect?
 	if (InvalidateRect(t->hwnd, &r, TRUE) == 0)
-		panic("error redrawing Table checkbox rect for mouse events");
+		return panicLastError("error redrawing Table checkbox rect for mouse events");
+	return 0;
 }
 
+// TODO what happens if any of these functions fail?
 HANDLER(checkboxMouseMoveHandler)
 {
 	// TODO make sure this function is even needed
@@ -163,6 +180,7 @@ HANDLER(checkboxMouseMoveHandler)
 }
 
 // TODO if we click on a partially invisible checkbox, should the mouse be moved up along with the scroll?
+// TODO what happens if any of these fail?
 HANDLER(checkboxMouseDownHandler)
 {
 	struct rowcol rc;
@@ -192,6 +210,7 @@ HANDLER(checkboxMouseDownHandler)
 	return TRUE;
 }
 
+// TODO what happens if any of these fail?
 HANDLER(checkboxMouseUpHandler)
 {
 	struct rowcol rc;
@@ -245,6 +264,7 @@ wrongUp:
 	return FALSE;		// TODO really?
 }
 
+// TODO what happens if any of these fail?
 HANDLER(checkboxCaptureChangedHandler)
 {
 	struct rowcol rc;

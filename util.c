@@ -49,16 +49,3 @@ DWORD deselectFont(HDC dc, HFONT prevfont, HFONT newfont)
 	// doin't delete newfont here, even if it is the system font (see http://msdn.microsoft.com/en-us/library/windows/desktop/dd144925%28v=vs.85%29.aspx)
 	return 0;
 }
-
-// and back to other functions
-
-// TODO move to metrics.c
-DWORD columnWidth(struct table *t, intmax_t n, LONG *width)
-{
-	RECT r;
-
-	if (SendMessageW(t->header, HDM_GETITEMRECT, (WPARAM) n, (LPARAM) (&r)) == 0)
-		return panicLastError("error getting Table column width");
-	*width = r.right - r.left;
-	return 0;
-}

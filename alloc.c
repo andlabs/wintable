@@ -1,52 +1,36 @@
 // 4 december 2014
 #include "tablepriv.h"
 
-// TODO migrate
-#define panic(...) abort()
+// wrappers for allocator of choice
+// return NULL on memory exhausted, undefined on heap corruption or other unreliably-detected malady (see http://stackoverflow.com/questions/28761680/is-there-a-windows-api-memory-allocator-deallocator-i-can-use-that-will-just-giv)
+// new memory is set to zero
+// passing NULL to tableRealloc() acts like tableAlloc()
+// passing NULL to tableFree() is a no-op
 
-// each of these functions do an implicit ZeroMemory()
-// these also make tableRealloc(NULL, ...)/tableFree(NULL) act like realloc(NULL, ...)/free(NULL) (that is, same as tableAlloc(...)/malloc(...) and a no-op, respectively)
-// we /would/ use LocalAlloc() here because
-// - whether the malloc() family supports the last-error code is undefined
-// - the HeapAlloc() family DOES NOT support the last-error code; you're supposed to use Windows exceptions, and I can't find a clean way to do this with MinGW-w64 that doesn't rely on inline assembly or external libraries (unless they added __try/__except blocks)
-// - there's no VirtualReAlloc() to complement VirtualAlloc() and I'm not sure if we can even get the original allocated size back out reliably to write it ourselves (http://blogs.msdn.com/b/oldnewthing/archive/2012/03/16/10283988.aspx)
-// alas, LocalAlloc() doesn't want to work on real Windows 7 after a few times, throwing up ERROR_NOT_ENOUGH_MEMORY after three (3) ints or so :|
-// we'll use malloc() until then
-// needless to say, TODO
-
-static void *tableAlloc(size_t size, const char *panicMessage)
+static void *tableAlloc(size_t size)
 {
-//	HLOCAL out;
 	void *out;
 
-//	out = LocalAlloc(LMEM_FIXED | LMEM_ZEROINIT, size);
 	out = malloc(size);
-	if (out == NULL)
-		panic(panicMessage);
-	ZeroMemory(out, size);
-	return (void *) out;
+	if (out != NULL)
+		ZeroMemory(out, size);
+	return out;
 }
 
-static void *tableRealloc(void *p, size_t size, const char *panicMessage)
+static void *tableRealloc(void *p, size_t size)
 {
-//	HLOCAL out;
 	void *out;
 
 	if (p == NULL)
-		return tableAlloc(size, panicMessage);
-//	out = LocalReAlloc((HLOCAL) p, size, LMEM_ZEROINIT);
+		return tableAlloc(size);
 	out = realloc(p, size);
-	if (out == NULL)
-		panic(panicMessage);
 	// TODO zero the extra memory
-	return (void *) out;
+	return out;
 }
 
-static void tableFree(void *p, const char *panicMessage)
+static void tableFree(void *p)
 {
 	if (p == NULL)
 		return;
-//	if (LocalFree((HLOCAL) p) != NULL)
-//		panic(panicMessage);
 	free(p);
 }

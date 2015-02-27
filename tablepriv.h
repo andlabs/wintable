@@ -68,3 +68,14 @@ typedef BOOL (*handlerfunc)(struct table *, UINT, WPARAM, LPARAM, LRESULT *);
 // debug.c
 extern DWORD panicLastError(const char *);
 extern HRESULT panicHRESULT(const char *, HRESULT);
+
+// alloc.c
+extern void *tableAlloc(size_t);
+extern void *tableRealloc(void *, size_t);
+extern void tableFree(void *);
+
+// util.c
+extern BOOL runHandlers(const handlerfunc[], struct table *, UINT, WPARAM, LPARAM, LRESULT *);
+extern BOOL runEventHandlers(const handlerfunc[], struct table *, UINT, WPARAM, LPARAM, LRESULT *);
+extern DWORD selectFont(struct table *, HDC, HFONT *, HFONT *);
+extern DWORD deselectFont(HDC, HFONT, HFONT);

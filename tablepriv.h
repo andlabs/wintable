@@ -1,5 +1,7 @@
 // 7 january 2015
 
+// TODO rename to tableimpl.h?
+
 // TODO prune the include list when finished
 #define UNICODE
 #define _UNICODE

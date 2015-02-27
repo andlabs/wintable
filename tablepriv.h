@@ -121,3 +121,9 @@ extern DWORD vscrollby(struct table *, intmax_t);
 extern DWORD vscroll(struct table *, WPARAM, LPARAM);
 extern DWORD vwheelscroll(struct table *, WPARAM, LPARAM);
 extern HANDLER(vscrollHandler);
+
+// hscroll.c
+extern DWORD hscrollto(struct table *, intmax_t);
+extern DWORD hscrollby(struct table *, intmax_t);
+extern DWORD hscroll(struct table *, WPARAM, LPARAM);
+extern HANDLER(hscrollHandler);

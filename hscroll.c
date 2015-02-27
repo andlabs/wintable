@@ -1,7 +1,5 @@
 // 9 december 2014
-
-// forward declaration needed here
-static void repositionHeader(struct table *);
+#include "tablepriv.h"
 
 static struct scrollParams hscrollParams(struct table *t)
 {
@@ -17,31 +15,32 @@ static struct scrollParams hscrollParams(struct table *t)
 	return p;
 }
 
-static void hscrollto(struct table *t, intmax_t pos)
+DWORD hscrollto(struct table *t, intmax_t pos)
 {
 	struct scrollParams p;
 
 	p = hscrollParams(t);
-	scrollto(t, SB_HORZ, &p, pos);
+	return scrollto(t, SB_HORZ, &p, pos);
 }
 
-static void hscrollby(struct table *t, intmax_t delta)
+DWORD hscrollby(struct table *t, intmax_t delta)
 {
 	struct scrollParams p;
 
 	p = hscrollParams(t);
-	scrollby(t, SB_HORZ, &p, delta);
+	return scrollby(t, SB_HORZ, &p, delta);
 }
 
-static void hscroll(struct table *t, WPARAM wParam, LPARAM lParam)
+DWORD hscroll(struct table *t, WPARAM wParam, LPARAM lParam)
 {
 	struct scrollParams p;
 
 	p = hscrollParams(t);
-	scroll(t, SB_HORZ, &p, wParam, lParam);
+	return scroll(t, SB_HORZ, &p, wParam, lParam);
 }
 
 // TODO find out if we can indicriminately check for WM_WHEELHSCROLL
+// TODO what to do if any of the functions fail?
 HANDLER(hscrollHandler)
 {
 	if (uMsg != WM_HSCROLL)

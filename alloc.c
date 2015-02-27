@@ -7,7 +7,7 @@
 // passing NULL to tableRealloc() acts like tableAlloc()
 // passing NULL to tableFree() is a no-op
 
-static void *tableAlloc(size_t size)
+void *tableAlloc(size_t size)
 {
 	void *out;
 
@@ -17,7 +17,7 @@ static void *tableAlloc(size_t size)
 	return out;
 }
 
-static void *tableRealloc(void *p, size_t size)
+void *tableRealloc(void *p, size_t size)
 {
 	void *out;
 
@@ -28,7 +28,7 @@ static void *tableRealloc(void *p, size_t size)
 	return out;
 }
 
-static void tableFree(void *p)
+void tableFree(void *p)
 {
 	if (p == NULL)
 		return;

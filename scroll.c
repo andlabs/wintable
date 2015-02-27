@@ -1,15 +1,7 @@
 // 9 december 2014
+#include "tablepriv.h"
 
-struct scrollParams {
-	intmax_t *pos;
-	intmax_t pagesize;
-	intmax_t length;
-	intmax_t scale;
-	void (*post)(struct table *);
-	int *wheelCarry;
-};
-
-static void scrollto(struct table *t, int which, struct scrollParams *p, intmax_t pos)
+DWORD scrollto(struct table *t, int which, struct scrollParams *p, intmax_t pos)
 {
 	RECT scrollArea;
 	SCROLLINFO si;
@@ -26,7 +18,7 @@ static void scrollto(struct table *t, int which, struct scrollParams *p, intmax_
 
 	// we don't want to scroll the header
 	if (GetClientRect(t->hwnd, &scrollArea) == 0)
-		panic("error getting Table client rect for scrollto()");
+		return panicLastError("error getting Table client rect for scrollto()");
 	scrollArea.top += t->headerHeight;
 
 	// negative because ScrollWindowEx() is "backwards"
@@ -41,7 +33,7 @@ static void scrollto(struct table *t, int which, struct scrollParams *p, intmax_
 		&scrollArea, &scrollArea, NULL, NULL,
 		SW_ERASE | SW_INVALIDATE) == ERROR)
 ;// TODO failure case ignored for now; see https://bugs.winehq.org/show_bug.cgi?id=37706
-//		panic("error scrolling Table");
+//		return panicLastError("error scrolling Table");
 	// TODO call UpdateWindow()?
 
 	*(p->pos) = pos;
@@ -61,14 +53,16 @@ static void scrollto(struct table *t, int which, struct scrollParams *p, intmax_
 
 	// EVENT_OBJECT_CONTENTSCROLLED is Vista and up only
 	// TODO send state changes for all affected rows/cells?
+
+	return 0;
 }
 
-static void scrollby(struct table *t, int which, struct scrollParams *p, intmax_t delta)
+DWORD scrollby(struct table *t, int which, struct scrollParams *p, intmax_t delta)
 {
-	scrollto(t, which, p, *(p->pos) + delta);
+	return scrollto(t, which, p, *(p->pos) + delta);
 }
 
-static void scroll(struct table *t, int which, struct scrollParams *p, WPARAM wParam, LPARAM lParam)
+DWORD scroll(struct table *t, int which, struct scrollParams *p, WPARAM wParam, LPARAM lParam)
 {
 	intmax_t pos;
 	SCROLLINFO si;
@@ -98,7 +92,7 @@ static void scroll(struct table *t, int which, struct scrollParams *p, WPARAM wP
 		si.cbSize = sizeof (SCROLLINFO);
 		si.fMask = SIF_POS;
 		if (GetScrollInfo(t->hwnd, which, &si) == 0)
-			panic("error getting thumb position for scroll() in Table");
+			return panicLastError("error getting thumb position for scroll() in Table");
 		pos = si.nPos;
 		break;
 	case SB_THUMBTRACK:
@@ -106,14 +100,14 @@ static void scroll(struct table *t, int which, struct scrollParams *p, WPARAM wP
 		si.cbSize = sizeof (SCROLLINFO);
 		si.fMask = SIF_TRACKPOS;
 		if (GetScrollInfo(t->hwnd, which, &si) == 0)
-			panic("error getting thumb track position for scroll() in Table");
+			return panicLastError("error getting thumb track position for scroll() in Table");
 		pos = si.nTrackPos;
 		break;
 	}
-	scrollto(t, which, p, pos);
+	return scrollto(t, which, p, pos);
 }
 
-static void wheelscroll(struct table *t, int which, struct scrollParams *p, WPARAM wParam, LPARAM lParam)
+DWORD wheelscroll(struct table *t, int which, struct scrollParams *p, WPARAM wParam, LPARAM lParam)
 {
 	int delta;
 	int lines;
@@ -123,15 +117,15 @@ static void wheelscroll(struct table *t, int which, struct scrollParams *p, WPAR
 	// TODO make a note of what the appropriate hscroll constant is
 	if (SystemParametersInfoW(SPI_GETWHEELSCROLLLINES, 0, &scrollAmount, 0) == 0)
 		// TODO use scrollAmount == 3 instead?
-		panic("error getting wheel scroll amount in wheelscroll()");
+		return panicLastError("error getting wheel scroll amount in wheelscroll()");
 	if (scrollAmount == WHEEL_PAGESCROLL)
 		scrollAmount = p->pagesize;
 	if (scrollAmount == 0)		// no mouse wheel scrolling (or t->pagesize == 0)
-		return;
+		return 0;
 	// the rest of this is basically http://blogs.msdn.com/b/oldnewthing/archive/2003/08/07/54615.aspx and http://blogs.msdn.com/b/oldnewthing/archive/2003/08/11/54624.aspx
 	// see those pages for information on subtleties
 	delta += *(p->wheelCarry);
 	lines = delta * ((int) scrollAmount) / WHEEL_DELTA;
 	*(p->wheelCarry) = delta - lines * WHEEL_DELTA / ((int) scrollAmount);
-	scrollby(t, which, p, -lines);
+	return scrollby(t, which, p, -lines);
 }

@@ -100,3 +100,17 @@ extern DWORD lParamToRowColumn(struct table *, LPARAM, struct rowcol *);
 extern DWORD rowColumnToClientRect(struct table *, struct rowcol, RECT *, BOOL *);
 extern void toCellContentRect(struct table *, RECT *, LRESULT, intmax_t, intmax_t);
 #define toCheckboxRect(t, r, xoff) toCellContentRect(t, r, xoff, t->checkboxWidth, t->checkboxHeight)
+
+// scroll.c
+struct scrollParams {
+	intmax_t *pos;
+	intmax_t pagesize;
+	intmax_t length;
+	intmax_t scale;
+	void (*post)(struct table *);
+	int *wheelCarry;
+};
+extern DWORD scrollto(struct table *, int, struct scrollParams *, intmax_t);
+extern DWORD scrollby(struct table *, int, struct scrollParams *, intmax_t);
+extern DWORD scroll(struct table *, int, struct scrollParams *, WPARAM, LPARAM);
+extern DWORD wheelscroll(struct table *, int, struct scrollParams *, WPARAM, LPARAM);

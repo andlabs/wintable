@@ -7,7 +7,7 @@
 // uncomment the following line to halt on a debug message
 #define tableDebugStop
 
-#ifdef tableDEBUG
+#ifdef tableDebug
 
 #include <stdio.h>
 

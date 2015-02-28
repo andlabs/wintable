@@ -65,8 +65,6 @@ struct table {
 typedef BOOL (*handlerfunc)(struct table *, UINT, WPARAM, LPARAM, LRESULT *);
 #define HANDLER(name) BOOL name(struct table *t, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT *lResult)
 
-// TODO all forward declarations
-
 // debug.c
 extern DWORD panicLastError(const char *);
 extern HRESULT panicHRESULT(const char *, HRESULT);
@@ -162,3 +160,7 @@ extern HANDLER(resizeHandler);
 
 // api.c
 extern HANDLER(apiHandlers);
+
+// update.c
+extern DWORD update(struct table *, BOOL);
+extern DWORD updateAll(struct table *);

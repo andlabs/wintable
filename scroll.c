@@ -6,6 +6,7 @@ DWORD scrollto(struct table *t, int which, struct scrollParams *p, intmax_t pos)
 	RECT scrollArea;
 	SCROLLINFO si;
 	intmax_t xamount, yamount;
+	DWORD le;
 
 	if (pos < 0)
 		pos = 0;
@@ -48,8 +49,11 @@ DWORD scrollto(struct table *t, int which, struct scrollParams *p, intmax_t pos)
 	si.nPos = *(p->pos);
 	SetScrollInfo(t->hwnd, which, &si, TRUE);
 
-	if (p->post != NULL)
-		(*(p->post))(t);
+	if (p->post != NULL) {
+		le = (*(p->post))(t);
+		if (le != 0)
+			return le;
+	}
 
 	// EVENT_OBJECT_CONTENTSCROLLED is Vista and up only
 	// TODO send state changes for all affected rows/cells?

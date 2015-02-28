@@ -63,6 +63,7 @@ DWORD headerAddColumn(struct table *t, WCHAR *name)
 	// TODO replace 100 with (t->nColumns - 1)
 	if (SendMessage(t->header, HDM_INSERTITEM, (WPARAM) (100), (LPARAM) (&item)) == (LRESULT) (-1))
 		return panicLastError("error adding column to Table header");
+	return 0;
 }
 
 // TODO is this triggered if we programmatically move headers (for autosizing)?

@@ -78,7 +78,7 @@ static HRESULT getThemeCheckboxSize(HDC dc, int *width, int *height, HTHEME them
 	for (cbState = 1; cbState < checkboxnStates; cbState++) {
 		SIZE against;
 
-		res = getStateSize(dc, cbState, theme, &res);
+		res = getStateSize(dc, cbState, theme, &against);
 		if (res != S_OK)
 			return res;
 		if (size.cx != against.cx || size.cy != against.cy)

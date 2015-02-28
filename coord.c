@@ -78,7 +78,7 @@ DWORD rowColumnToClientRect(struct table *t, struct rowcol rc, RECT *r, BOOL *vi
 	intmax_t xpos;
 	intmax_t i;
 	DWORD le;
-	intmax_t n;
+	LONG cwid;
 
 	if (rc.row < t->vscrollpos)
 		goto invisible;
@@ -100,19 +100,19 @@ DWORD rowColumnToClientRect(struct table *t, struct rowcol rc, RECT *r, BOOL *vi
 	// so we start with client.left - t->hscrollpos, then keep adding widths until we get to the column we want
 	xpos = client.left - t->hscrollpos;
 	for (i = 0; i < rc.column; i++) {
-		le = columnWidth(t, i, &n);
+		le = columnWidth(t, i, &cwid);
 		if (le != 0)
 			return le;
-		xpos += n;
+		xpos += cwid;
 	}
 	// did we stray too far to the right? if so it's not visible
 	if (xpos >= client.right)		// >= because RECT.right is the first pixel outside the rectangle
 		goto invisible;
 	out.left = xpos;
-	le = columnWidth(t, rc.column, &n);
+	le = columnWidth(t, rc.column, &cwid);
 	if (le != 0)
 		return le;
-	out.right = xpos + n;
+	out.right = xpos + cwid;
 	// and is this too far to the left?
 	if (out.right < client.left)		// < because RECT.left is the first pixel inside the rect
 		goto invisible;

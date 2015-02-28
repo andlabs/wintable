@@ -107,7 +107,7 @@ struct scrollParams {
 	intmax_t pagesize;
 	intmax_t length;
 	intmax_t scale;
-	void (*post)(struct table *);
+	DWORD (*post)(struct table *);
 	int *wheelCarry;
 };
 extern DWORD scrollto(struct table *, int, struct scrollParams *, intmax_t);

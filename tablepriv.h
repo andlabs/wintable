@@ -159,3 +159,6 @@ enum {
 
 // resize.c
 extern HANDLER(resizeHandler);
+
+// api.c
+extern HANDLER(apiHandlers);

@@ -1,5 +1,11 @@
 // 8 december 2014
 
+// TODO make the API return error codes directly
+// TODO and adjust all the below functions to boot
+
+// TODO
+#define panic(...) abort()
+
 static void addColumn(struct table *t, WPARAM wParam, LPARAM lParam)
 {
 	t->nColumns++;

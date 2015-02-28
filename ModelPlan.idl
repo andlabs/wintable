@@ -1,0 +1,43 @@
+// 27 february 2015
+
+import "unknwn.idl";
+
+// TODO STA?
+
+// TODO object? local?
+[uuid(TODO)]
+interface tableModel: IUnknown {
+	// TODO document
+	// TODO refcounting
+	TODOTYPE tableSubscribe(
+		[in] HWND hwnd
+	);
+
+	// TODO document
+	// TODO refcounting
+	TODOTYPE tableUnsubscribe(
+		[in] HWND hwnd
+	);
+
+	// TODO document
+	TODOTYPE tableColumnCount(TODO no arguments);
+
+	// TODO document
+	TODOTYPE tableColumnType(
+		[in] intmax_t column
+	);
+
+	// TODO document
+	TODOTYPE tableRowCount(TODO no arguments);
+
+	// TODO document
+	HRESULT tableCellValue(
+		[in] intptr_t row,
+		[in] intptr_t column,
+		[TODO] VARIANTTODO data
+	);
+}
+
+// TODO tableMutableModel
+
+// TODO trees?

@@ -1,6 +1,9 @@
 // 8 december 2014
 #include "tablepriv.h"
 
+// TODO
+#define panic(...) abort()
+
 // TODO move to api.h? definitely move somewhere
 // TODO migrate
 static WCHAR *getCellText(struct table *t, intmax_t row, intmax_t column)
@@ -185,7 +188,7 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 	ZeroMemory(&p, sizeof (struct drawCellParams));
 	le = rowHeight(t, dc, FALSE, &(p.height));
 	if (le != 0)
-		return le;
+		return HRESULT_FROM_WIN32(le);
 	p.xoff = SendMessageW(t->header, HDM_GETBITMAPMARGIN, 0, 0);
 
 	p.y = client.top;
@@ -194,7 +197,9 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 		p.x = client.left - t->hscrollpos;
 		for (j = 0; j < t->nColumns; j++) {
 			p.column = j;
-			p.width = columnWidth(t, p.column);
+			le = columnWidth(t, p.column, &(p.width));
+			if (le != 0)
+				return HRESULT_FROM_WIN32(le);
 			hr = drawCell(t, dc, &p);
 			if (hr != S_OK)
 				return hr;

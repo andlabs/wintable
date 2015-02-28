@@ -4,13 +4,15 @@
 static struct scrollParams vscrollParams(struct table *t)
 {
 	struct scrollParams p;
+	LONG rh;
 
 	ZeroMemory(&p, sizeof (struct scrollParams));
 	p.pos = &(t->vscrollpos);
 	p.pagesize = t->vpagesize;
 	p.length = t->count;
 	// TODO handle error
-	rowht(t, &(p.scale));
+	rowht(t, &rh);
+	p.scale = rh;
 	p.post = NULL;
 	p.wheelCarry = &(t->vwheelCarry);
 	return p;

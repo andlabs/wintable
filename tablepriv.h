@@ -154,7 +154,9 @@ enum {
 	checkboxStatePushed = 1 << 2,
 	checkboxnStates = 1 << 3,
 };
-// TODO which ones?
+extern HRESULT drawCheckbox(struct table *, HDC, RECT *, int);
+extern HRESULT freeCheckboxThemeData(struct table *);
+extern HRESULT loadCheckboxThemeData(struct table *);
 extern HANDLER(checkboxMouseMoveHandler);
 extern HANDLER(checkboxMouseDownHandler);
 extern HANDLER(checkboxMouseUpHandler);

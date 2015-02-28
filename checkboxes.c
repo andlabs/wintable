@@ -1,6 +1,9 @@
 // 16 august 2014
 #include "tablepriv.h"
 
+// TODO
+#define panic(...) abort()
+
 static UINT dfcState(int cbstate)
 {
 	UINT ret;
@@ -22,12 +25,13 @@ static DWORD drawFrameControlCheckbox(HDC dc, RECT *r, int cbState)
 	return 0;
 }
 
-static void getFrameControlCheckboxSize(HDC dc, int *width, int *height)
+static HRESULT getFrameControlCheckboxSize(HDC dc, int *width, int *height)
 {
 	// there's no real metric around
 	// let's use SM_CX/YSMICON and hope for the best
 	*width = GetSystemMetrics(SM_CXSMICON);
 	*height = GetSystemMetrics(SM_CYSMICON);
+	return S_OK;
 }
 
 static int themestates[checkboxnStates] = {
@@ -85,7 +89,7 @@ static HRESULT getThemeCheckboxSize(HDC dc, int *width, int *height, HTHEME them
 	return S_OK;
 }
 
-static HRESULT drawCheckbox(struct table *t, HDC dc, RECT *r, int cbState)
+HRESULT drawCheckbox(struct table *t, HDC dc, RECT *r, int cbState)
 {
 	DWORD le;
 
@@ -98,7 +102,7 @@ static HRESULT drawCheckbox(struct table *t, HDC dc, RECT *r, int cbState)
 }
 
 // TODO really panic on failure?
-static HRESULT freeCheckboxThemeData(struct table *t)
+HRESULT freeCheckboxThemeData(struct table *t)
 {
 	if (t->theme != NULL) {
 		HRESULT res;
@@ -112,7 +116,7 @@ static HRESULT freeCheckboxThemeData(struct table *t)
 }
 
 // TODO really panic on failure to ReleaseDC()?
-static HRESULT loadCheckboxThemeData(struct table *t)
+HRESULT loadCheckboxThemeData(struct table *t)
 {
 	HDC dc;
 	HRESULT hr;
@@ -144,7 +148,9 @@ static DWORD redrawCheckboxRect(struct table *t, LPARAM lParam)
 	DWORD le;
 	BOOL visible;
 
-	rc = lParamToRowColumn(t, lParam);
+	le = lParamToRowColumn(t, lParam, &rc);
+	if (le != 0)
+		;	// TODO
 	if (rc.row == -1 && rc.column == -1)
 		return 0;
 	if (t->columnTypes[rc.column] != tableColumnCheckbox)
@@ -186,13 +192,20 @@ HANDLER(checkboxMouseDownHandler)
 	struct rowcol rc;
 	RECT r;
 	POINT pt;
+	DWORD le;
+	BOOL visible;
 
-	rc = lParamToRowColumn(t, lParam);
+	le = lParamToRowColumn(t, lParam, &rc);
+	if (le != 0)
+		;	// TODO
 	if (rc.row == -1 || rc.column == -1)
 		return FALSE;
 	if (t->columnTypes[rc.column] != tableColumnCheckbox)
 		return FALSE;
-	if (!rowColumnToClientRect(t, rc, &r))
+	le = rowColumnToClientRect(t, rc, &r, &visible);
+	if (le != 0)
+		;	// TODO
+	if (!visible)
 		return FALSE;
 	toCheckboxRect(t, &r, 0);
 	pt.x = GET_X_LPARAM(lParam);
@@ -216,18 +229,25 @@ HANDLER(checkboxMouseUpHandler)
 	struct rowcol rc;
 	RECT r;
 	POINT pt;
+	DWORD le;
+	BOOL visible;
 
 	if (!t->checkboxMouseDown)
 		return FALSE;
 	// the logic behind goto wrongUp is that the mouse must be released on the same checkbox
-	rc = lParamToRowColumn(t, lParam);
+	le = lParamToRowColumn(t, lParam, &rc);
+	if (le != 0)
+		;	// TODO
 	if (rc.row == -1 || rc.column == -1)
 		goto wrongUp;
 	if (rc.row != t->checkboxMouseDownRow || rc.column != t->checkboxMouseDownColumn)
 		goto wrongUp;
 	if (t->columnTypes[rc.column] != tableColumnCheckbox)
 		goto wrongUp;
-	if (!rowColumnToClientRect(t, rc, &r))
+	le = rowColumnToClientRect(t, rc, &r, &visible);
+	if (le != 0)
+		;	// TODO
+	if (!visible)
 		goto wrongUp;
 	toCheckboxRect(t, &r, 0);
 	pt.x = GET_X_LPARAM(lParam);
@@ -250,7 +270,10 @@ wrongUp:
 	if (t->checkboxMouseDown) {
 		rc.row = t->checkboxMouseDownRow;
 		rc.column = t->checkboxMouseDownColumn;
-		if (rowColumnToClientRect(t, rc, &r))
+		le = rowColumnToClientRect(t, rc, &r, &visible);
+		if (le != 0)
+			;	// TODO
+		if (visible)
 			// TODO only the checkbox rect?
 			if (InvalidateRect(t->hwnd, &r, TRUE) == 0)
 				panic("error redrawing Table checkbox rect for aborted mouse up event");
@@ -269,6 +292,8 @@ HANDLER(checkboxCaptureChangedHandler)
 {
 	struct rowcol rc;
 	RECT r;
+	DWORD le;
+	BOOL visible;
 
 	if (!t->checkboxMouseDown)
 		return FALSE;
@@ -277,7 +302,10 @@ HANDLER(checkboxCaptureChangedHandler)
 	if (t->checkboxMouseDown) {
 		rc.row = t->checkboxMouseDownRow;
 		rc.column = t->checkboxMouseDownColumn;
-		if (rowColumnToClientRect(t, rc, &r))
+		le = rowColumnToClientRect(t, rc, &r, &visible);
+		if (le != 0)
+			;	// TODO
+		if (visible)
 			// TODO only the checkbox rect?
 			if (InvalidateRect(t->hwnd, &r, TRUE) == 0)
 				panic("error redrawing Table checkbox rect for aborted mouse up event");

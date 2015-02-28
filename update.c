@@ -14,6 +14,7 @@ DWORD update(struct table *t, BOOL redraw)
 	intmax_t height;
 	DWORD le;
 	LONG width;
+	LONG rh;
 
 	// before we do anything we need the client rect
 	if (GetClientRect(t->hwnd, &client) == 0)
@@ -47,7 +48,10 @@ DWORD update(struct table *t, BOOL redraw)
 	client.top += t->headerHeight;
 	// and update our page size appropriately
 	height = client.bottom - client.top;
-	t->vpagesize = height / rowht(t);
+	le = rowht(t, &rh);
+	if (le != 0)
+		return le;
+	t->vpagesize = height / rh;
 	// and do a dummy vertical scroll to apply that
 	le = vscrollby(t, 0);
 	if (le != 0)

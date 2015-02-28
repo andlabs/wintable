@@ -28,7 +28,14 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 		if (uMsg == WM_CREATE) {
 			CREATESTRUCTW *cs = (CREATESTRUCTW *) lParam;
 
-			t = (struct table *) tableAlloc(sizeof (struct table), "error allocating internal Table data structure");
+			t = (struct table *) tableAlloc(sizeof (struct table));
+			if (t == NULL) {
+				panicMemoryExhausted("error allocating internal Table data structure");
+				// ABORT CREATION
+				// TODO correct value?
+				// TODO last error or some other way to set error?
+				return FALSE;
+			}
 			t->hwnd = hwnd;
 			makeHeader(t, cs->hInstance);
 			t->selectedRow = -1;
@@ -44,7 +51,7 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 //TODO		invalidateTableAccs(t);
 		freeCheckboxThemeData(t);
 		destroyHeader(t);
-		tableFree(t, "error allocating internal Table data structure");
+		tableFree(t);//TODO, "error allocating internal Table data structure");
 		return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 	}
 	if (runHandlers(handlers, t, uMsg, wParam, lParam, &lResult))

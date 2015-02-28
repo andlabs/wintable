@@ -21,6 +21,7 @@ DWORD doselect(struct table *t, intmax_t row, intmax_t column)
 	LONG clientWidth;
 	DWORD le;
 	BOOL visible;
+	LONG cwid;
 
 	// check existing selection to see if it's valid
 	if (t->selectedRow == -1 && t->selectedColumn != -1)
@@ -50,7 +51,9 @@ DWORD doselect(struct table *t, intmax_t row, intmax_t column)
 	if (GetClientRect(t->hwnd, &client) == 0)
 		return panicLastError("error getting Table client rect in doselect()");
 	client.top += t->headerHeight;
-	height = rowht(t);
+	le = rowht(t, &height);
+	if (le != 0)
+		return le;
 
 	// only scroll if we selected something
 	if (t->selectedRow == -1 || t->selectedColumn == -1)
@@ -66,7 +69,7 @@ DWORD doselect(struct table *t, intmax_t row, intmax_t column)
 		rc.column = t->selectedColumn;
 		// first assume entirely outside the client area
 		dovscroll = TRUE;
-		le = rowColumnToClientRect(t, rc, &r, &rctcr);
+		le = rowColumnToClientRect(t, rc, &r, &visible);
 		if (le != 0)
 			return le;
 		if (visible)
@@ -82,15 +85,21 @@ DWORD doselect(struct table *t, intmax_t row, intmax_t column)
 
 	// now see if the cell we want is to the left of offscreen, in which case scroll to its x-position
 	xpos = 0;
-	for (i = 0; i < t->selectedColumn; i++)
-		xpos += columnWidth(t, i);
+	for (i = 0; i < t->selectedColumn; i++) {
+		le = columnWidth(t, i, &cwid);
+		if (le != 0)
+			return le;
+		xpos += cwid;
+	}
 	if (xpos < t->hscrollpos) {
 		le = hscrollto(t, xpos);
 		if (le != 0)
 			return le;
 	} else {
 		// if the full cell is not visible, scroll to the right just enough to make it fully visible (or as visible as possible)
-		width = columnWidth(t, t->selectedColumn);
+		le = columnWidth(t, t->selectedColumn, &width);
+		if (le != 0)
+			return le;
 		clientWidth = client.right - client.left;
 		if (xpos + width > t->hscrollpos + clientWidth)			// > because both sides deal with the first pixel outside
 			// if the column is too wide, then just make it occupy the whole visible area (left-aligned)
@@ -133,6 +142,8 @@ noScroll:
 
 	// TODO before or after NotifyWinEvent()? (see what other things I'm doing)
 	notify(t, tableNotificationSelectionChanged, t->selectedRow, t->selectedColumn, 0);
+
+	return 0;
 }
 
 // TODO which WM_xBUTTONDOWNs?
@@ -140,8 +151,11 @@ noScroll:
 HANDLER(mouseDownSelectHandler)
 {
 	struct rowcol rc;
+	DWORD le;
 
-	rc = lParamToRowColumn(t, lParam);
+	le = lParamToRowColumn(t, lParam, &rc);
+	if (le != 0)
+		;	// TODO
 	// don't check if lParamToRowColumn() returned row -1 or column -1; we want deselection behavior
 	doselect(t, rc.row, rc.column);
 	// TODO separate this from here

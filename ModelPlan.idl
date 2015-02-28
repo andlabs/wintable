@@ -32,8 +32,8 @@ interface tableModel: IUnknown {
 
 	// TODO document
 	HRESULT tableCellValue(
-		[in] intptr_t row,
-		[in] intptr_t column,
+		[in] intmax_t row,
+		[in] intmax_t column,
 		[TODO] VARIANTTODO data
 	);
 }

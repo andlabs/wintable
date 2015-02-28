@@ -17,3 +17,4 @@ TODO
 - checkboxes: use capture instead of manual tracking logic? http://blogs.msdn.com/b/oldnewthing/archive/2015/02/25/10595729.aspx
 - see if we can get tableRealloc() to not be destructive on failure and change every use of tableRealloc() to boot
 - make sure all arithmetic operations are strongly typed
+- http://blogs.msdn.com/b/oldnewthing/archive/2006/01/03/508694.aspx both the double buffering and the RDC fix?

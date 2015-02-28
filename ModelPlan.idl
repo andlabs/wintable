@@ -34,7 +34,7 @@ interface tableModel : IUnknown {
 	// tableColumnCount() returns the number of columns in the tableModel.
 	// This value should be a constant; it should never change after object creation.
 	// (TODO would this go against CoCreateInstance()? maybe "after the first subscription" instead?)
-	intmax_t tableColumnCount();
+	intmax_t tableColumnCount(TODO no arguments);
 
 	// tableColumnType() returns the data type for a given column.
 	// This should be one of the tableColumnXxxx constants.
@@ -51,7 +51,7 @@ interface tableModel : IUnknown {
 	);
 
 	// tableRowCount() returns the number of rows in the tableModel.
-	intmax_t tableRowCount();
+	intmax_t tableRowCount(TODO no arguments);
 
 	// TODO document
 	HRESULT tableCellValue(

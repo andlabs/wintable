@@ -3,38 +3,61 @@
 import "unknwn.idl";
 
 // TODO STA?
+// TODO make sure all parameter attributes are correct
 
 // TODO object? local?
 [uuid(TODO)]
-interface tableModel: IUnknown {
-	// TODO document
-	// TODO refcounting
-	TODOTYPE tableSubscribe(
+interface tableModel : IUnknown {
+	// tableSubscribe() adds the Table with the given window handle to a list of Tables to notify of any changes to the tableModel.
+	// It should neither take a reference to the tableModel nor assume that one has been taken beforehand/will be taken afterward; the Table will do that itself.
+	// It should return S_OK on success or a COM error code on failure; in particular, it should return:
+	// - E_INVALIDARG if hwnd is NULL
+	// TODO E_OUTOFMEMORY?
+	// TODO should this check if hwnd is actually a Table?
+	HRESULT tableSubscribe(
+		[in] HWND hwnd
+	);
+
+	// tableUnsubscribe() removes the Table with the given window handle from a list of Tables to notify of any changes to the tableModel.
+	// It should neither release a reference to the tableModel nor assume that one has been released beforehand/will be released afterward; the Table will do that itself.
+	// It should return S_OK on success or a COM error code on failure; in particular, it should return:
+	// - E_INVALIDARG if hwnd is NULL
+	// TODO what error for not already subscribed
+	HRESULT tableUnsubscribe(
 		[in] HWND hwnd
 	);
 
 	// TODO document
-	// TODO refcounting
-	TODOTYPE tableUnsubscribe(
-		[in] HWND hwnd
+	// TODO return an error?
+	TODOTYPE tableNotify(TODO arguments);
+
+	// tableColumnCount() returns the number of columns in the tableModel.
+	// This value should be a constant; it should never change after object creation.
+	// (TODO would this go against CoCreateInstance()? maybe "after the first subscription" instead?)
+	intmax_t tableColumnCount();
+
+	// tableColumnType() returns the data type for a given column.
+	// This should be one of the tableColumnXxxx constants.
+	// It should return S_OK on success or a COM error code on failure; in particular, it should return:
+	// - E_POINTER if colType is NULL
+	// - E_INVALIDARG if column is out of range
+	// The value of *colType on return should be a constant; it should never change after object creation.
+	// (TODO would this go against CoCreateInstance()? maybe "after the first subscription" instead?)
+	// TODO annotation for colType?
+	// TODO value of *colType on error?
+	HRESULT tableColumnType(
+		[in] intmax_t column,
+		[out, retval] int *colType
 	);
 
-	// TODO document
-	TODOTYPE tableColumnCount(TODO no arguments);
-
-	// TODO document
-	TODOTYPE tableColumnType(
-		[in] intmax_t column
-	);
-
-	// TODO document
-	TODOTYPE tableRowCount(TODO no arguments);
+	// tableRowCount() returns the number of rows in the tableModel.
+	intmax_t tableRowCount();
 
 	// TODO document
 	HRESULT tableCellValue(
 		[in] intmax_t row,
 		[in] intmax_t column,
-		[TODO] VARIANTTODO data
+		[out, retval] VARIANT *data
 	);
 }
 

@@ -156,3 +156,6 @@ enum {
 	checkboxnStates = 1 << 3,
 };
 // TODO which ones?
+
+// resize.c
+extern HANDLER(resizeHandler);

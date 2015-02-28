@@ -164,3 +164,6 @@ extern HANDLER(apiHandlers);
 // update.c
 extern DWORD update(struct table *, BOOL);
 extern DWORD updateAll(struct table *);
+
+// draw.c
+extern HANDLER(drawHandlers);

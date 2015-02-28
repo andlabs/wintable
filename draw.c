@@ -1,6 +1,8 @@
 // 8 december 2014
+#include "tablepriv.h"
 
 // TODO move to api.h? definitely move somewhere
+// TODO migrate
 static WCHAR *getCellText(struct table *t, intmax_t row, intmax_t column)
 {
 	return (WCHAR *) notify(t, tableNotificationGetCellData, row, column, 0);
@@ -24,22 +26,24 @@ struct drawCellParams {
 	LRESULT xoff;		// result of HDM_GETBITMAPMARGIN
 };
 
-static void drawTextCell(struct table *t, HDC dc, struct drawCellParams *p, RECT *r, int textColor)
+static DWORD drawTextCell(struct table *t, HDC dc, struct drawCellParams *p, RECT *r, int textColor)
 {
 	WCHAR *text;
 
 	toCellContentRect(t, r, p->xoff, 0, 0);		// TODO get the text height
 	if (SetTextColor(dc, GetSysColor(textColor)) == CLR_INVALID)
-		panic("error setting Table cell text color");
+		return panicLastError("error setting Table cell text color");
 	if (SetBkMode(dc, TRANSPARENT) == 0)
-		panic("error setting transparent text drawing mode for Table cell");
+		return panicLastError("error setting transparent text drawing mode for Table cell");
 	text = getCellText(t, p->row, p->column);
 	if (DrawTextExW(dc, text, -1, r, DT_END_ELLIPSIS | DT_LEFT | DT_NOPREFIX | DT_SINGLELINE, NULL) == 0)
-		panic("error drawing Table cell text");
+		return panicLastError("error drawing Table cell text");
 	returnCellData(t, p->row, p->column, text);
+	return 0;
 }
 
-static void drawImageCell(struct table *t, HDC dc, struct drawCellParams *p, RECT *r)
+// TODO really panic on cleanup failure?
+static DWORD drawImageCell(struct table *t, HDC dc, struct drawCellParams *p, RECT *r)
 {
 	HBITMAP bitmap;
 	BITMAP bi;
@@ -54,15 +58,15 @@ static void drawImageCell(struct table *t, HDC dc, struct drawCellParams *p, REC
 	bitmap = (HBITMAP) notify(t, tableNotificationGetCellData, p->row, p->column, 0);
 	ZeroMemory(&bi, sizeof (BITMAP));
 	if (GetObject(bitmap, sizeof (BITMAP), &bi) == 0)
-		panic("error getting Table cell image dimensions for drawing");
+		return panicLastError("error getting Table cell image dimensions for drawing");
 	// is it even possible to enforce the type of bitmap we need here based on the contents of the BITMAP (or even the DIBSECTION) structs?
 
 	idc = CreateCompatibleDC(dc);
 	if (idc == NULL)
-		panic("error creating compatible DC for Table image cell drawing");
+		return panicLastError("error creating compatible DC for Table image cell drawing");
 	previbitmap = SelectObject(idc, bitmap);
 	if (previbitmap == NULL)
-		panic("error selecting Table cell image into compatible DC for image drawing");
+		return panicLastError("error selecting Table cell image into compatible DC for image drawing");
 
 	ZeroMemory(&bf, sizeof (BLENDFUNCTION));
 	bf.BlendOp = AC_SRC_OVER;
@@ -71,17 +75,18 @@ static void drawImageCell(struct table *t, HDC dc, struct drawCellParams *p, REC
 	bf.AlphaFormat = AC_SRC_ALPHA;
 	if (AlphaBlend(dc, r->left, r->top, r->right - r->left, r->bottom - r->top,
 		idc, 0, 0, bi.bmWidth, bi.bmHeight, bf) == FALSE)
-		panic("error drawing image into Table cell");
+		return panicLastError("error drawing image into Table cell");
 
 	if (SelectObject(idc, previbitmap) != bitmap)
-		panic("error deselecting Table cell image for drawing image");
+		return panicLastError("error deselecting Table cell image for drawing image");
 	if (DeleteDC(idc) == 0)
-		panic("error deleting Table compatible DC for image cell drawing");
+		return panicLastError("error deleting Table compatible DC for image cell drawing");
 
 	returnCellData(t, p->row, p->column, bitmap);
+	return 0;
 }
 
-static void drawCheckboxCell(struct table *t, HDC dc, struct drawCellParams *p, RECT *r)
+static HRESULT drawCheckboxCell(struct table *t, HDC dc, struct drawCellParams *p, RECT *r)
 {
 	POINT pt;
 	int cbState;
@@ -99,15 +104,18 @@ static void drawCheckboxCell(struct table *t, HDC dc, struct drawCellParams *p, 
 		if (PtInRect(r, pt) != 0)
 			cbState |= checkboxStateHot;
 	}
-	drawCheckbox(t, dc, r, cbState);
+	return drawCheckbox(t, dc, r, cbState);
 }
 
-static void drawCell(struct table *t, HDC dc, struct drawCellParams *p)
+// TODO really abort on error?
+static HRESULT drawCell(struct table *t, HDC dc, struct drawCellParams *p)
 {
 	RECT r;
 	HBRUSH background;
 	int textColor;
 	RECT cellrect;
+	DWORD le;
+	HRESULT hr;
 
 	// TODO verify these two
 	background = (HBRUSH) (COLOR_WINDOW + 1);
@@ -129,35 +137,48 @@ static void drawCell(struct table *t, HDC dc, struct drawCellParams *p)
 	r.top = p->y;
 	r.bottom = p->y + p->height;
 	if (FillRect(dc, &r, background) == 0)
-		panic("error filling Table cell background");
+		return panicLastErrorAsHRESULT("error filling Table cell background");
 	cellrect = r;		// save for drawing the focus rect
 
 	switch (t->columnTypes[p->column]) {
 	case tableColumnText:
-		drawTextCell(t, dc, p, &r, textColor);
+		le = drawTextCell(t, dc, p, &r, textColor);
+		if (le != 0)
+			return HRESULT_FROM_WIN32(le);
 		break;
 	case tableColumnImage:
-		drawImageCell(t, dc, p, &r);
+		le = drawImageCell(t, dc, p, &r);
+		if (le != 0)
+			return HRESULT_FROM_WIN32(le);
 		break;
 	case tableColumnCheckbox:
-		drawCheckboxCell(t, dc, p, &r);
+		hr = drawCheckboxCell(t, dc, p, &r);
+		if (hr != S_OK)
+			return hr;
 		break;
 	}
 
 	// TODO in front of or behind the cell contents?
 	if (t->selectedRow == p->row && t->selectedColumn == p->column)
 		if (DrawFocusRect(dc, &cellrect) == 0)
-			panic("error drawing focus rect on current Table cell");
+			return panicLastErrorAsHRESULT("error drawing focus rect on current Table cell");
+
+	return S_OK;
 }
 
 // TODO use cliprect
-static void draw(struct table *t, HDC dc, RECT cliprect, RECT client)
+// TODO abort on error?
+static HRESULT draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 {
 	intmax_t i, j;
 	HFONT prevfont, newfont;
 	struct drawCellParams p;
+	DWORD le;
+	HRESULT hr;
 
-	prevfont = selectFont(t, dc, &newfont);
+	le = selectFont(t, dc, &newfont, &prevfont);
+	if (le != 0)
+		return HRESULT_FROM_WIN32(le);
 
 	client.top += t->headerHeight;
 
@@ -172,7 +193,9 @@ static void draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 		for (j = 0; j < t->nColumns; j++) {
 			p.column = j;
 			p.width = columnWidth(t, p.column);
-			drawCell(t, dc, &p);
+			hr = drawCell(t, dc, &p);
+			if (hr != S_OK)
+				return hr;
 			p.x += p.width;
 		}
 		p.y += p.height;
@@ -180,9 +203,13 @@ static void draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 			break;
 	}
 
-	deselectFont(dc, prevfont, newfont);
+	le = deselectFont(dc, prevfont, newfont);
+	if (le != 0)
+		return HRESULT_FROM_WIN32(le);
+	return S_OK;
 }
 
+// TODO what to do if any function fails?
 HANDLER(drawHandlers)
 {
 	HDC dc;

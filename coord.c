@@ -10,6 +10,7 @@ DWORD clientCoordToRowColumn(struct table *t, POINT pt, struct rowcol *rc)
 	intmax_t i;
 	LONG height;
 	DWORD le;
+	LONG cwid;
 
 	if (GetClientRect(t->hwnd, &r) == 0)
 		return panicLastError("error getting Table client rect in clientCoordToRowColumn()");
@@ -18,7 +19,7 @@ DWORD clientCoordToRowColumn(struct table *t, POINT pt, struct rowcol *rc)
 		goto outside;
 
 	// the row is easy
-	le = rowhtt(t, &height);
+	le = rowht(t, &height);
 	if (le != 0)
 		return le;
 	pt.y -= t->headerHeight;
@@ -31,7 +32,10 @@ DWORD clientCoordToRowColumn(struct table *t, POINT pt, struct rowcol *rc)
 	pt.x += t->hscrollpos;
 	rc->column = 0;
 	for (i = 0; i < t->nColumns; i++) {
-		pt.x -= columnWidth(t, i);
+		le = columnWidth(t, i, &cwid);
+		if (le != 0)
+			return le;
+		pt.x -= cwid;
 		// use <, not <=, here:
 		// assume r.left and t->hscrollpos == 0;
 		// given the first column is 100 wide,

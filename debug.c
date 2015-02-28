@@ -58,6 +58,14 @@ HRESULT panicHRESULT(const char *context, HRESULT hr)
 	return hr;
 }
 
+void panicMemoryExhausted(const char *reason)
+{
+	fprintf(stderr, "memory exhausted %s\n", reason);
+#ifdef tableDebugStop
+	DebugBreak();
+#endif
+}
+
 #else
 
 DWORD panicLastError(const char *reason)
@@ -73,6 +81,10 @@ DWORD panicLastError(const char *reason)
 HRESULT panicHRESULT(const char *reason, HRESULT hr)
 {
 	return hr;
+}
+
+void panicMemoryExhausted(const char *reason)
+{
 }
 
 #endif

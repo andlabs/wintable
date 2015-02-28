@@ -9,7 +9,8 @@ static struct scrollParams vscrollParams(struct table *t)
 	p.pos = &(t->vscrollpos);
 	p.pagesize = t->vpagesize;
 	p.length = t->count;
-	p.scale = rowht(t);
+	// TODO handle error
+	rowht(t, &(p.scale));
 	p.post = NULL;
 	p.wheelCarry = &(t->vwheelCarry);
 	return p;

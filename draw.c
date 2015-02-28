@@ -183,7 +183,9 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 	client.top += t->headerHeight;
 
 	ZeroMemory(&p, sizeof (struct drawCellParams));
-	p.height = rowHeight(t, dc, FALSE);
+	le = rowHeight(t, dc, FALSE, &(p.height));
+	if (le != 0)
+		return le;
 	p.xoff = SendMessageW(t->header, HDM_GETBITMAPMARGIN, 0, 0);
 
 	p.y = client.top;
@@ -219,8 +221,9 @@ HANDLER(drawHandlers)
 
 	if (uMsg != WM_PAINT && uMsg != WM_PRINTCLIENT)
 		return FALSE;
+	// TODO fail here
 	if (GetClientRect(t->hwnd, &client) == 0)
-		panic("error getting client rect for Table painting");
+		panicLastError("error getting client rect for Table painting");
 	if (uMsg == WM_PAINT) {
 		dc = BeginPaint(t->hwnd, &ps);
 		if (dc == NULL)

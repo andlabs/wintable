@@ -68,6 +68,7 @@ typedef BOOL (*handlerfunc)(struct table *, UINT, WPARAM, LPARAM, LRESULT *);
 // debug.c
 extern DWORD panicLastError(const char *);
 extern HRESULT panicHRESULT(const char *, HRESULT);
+extern void panicMemoryExhausted(const char *);
 #define panicLastErrorAsHRESULT(s) HRESULT_FROM_WIN32(panicLastError(s))
 
 // alloc.c
@@ -154,12 +155,17 @@ enum {
 	checkboxnStates = 1 << 3,
 };
 // TODO which ones?
+extern HANDLER(checkboxMouseMoveHandler);
+extern HANDLER(checkboxMouseDownHandler);
+extern HANDLER(checkboxMouseUpHandler);
+extern HANDLER(checkboxCaptureChangedHandler);
 
 // resize.c
 extern HANDLER(resizeHandler);
 
 // api.c
 extern HANDLER(apiHandlers);
+extern LRESULT notify(struct table *, UINT, intmax_t, intmax_t, uintptr_t);
 
 // update.c
 extern DWORD update(struct table *, BOOL);

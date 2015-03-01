@@ -69,7 +69,7 @@ typedef BOOL (*handlerfunc)(struct table *, UINT, WPARAM, LPARAM, LRESULT *);
 extern DWORD logLastError(const char *);
 extern HRESULT logHRESULT(const char *, HRESULT);
 extern void logMemoryExhausted(const char *);
-#define logLastErrorAsHRESULT(s) HRESULT_FROM_WIN32(panicLastError(s))
+#define logLastErrorAsHRESULT(s) HRESULT_FROM_WIN32(logLastError(s))
 
 // alloc.c
 extern void *tableAlloc(size_t);

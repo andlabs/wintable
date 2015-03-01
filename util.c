@@ -47,7 +47,7 @@ HRESULT selectFont(struct table *t, HDC dc, HFONT *newfont, HFONT *prevfont)
 HRESULT deselectFont(HDC dc, HFONT prevfont, HFONT newfont)
 {
 	if (SelectObject(dc, prevfont) != newfont)
-		return panicLastError("error deselecting Table font from Table DC");
+		return logLastError("error deselecting Table font from Table DC");
 	// doin't delete newfont here, even if it is the system font (see http://msdn.microsoft.com/en-us/library/windows/desktop/dd144925%28v=vs.85%29.aspx)
 	return S_OK;
 }

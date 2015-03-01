@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 
-DWORD logLastError(const char *context)
+HRESULT logLastError(const char *context)
 {
 	DWORD le;
 	WCHAR *msg;
@@ -32,7 +32,7 @@ DWORD logLastError(const char *context)
 	DebugBreak();
 #endif
 	SetLastError(le);
-	return le;
+	return HRESULT_FROM_WIN32(le);
 }
 
 HRESULT logHRESULT(const char *context, HRESULT hr)
@@ -68,14 +68,14 @@ void logMemoryExhausted(const char *reason)
 
 #else
 
-DWORD logLastError(const char *reason)
+HRESULT logLastError(const char *reason)
 {
 	DWORD le;
 
 	// technically (I think? TODO) we don't need to do this, but let's do this anyway just to be safe
 	le = GetLastError();
 	SetLastError(le);
-	return le;
+	return HRESULT_FROM_WIN32(le);
 }
 
 HRESULT logHRESULT(const char *reason, HRESULT hr)

@@ -10,7 +10,7 @@
 
 #include <stdio.h>
 
-DWORD panicLastError(const char *context)
+DWORD logLastError(const char *context)
 {
 	DWORD le;
 	WCHAR *msg;
@@ -35,7 +35,7 @@ DWORD panicLastError(const char *context)
 	return le;
 }
 
-HRESULT panicHRESULT(const char *context, HRESULT hr)
+HRESULT logHRESULT(const char *context, HRESULT hr)
 {
 	WCHAR *msg;
 	int parenthesize = 0;
@@ -58,7 +58,7 @@ HRESULT panicHRESULT(const char *context, HRESULT hr)
 	return hr;
 }
 
-void panicMemoryExhausted(const char *reason)
+void logMemoryExhausted(const char *reason)
 {
 	fprintf(stderr, "memory exhausted %s\n", reason);
 #ifdef tableDebugStop
@@ -68,7 +68,7 @@ void panicMemoryExhausted(const char *reason)
 
 #else
 
-DWORD panicLastError(const char *reason)
+DWORD logLastError(const char *reason)
 {
 	DWORD le;
 
@@ -78,12 +78,12 @@ DWORD panicLastError(const char *reason)
 	return le;
 }
 
-HRESULT panicHRESULT(const char *reason, HRESULT hr)
+HRESULT logHRESULT(const char *reason, HRESULT hr)
 {
 	return hr;
 }
 
-void panicMemoryExhausted(const char *reason)
+void logMemoryExhausted(const char *reason)
 {
 }
 

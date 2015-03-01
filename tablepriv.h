@@ -66,10 +66,10 @@ typedef BOOL (*handlerfunc)(struct table *, UINT, WPARAM, LPARAM, LRESULT *);
 #define HANDLER(name) BOOL name(struct table *t, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT *lResult)
 
 // debug.c
-extern DWORD panicLastError(const char *);
-extern HRESULT panicHRESULT(const char *, HRESULT);
-extern void panicMemoryExhausted(const char *);
-#define panicLastErrorAsHRESULT(s) HRESULT_FROM_WIN32(panicLastError(s))
+extern DWORD logLastError(const char *);
+extern HRESULT logHRESULT(const char *, HRESULT);
+extern void logMemoryExhausted(const char *);
+#define logLastErrorAsHRESULT(s) HRESULT_FROM_WIN32(panicLastError(s))
 
 // alloc.c
 extern void *tableAlloc(size_t);

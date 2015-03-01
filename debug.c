@@ -32,6 +32,11 @@ HRESULT logLastError(const char *context)
 	DebugBreak();
 #endif
 	SetLastError(le);
+	// a function does not have to set a last error
+	// what happens if a future version of some header file changes HRESULT_FROM_WIN32(0) to explicitly return S_OK?
+	// prevent this by returning E_FAIL, so the rest of the Table code doesn't barge onward
+	if (le == 0)
+		return E_FAIL;
 	return HRESULT_FROM_WIN32(le);
 }
 
@@ -72,9 +77,11 @@ HRESULT logLastError(const char *reason)
 {
 	DWORD le;
 
-	// technically (I think? TODO) we don't need to do this, but let's do this anyway just to be safe
 	le = GetLastError();
+	// technically (I think? TODO) we don't need to do this, but let's do this anyway just to be safe
 	SetLastError(le);
+	if (le == 0)
+		return E_FAIL;
 	return HRESULT_FROM_WIN32(le);
 }
 

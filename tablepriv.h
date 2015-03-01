@@ -78,8 +78,8 @@ extern void tableFree(void *);
 // util.c
 extern BOOL runHandlers(const handlerfunc[], struct table *, UINT, WPARAM, LPARAM, LRESULT *);
 extern BOOL runEventHandlers(const handlerfunc[], struct table *, UINT, WPARAM, LPARAM, LRESULT *);
-extern DWORD selectFont(struct table *, HDC, HFONT *, HFONT *);
-extern DWORD deselectFont(HDC, HFONT, HFONT);
+extern HRESULT selectFont(struct table *, HDC, HFONT *, HFONT *);
+extern HRESULT deselectFont(HDC, HFONT, HFONT);
 
 // metrics.c
 extern DWORD columnWidth(struct table *, intmax_t, LONG *);

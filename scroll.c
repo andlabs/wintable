@@ -45,7 +45,7 @@ HRESULT scrollto(struct table *t, int which, struct scrollParams *p, intmax_t po
 
 	if (p->post != NULL) {
 		hr = (*(p->post))(t);
-		if (hr != 0)
+		if (hr != S_OK)
 			return hr;
 	}
 

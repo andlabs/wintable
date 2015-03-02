@@ -54,7 +54,7 @@ HRESULT rowHeight(struct table *t, HDC dc, BOOL select, LONG *height)
 
 	// do this first to avoid overwriting height before an error case
 	hr = textHeight(t, dc, select, &tmHeight);
-	if (hr != 0)
+	if (hr != S_OK)
 		return hr;
 	*height = tableImageHeight();		// start with this to avoid two function calls
 	if (*height < tmHeight)

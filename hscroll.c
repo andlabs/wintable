@@ -6,7 +6,7 @@ static struct scrollParams hscrollParams(struct table *t)
 	struct scrollParams p;
 
 	ZeroMemory(&p, sizeof (struct scrollParams));
-	p.pos = &(t->hscrollpos);
+	p.pos = &(t->xOrigin);
 	p.pagesize = t->hpagesize;
 	p.length = t->width;
 	p.scale = 1;
@@ -15,7 +15,7 @@ static struct scrollParams hscrollParams(struct table *t)
 	return p;
 }
 
-DWORD hscrollto(struct table *t, intmax_t pos)
+HRESULT hscrollto(struct table *t, intmax_t pos)
 {
 	struct scrollParams p;
 
@@ -23,7 +23,7 @@ DWORD hscrollto(struct table *t, intmax_t pos)
 	return scrollto(t, SB_HORZ, &p, pos);
 }
 
-DWORD hscrollby(struct table *t, intmax_t delta)
+HRESULT hscrollby(struct table *t, intmax_t delta)
 {
 	struct scrollParams p;
 
@@ -31,7 +31,7 @@ DWORD hscrollby(struct table *t, intmax_t delta)
 	return scrollby(t, SB_HORZ, &p, delta);
 }
 
-DWORD hscroll(struct table *t, WPARAM wParam, LPARAM lParam)
+HRESULT hscroll(struct table *t, WPARAM wParam, LPARAM lParam)
 {
 	struct scrollParams p;
 
@@ -40,11 +40,12 @@ DWORD hscroll(struct table *t, WPARAM wParam, LPARAM lParam)
 }
 
 // TODO find out if we can indicriminately check for WM_WHEELHSCROLL
-// TODO what to do if any of the functions fail?
 HANDLER(hscrollHandler)
 {
 	if (uMsg != WM_HSCROLL)
 		return FALSE;
+	// ignore failure; there's not much we can do
+	// TODO defer to DefWindowProc()?
 	hscroll(t, wParam, lParam);
 	*lResult = 0;
 	return TRUE;

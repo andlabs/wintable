@@ -30,7 +30,7 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 
 			t = (struct table *) tableAlloc(sizeof (struct table));
 			if (t == NULL) {
-				panicMemoryExhausted("error allocating internal Table data structure");
+				logMemoryExhausted("error allocating internal Table data structure");
 				// ABORT CREATION
 				// TODO correct value?
 				// TODO last error or some other way to set error?
@@ -74,12 +74,12 @@ __declspec(dllexport) ATOM __stdcall tableInit(void)
 	wc.lpfnWndProc = tableWndProc;
 	wc.hCursor = LoadCursorW(NULL, IDC_ARROW);
 	if (wc.hCursor == NULL) {
-		panicLastError("error loading Table window class cursor");
+		logLastError("error loading Table window class cursor");
 		return 0;		// pass last error up
 	}
 	wc.hIcon = LoadIconW(NULL, IDI_APPLICATION);
 	if (wc.hIcon == NULL) {
-		panicLastError("error loading Table window class icon");
+		logLastError("error loading Table window class icon");
 		return 0;		// pass last error up
 	}
 	wc.hbrBackground = (HBRUSH) (COLOR_WINDOW + 1);		// TODO correct? (check list view behavior on COLOR_WINDOW change)
@@ -87,7 +87,7 @@ __declspec(dllexport) ATOM __stdcall tableInit(void)
 	wc.hInstance = hInstance;
 	a = RegisterClassW(&wc);
 	if (a == 0)
-		panicLastError("error registering Table window class");
+		logLastError("error registering Table window class");
 	return a;		// pass last error up if a == 0
 }
 

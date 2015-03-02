@@ -2,7 +2,7 @@
 #include "tablepriv.h"
 
 static const handlerfunc handlers[] = {
-	eventHandlers,
+//TODO	eventHandlers,
 	childrenHandlers,
 	resizeHandler,
 	drawHandlers,
@@ -14,7 +14,7 @@ static const handlerfunc handlers[] = {
 };
 
 // TODO migrate this
-// TODO check all of these functions for failure
+// TODO check all of these functions for failure and/or copy comments from hscroll.c
 static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	struct table *t;
@@ -40,7 +40,7 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 			makeHeader(t, cs->hInstance);
 			t->selectedRow = -1;
 			t->selectedColumn = -1;
-			loadCheckboxThemeData(t);
+//TODO			loadCheckboxThemeData(t);
 			SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR) t);
 		}
 		// even if we did the above, fall through
@@ -49,7 +49,7 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 	if (uMsg == WM_DESTROY) {
 		// TODO free appropriate (after figuring this part out) components of t
 //TODO		invalidateTableAccs(t);
-		freeCheckboxThemeData(t);
+//TODO		freeCheckboxThemeData(t);
 		destroyHeader(t);
 		tableFree(t);//TODO, "error allocating internal Table data structure");
 		return DefWindowProcW(hwnd, uMsg, wParam, lParam);

@@ -192,7 +192,7 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 	p.xoff = SendMessageW(t->header, HDM_GETBITMAPMARGIN, 0, 0);
 
 	// see http://blogs.msdn.com/b/oldnewthing/archive/2003/07/31/54601.aspx
-	if (OffsetRect(&cliprect, t->xOrigin, t->yOrigin) == 0)
+	if (OffsetRect(&cliprect, t->xOrigin, t->yOrigin * p.height) == 0)
 		return logLastError("error adjusting cliprect to Table scroll origin in draw()");
 	if (GetWindowOrgEx(dc, &prevOrigin) == 0)
 		return logLastError("error saving previous Table DC origin in draw()");

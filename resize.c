@@ -6,7 +6,7 @@
 // TODO rename this to boot
 // TODO merge with update.h?
 
-// TODO what if one of these methods fails?
+// TODO what if one of these methods fails? blah blah blah hscroll.c
 HANDLER(resizeHandler)
 {
 	WINDOWPOS *wp;

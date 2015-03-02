@@ -169,8 +169,8 @@ extern HANDLER(apiHandlers);
 extern LRESULT notify(struct table *, UINT, intmax_t, intmax_t, uintptr_t);
 
 // update.c
-extern DWORD update(struct table *, BOOL);
-extern DWORD updateAll(struct table *);
+extern HRESULT update(struct table *, BOOL);
+extern HRESULT updateAll(struct table *);
 
 // draw.c
 extern HANDLER(drawHandlers);

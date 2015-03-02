@@ -1,25 +1,21 @@
 // 9 december 2014
 #include "tablepriv.h"
 
-DWORD scrollto(struct table *t, int which, struct scrollParams *p, intmax_t pos)
+HRESULT scrollto(struct table *t, int which, struct scrollParams *p, intmax_t pos)
 {
 	RECT scrollArea;
 	SCROLLINFO si;
 	intmax_t xamount, yamount;
-	DWORD le;
+	HRESULT hr;
 
 	if (pos < 0)
 		pos = 0;
 	if (pos > p->length - p->pagesize)
 		pos = p->length - p->pagesize;
-	// TODO this shouldn't have been necessary but alas
-	// TODO the logic is really intended for the whole y origin thing in the scrollbar series; fix that
-	if (pos < 0)
-		pos = 0;
 
 	// we don't want to scroll the header
 	if (GetClientRect(t->hwnd, &scrollArea) == 0)
-		return panicLastError("error getting Table client rect for scrollto()");
+		return logLastError("error getting Table client rect for scrollto()");
 	scrollArea.top += t->headerHeight;
 
 	// negative because ScrollWindowEx() is "backwards"
@@ -33,9 +29,7 @@ DWORD scrollto(struct table *t, int which, struct scrollParams *p, intmax_t pos)
 	if (ScrollWindowEx(t->hwnd, xamount, yamount,
 		&scrollArea, &scrollArea, NULL, NULL,
 		SW_ERASE | SW_INVALIDATE) == ERROR)
-;// TODO failure case ignored for now; see https://bugs.winehq.org/show_bug.cgi?id=37706
-//		return panicLastError("error scrolling Table");
-	// TODO call UpdateWindow()?
+		return logLastError("error scrolling Table");
 
 	*(p->pos) = pos;
 
@@ -50,23 +44,23 @@ DWORD scrollto(struct table *t, int which, struct scrollParams *p, intmax_t pos)
 	SetScrollInfo(t->hwnd, which, &si, TRUE);
 
 	if (p->post != NULL) {
-		le = (*(p->post))(t);
-		if (le != 0)
-			return le;
+		hr = (*(p->post))(t);
+		if (hr != 0)
+			return hr;
 	}
 
 	// EVENT_OBJECT_CONTENTSCROLLED is Vista and up only
 	// TODO send state changes for all affected rows/cells?
 
-	return 0;
+	return S_OK;
 }
 
-DWORD scrollby(struct table *t, int which, struct scrollParams *p, intmax_t delta)
+HRESULT scrollby(struct table *t, int which, struct scrollParams *p, intmax_t delta)
 {
 	return scrollto(t, which, p, *(p->pos) + delta);
 }
 
-DWORD scroll(struct table *t, int which, struct scrollParams *p, WPARAM wParam, LPARAM lParam)
+HRESULT scroll(struct table *t, int which, struct scrollParams *p, WPARAM wParam, LPARAM lParam)
 {
 	intmax_t pos;
 	SCROLLINFO si;
@@ -96,7 +90,7 @@ DWORD scroll(struct table *t, int which, struct scrollParams *p, WPARAM wParam, 
 		si.cbSize = sizeof (SCROLLINFO);
 		si.fMask = SIF_POS;
 		if (GetScrollInfo(t->hwnd, which, &si) == 0)
-			return panicLastError("error getting thumb position for scroll() in Table");
+			return logLastError("error getting thumb position for scroll() in Table");
 		pos = si.nPos;
 		break;
 	case SB_THUMBTRACK:
@@ -104,14 +98,14 @@ DWORD scroll(struct table *t, int which, struct scrollParams *p, WPARAM wParam, 
 		si.cbSize = sizeof (SCROLLINFO);
 		si.fMask = SIF_TRACKPOS;
 		if (GetScrollInfo(t->hwnd, which, &si) == 0)
-			return panicLastError("error getting thumb track position for scroll() in Table");
+			return logLastError("error getting thumb track position for scroll() in Table");
 		pos = si.nTrackPos;
 		break;
 	}
 	return scrollto(t, which, p, pos);
 }
 
-DWORD wheelscroll(struct table *t, int which, struct scrollParams *p, WPARAM wParam, LPARAM lParam)
+HRESULT wheelscroll(struct table *t, int which, struct scrollParams *p, WPARAM wParam, LPARAM lParam)
 {
 	int delta;
 	int lines;
@@ -121,11 +115,11 @@ DWORD wheelscroll(struct table *t, int which, struct scrollParams *p, WPARAM wPa
 	// TODO make a note of what the appropriate hscroll constant is
 	if (SystemParametersInfoW(SPI_GETWHEELSCROLLLINES, 0, &scrollAmount, 0) == 0)
 		// TODO use scrollAmount == 3 instead?
-		return panicLastError("error getting wheel scroll amount in wheelscroll()");
+		return logLastError("error getting wheel scroll amount in wheelscroll()");
 	if (scrollAmount == WHEEL_PAGESCROLL)
 		scrollAmount = p->pagesize;
 	if (scrollAmount == 0)		// no mouse wheel scrolling (or t->pagesize == 0)
-		return 0;
+		return S_OK;
 	// the rest of this is basically http://blogs.msdn.com/b/oldnewthing/archive/2003/08/07/54615.aspx and http://blogs.msdn.com/b/oldnewthing/archive/2003/08/11/54624.aspx
 	// see those pages for information on subtleties
 	delta += *(p->wheelCarry);

@@ -42,10 +42,10 @@ struct table {
 	int *columnTypes;
 	intmax_t width;
 	intmax_t headerHeight;
-	intmax_t hscrollpos;		// in logical units
+	intmax_t xOrigin;		// in logical units
 	intmax_t hpagesize;		// in logical units
 	intmax_t count;
-	intmax_t vscrollpos;		// in rows
+	intmax_t yOrigin;		// in rows
 	intmax_t vpagesize;		// in rows
 	int hwheelCarry;
 	int vwheelCarry;
@@ -109,22 +109,22 @@ struct scrollParams {
 	DWORD (*post)(struct table *);
 	int *wheelCarry;
 };
-extern DWORD scrollto(struct table *, int, struct scrollParams *, intmax_t);
-extern DWORD scrollby(struct table *, int, struct scrollParams *, intmax_t);
-extern DWORD scroll(struct table *, int, struct scrollParams *, WPARAM, LPARAM);
-extern DWORD wheelscroll(struct table *, int, struct scrollParams *, WPARAM, LPARAM);
+extern HRESULT scrollto(struct table *, int, struct scrollParams *, intmax_t);
+extern HRESULT scrollby(struct table *, int, struct scrollParams *, intmax_t);
+extern HRESULT scroll(struct table *, int, struct scrollParams *, WPARAM, LPARAM);
+extern HRESULT wheelscroll(struct table *, int, struct scrollParams *, WPARAM, LPARAM);
 
 // vscroll.h
-extern DWORD vscrollto(struct table *, intmax_t);
-extern DWORD vscrollby(struct table *, intmax_t);
-extern DWORD vscroll(struct table *, WPARAM, LPARAM);
-extern DWORD vwheelscroll(struct table *, WPARAM, LPARAM);
+extern HRESULT vscrollto(struct table *, intmax_t);
+extern HRESULT vscrollby(struct table *, intmax_t);
+extern HRESULT vscroll(struct table *, WPARAM, LPARAM);
+extern HRESULT vwheelscroll(struct table *, WPARAM, LPARAM);
 extern HANDLER(vscrollHandler);
 
 // hscroll.c
-extern DWORD hscrollto(struct table *, intmax_t);
-extern DWORD hscrollby(struct table *, intmax_t);
-extern DWORD hscroll(struct table *, WPARAM, LPARAM);
+extern HRESULT hscrollto(struct table *, intmax_t);
+extern HRESULT hscrollby(struct table *, intmax_t);
+extern HRESULT hscroll(struct table *, WPARAM, LPARAM);
 extern HANDLER(hscrollHandler);
 
 // children.c

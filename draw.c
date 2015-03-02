@@ -177,6 +177,7 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 	struct drawCellParams p;
 	HRESULT hr;
 	intmax_t startRow, endRow;
+	POINT prevOrigin;
 
 	hr = selectFont(t, dc, &newfont, &prevfont);
 	if (hr != S_OK)
@@ -189,6 +190,15 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 	if (hr != S_OK)
 		return hr;
 	p.xoff = SendMessageW(t->header, HDM_GETBITMAPMARGIN, 0, 0);
+
+	// see http://blogs.msdn.com/b/oldnewthing/archive/2003/07/31/54601.aspx
+	if (OffsetRect(&cliprect, t->xOrigin, t->yOrigin) == 0)
+		return logLastError("error adjusting cliprect to Table scroll origin in draw()");
+	if (GetWindowOrgEx(dc, &prevOrigin) == 0)
+		return logLastError("error saving previous Table DC origin in draw()");
+	if (SetWindowOrgEx(dc, prevOrigin.x + t->xOrigin,
+		prevOrigin.y + (t->yOrigin * p.height), NULL) == 0)
+		return logLastError("error setting Table DC origin to account for Table scroll origin in draw()");
 
 	// see http://blogs.msdn.com/b/oldnewthing/archive/2003/07/29/54591.aspx
 	startRow = cliprect.top / p.height;
@@ -216,6 +226,8 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 		p.y += p.height;
 	}
 
+	if (SetWindowOrgEx(dc, prevOrigin.x, prevOrigin.y, NULL) == 0)
+		return logLastError("error resetting Table DC after finishing drawing in draw()");
 	hr = deselectFont(dc, prevfont, newfont);
 	if (hr != S_OK)
 		return hr;

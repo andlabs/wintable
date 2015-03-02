@@ -205,8 +205,8 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 	if (startRow < 0)
 		startRow = 0;
 	endRow = (cliprect.bottom + p.height - 1) / p.height;
-	if (endRow > t->count - 1)
-		endRow = t->count - 1;
+	if (endRow > t->count)		// exclusive
+		endRow = t->count;
 
 	for (i = startRow; i < endRow; i++) {
 		p.row = i;

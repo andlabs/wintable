@@ -7,7 +7,7 @@ static HRESULT vscrollParams(struct table *t, struct scrollParams *p)
 	HRESULT hr;
 
 	ZeroMemory(p, sizeof (struct scrollParams));
-	p->pos = &(t->vscrollpos);
+	p->pos = &(t->yOrigin);
 	p->pagesize = t->vpagesize;
 	p->length = t->count;
 	hr = rowht(t, &rh);

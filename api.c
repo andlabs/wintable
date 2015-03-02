@@ -85,7 +85,7 @@ HANDLER(apiHandlers)
 			*rcp = t->selectedColumn;
 		*lResult = 0;
 		return TRUE;
-	case tableSetSelection:
+/*TODO	case tableSetSelection:
 		// TODO does doselect() do validation?
 		rcp = (intmax_t *) wParam;
 		row = *rcp;
@@ -99,7 +99,7 @@ HANDLER(apiHandlers)
 			doselect(t, row, *rcp);
 		*lResult = 0;
 		return TRUE;
-	}
+*/	}
 	return FALSE;
 }
 

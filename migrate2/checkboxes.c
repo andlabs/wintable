@@ -4,6 +4,8 @@
 // TODO
 #define panic(...) abort()
 
+// TODO http://stackoverflow.com/a/22695333/3408572
+
 static UINT dfcState(int cbstate)
 {
 	UINT ret;

@@ -1,6 +1,9 @@
 // 4 december 2014
 #include "tablepriv.h"
 
+/*
+TODO MIGRATE
+
 // TODO these functions rely on t->firstVisible being > 0; this causes problems for our drawing and scrolling logic, so that will have to change...
 
 // TODO call erroring functions before returning anything else?
@@ -127,6 +130,8 @@ invisible:
 }
 
 // TODO idealCoordToRowColumn/rowColumnToIdealCoord?
+
+*/
 
 void toCellContentRect(struct table *t, RECT *r, LRESULT xoff, intmax_t width, intmax_t height)
 {

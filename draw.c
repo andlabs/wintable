@@ -176,6 +176,7 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 	HFONT prevfont, newfont;
 	struct drawCellParams p;
 	HRESULT hr;
+	intmax_t startRow, endRow;
 
 	hr = selectFont(t, dc, &newfont, &prevfont);
 	if (hr != S_OK)
@@ -189,10 +190,19 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 		return hr;
 	p.xoff = SendMessageW(t->header, HDM_GETBITMAPMARGIN, 0, 0);
 
-	p.y = client.top;
-	for (i = t->vscrollpos; i < t->count; i++) {
+	// see http://blogs.msdn.com/b/oldnewthing/archive/2003/07/29/54591.aspx
+	startRow = cliprect.top / p.height;
+	if (startRow < 0)
+		startRow = 0;
+	endRow = (cliprect.bottom + p.height - 1) / p.height;
+	if (endRow > t->count - 1)
+		endRow = t->count - 1;
+
+	for (i = startRow; i < endRow; i++) {
 		p.row = i;
-		p.x = client.left - t->hscrollpos;
+		p.y = i * p.height;
+		// TODO migrate
+		p.x = client.left - t->xOrigin;
 		for (j = 0; j < t->nColumns; j++) {
 			p.column = j;
 			hr = columnWidth(t, p.column, &(p.width));
@@ -204,8 +214,6 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 			p.x += p.width;
 		}
 		p.y += p.height;
-		if (p.y >= client.bottom)			// >= because RECT.bottom is the first pixel outside the rect
-			break;
 	}
 
 	hr = deselectFont(dc, prevfont, newfont);

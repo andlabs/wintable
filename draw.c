@@ -194,6 +194,7 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 	// see http://blogs.msdn.com/b/oldnewthing/archive/2003/07/31/54601.aspx
 	// TODO explain why we /subtract/ t->headerHeight
 	// TODO split the offset into another variable
+	// TODO what does this make (0, 0)? for an explanation of the following
 	if (OffsetRect(&cliprect, t->xOrigin, t->yOrigin * p.height - t->headerHeight) == 0)
 		return logLastError("error adjusting cliprect to Table scroll origin in draw()");
 	if (GetWindowOrgEx(dc, &prevOrigin) == 0)
@@ -203,6 +204,7 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 		return logLastError("error setting Table DC origin to account for Table scroll origin in draw()");
 
 	// see http://blogs.msdn.com/b/oldnewthing/archive/2003/07/29/54591.aspx
+	// TODO figure out why the t->headerHeight stuff still works here
 	startRow = cliprect.top / p.height;
 	if (startRow < 0)
 		startRow = 0;
@@ -213,8 +215,8 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 	for (i = startRow; i < endRow; i++) {
 		p.row = i;
 		p.y = i * p.height;
-		// TODO migrate
-		p.x = client.left - t->xOrigin;
+		// TODO only draw visible columns
+		p.x = 0;
 		for (j = 0; j < t->nColumns; j++) {
 			p.column = j;
 			hr = columnWidth(t, p.column, &(p.width));

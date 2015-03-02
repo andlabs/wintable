@@ -3,6 +3,7 @@
 
 // TODO make the API return error codes directly
 // TODO and adjust all the below functions to boot
+// TODO migrate in general
 
 // TODO
 #define panic(...) abort()
@@ -13,7 +14,7 @@ static void addColumn(struct table *t, WPARAM wParam, LPARAM lParam)
 	t->columnTypes = (int *) tableRealloc(t->columnTypes, t->nColumns * sizeof (int));
 	// TODO return failure
 	if (t->columnTypes == NULL)
-		panicMemoryExhausted("adding the new column type to the current Table's list of column types");
+		logMemoryExhausted("adding the new column type to the current Table's list of column types");
 	t->columnTypes[t->nColumns - 1] = (int) wParam;
 	// TODO make a panicNoErrCode() or panicArg() for this
 	if (t->columnTypes[t->nColumns - 1] >= nTableColumnTypes)

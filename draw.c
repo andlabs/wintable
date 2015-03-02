@@ -186,7 +186,7 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 
 	ZeroMemory(&p, sizeof (struct drawCellParams));
 	hr = rowHeight(t, dc, FALSE, &(p.height));
-	if (hr != 0)
+	if (hr != S_OK)
 		return hr;
 	p.xoff = SendMessageW(t->header, HDM_GETBITMAPMARGIN, 0, 0);
 
@@ -217,7 +217,7 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 	}
 
 	hr = deselectFont(dc, prevfont, newfont);
-	if (hr != 0)
+	if (hr != S_OK)
 		return hr;
 	return S_OK;
 }

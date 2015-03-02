@@ -131,10 +131,10 @@ extern HANDLER(hscrollHandler);
 extern HANDLER(childrenHandlers);
 
 // header.c
-extern DWORD makeHeader(struct table *, HINSTANCE);
-extern DWORD destroyHeader(struct table *);
-extern DWORD repositionHeader(struct table *);
-extern DWORD headerAddColumn(struct table *, WCHAR *);
+extern HRESULT makeHeader(struct table *, HINSTANCE);
+extern HRESULT destroyHeader(struct table *);
+extern HRESULT repositionHeader(struct table *);
+extern HRESULT headerAddColumn(struct table *, WCHAR *);
 extern HANDLER(headerNotifyHandler);
 
 // events.c

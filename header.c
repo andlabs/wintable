@@ -3,7 +3,7 @@
 
 // TODO verify header events (double-clicking on a divider, for example)
 
-DWORD makeHeader(struct table *t, HINSTANCE hInstance)
+HRESULT makeHeader(struct table *t, HINSTANCE hInstance)
 {
 	t->header = CreateWindowExW(0,
 		WC_HEADERW, L"",
@@ -14,44 +14,48 @@ DWORD makeHeader(struct table *t, HINSTANCE hInstance)
 		0, 0, 0, 0,		// no initial size
 		t->hwnd, (HMENU) 100, hInstance, NULL);
 	if (t->header == NULL)
-		return panicLastError("error creating Table header");
-	return 0;
+		return logLastError("error creating Table header");
+	return S_OK;
 }
 
-DWORD destroyHeader(struct table *t)
+// TODO really error out here? it's cleanup...
+HRESULT destroyHeader(struct table *t)
 {
 	if (DestroyWindow(t->header) == 0)
-		return panicLastError("error destroying Table header");
-	return 0;
+		return logLastError("error destroying Table header");
+	return S_OK;
 }
 
 // to avoid weird bugs, the only functions allowed to call this one are the horizontal scroll functions
 // when we need to reposition the header in a situation other than a user-initiated scroll, we use a dummy scroll (hscrollby(t, 0))
-// see update() in update.h
-DWORD repositionHeader(struct table *t)
+// see update() in update.c
+HRESULT repositionHeader(struct table *t)
 {
 	RECT r;
 	WINDOWPOS wp;
 	HDLAYOUT l;
 
 	if (GetClientRect(t->hwnd, &r) == 0)
-		return panicLastError("error getting client rect for Table header repositioning");
+		return logLastError("error getting client rect for Table header repositioning");
 	// we fake horizontal scrolling here by extending the client rect to the left by the scroll position
-	r.left -= t->hscrollpos;
+	// when t->xOrigin is negative, that means there's no scrolling to be done; in that case don't move to the left
+	// TODO verify
+	if (t->xOrigin >= 0)
+		r.left -= t->xOrigin;
 	l.prc = &r;
 	l.pwpos = &wp;
 	if (SendMessageW(t->header, HDM_LAYOUT, 0, (LPARAM) (&l)) == FALSE)
-		return panicLastError("error getting new Table header position");
+		return logLastError("error getting new Table header position");
 	if (SetWindowPos(t->header, wp.hwndInsertAfter,
 		wp.x, wp.y, wp.cx, wp.cy,
 		// see above on showing the header here instead of in the CreateWindowExW() call
 		wp.flags | SWP_SHOWWINDOW) == 0)
-		return panicLastError("error repositioning Table header");
+		return logLastError("error repositioning Table header");
 	t->headerHeight = wp.cy;
-	return 0;
+	return S_OK;
 }
 
-DWORD headerAddColumn(struct table *t, WCHAR *name)
+HRESULT headerAddColumn(struct table *t, WCHAR *name)
 {
 	HDITEMW item;
 
@@ -62,12 +66,12 @@ DWORD headerAddColumn(struct table *t, WCHAR *name)
 	item.fmt = HDF_LEFT | HDF_STRING;
 	// TODO replace 100 with (t->nColumns - 1)
 	if (SendMessage(t->header, HDM_INSERTITEM, (WPARAM) (100), (LPARAM) (&item)) == (LRESULT) (-1))
-		return panicLastError("error adding column to Table header");
-	return 0;
+		return logLastError("error adding column to Table header");
+	return S_OK;
 }
 
 // TODO is this triggered if we programmatically move headers (for autosizing)?
-// TODO what happens if any of the functions here fail?
+// TODO copy failure comments from hscroll.c
 HANDLER(headerNotifyHandler)
 {
 	NMHDR *nmhdr = (NMHDR *) lParam;

@@ -178,6 +178,7 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 	HRESULT hr;
 	intmax_t startRow, endRow;
 	POINT prevOrigin;
+	intmax_t yOffset;
 
 	hr = selectFont(t, dc, &newfont, &prevfont);
 	if (hr != S_OK)
@@ -192,19 +193,20 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 	p.xoff = SendMessageW(t->header, HDM_GETBITMAPMARGIN, 0, 0);
 
 	// see http://blogs.msdn.com/b/oldnewthing/archive/2003/07/31/54601.aspx
-	// TODO explain why we /subtract/ t->headerHeight
-	// TODO split the offset into another variable
-	// TODO what does this make (0, 0)? for an explanation of the following
-	if (OffsetRect(&cliprect, t->xOrigin, t->yOrigin * p.height - t->headerHeight) == 0)
+	// we need to get cliprect to be in a position where (0, header height) is row 0
+	// we can get row 0 at (0, 0) by moving cliprect down the number of pixels in all the rows above the current Y origin value
+	// TODO explain why we subtract t->headerHeight
+	yOffset = t->yOrigin * p.height - t->headerHeight;
+	if (OffsetRect(&cliprect, t->xOrigin, yOffset) == 0)
 		return logLastError("error adjusting cliprect to Table scroll origin in draw()");
 	if (GetWindowOrgEx(dc, &prevOrigin) == 0)
 		return logLastError("error saving previous Table DC origin in draw()");
-	if (SetWindowOrgEx(dc, prevOrigin.x + t->xOrigin,
-		prevOrigin.y + (t->yOrigin * p.height - t->headerHeight), NULL) == 0)
+	if (SetWindowOrgEx(dc, prevOrigin.x + t->xOrigin, prevOrigin.y + yOffset, NULL) == 0)
 		return logLastError("error setting Table DC origin to account for Table scroll origin in draw()");
 
 	// see http://blogs.msdn.com/b/oldnewthing/archive/2003/07/29/54591.aspx
 	// TODO figure out why the t->headerHeight stuff still works here
+	// TODO see how we can adapt this into a firstVisible()
 	startRow = cliprect.top / p.height;
 	if (startRow < 0)
 		startRow = 0;

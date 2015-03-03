@@ -7,53 +7,32 @@
 // TODO rewrite this messy file in general
 
 // damn winsock
-// TODO rewrite this to make error handling more sane
-// TODO should failure to scroll really be fatal to selection?
+// TODO should failure to ensure visible really be fatal to selection?
 HRESULT doselect(struct table *t, intmax_t row, intmax_t column)
 {
-	struct metrics *m;
+	struct metrics m;
 	intmax_t oldrow;
 	struct rowcol rc;
 	intmax_t i;
 	HRESULT hr;
 
-	// check existing selection to see if it's valid
-	if (t->selectedRow == -1 && t->selectedColumn != -1)
-		panic("sanity check failure: old Table selection invalid (row == -1, column != -1)");
-	if (t->selectedRow != -1 && t->selectedColumn == -1)
-		panic("sanity check failure: old Table selection invalid (row != -1, column == -1)");
-	if (t->selectedRow >= t->count)
-		panic("sanity check failure: old Table selection invalid (row out of range)");
-	if (t->selectedColumn >= t->nColumns)
-		panic("sanity check failure: old Table selection invalid (column out of range)");
+	hr = metrics(t, &m);
+	if (hr != S_OK)
+		return hr;
 
 	oldrow = t->selectedRow;
 	t->selectedRow = row;
 	t->selectedColumn = column;
 
-	// check new selection to see if it's valid
-	if (t->selectedRow == -1 && t->selectedColumn != -1)
-		panic("sanity check failure: new Table selection invalid (row == -1, column != -1)");
-	if (t->selectedRow != -1 && t->selectedColumn == -1)
-		panic("sanity check failure: new Table selection invalid (row != -1, column == -1)");
-	if (t->selectedRow >= t->count)
-		panic("sanity check failure: new Table selection invalid (row out of range)");
-	if (t->selectedColumn >= t->nColumns)
-		panic("sanity check failure: new Table selection invalid (column out of range)");
+	// only ensure visibility if we selected something
+	if (t->selectedRow != -1 || t->selectedColumn != -1) {
+		rc.row = t->selectedRow;
+		rc.column = t->selectedColumn;
+		hr = ensureVisible(t, &m, rc);
+		if (hr != S_OK)
+			return hr;
+	}
 
-	// do this even if we don't scroll before; noScroll depends on it
-	if (GetClientRect(t->hwnd, &client) == 0)
-		return panicLastError("error getting Table client rect in doselect()");
-	client.top += t->headerHeight;
-	le = rowht(t, &height);
-	if (le != 0)
-		return le;
-
-	// only scroll if we selected something
-	if (t->selectedRow == -1 || t->selectedColumn == -1)
-		goto noScroll;
-
-noScroll:
 	// now redraw the old and new /rows/
 	// we do this after scrolling so the rectangles to be invalidated make sense
 	r.left = client.left;

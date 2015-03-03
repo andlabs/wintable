@@ -82,6 +82,12 @@ extern HRESULT selectFont(struct table *, HDC, HFONT *, HFONT *);
 extern HRESULT deselectFont(HDC, HFONT, HFONT);
 
 // metrics.c
+struct metrics {
+	RECT client;
+	LONG rowHeight;
+	LONG textHeight;
+	SIZE checkboxSize;
+};
 extern HRESULT columnWidth(struct table *, intmax_t, LONG *);
 extern HRESULT textHeight(struct table *, HDC, BOOL, LONG *);
 #define tableImageWidth() GetSystemMetrics(SM_CXSMICON)

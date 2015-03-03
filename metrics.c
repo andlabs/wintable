@@ -11,19 +11,26 @@ HRESULT columnWidth(struct table *t, intmax_t n, LONG *width)
 	return S_OK;
 }
 
+// TODO add firstVisible?
 // TODO really return an error in the freeing process?
-HRESULT textHeight(struct table *t, HDC dc, BOOL select, LONG *height)
+HRESULT getMetrics(struct table *t, HDC dc, BOOL select, struct metrics *m)
 {
 	BOOL release;
 	HFONT prevfont, newfont;
 	TEXTMETRICW tm;
 	HRESULT hr;
 
+	if (GetClientRect(t->hwnd, &(m->client)) == 0)
+		return logLastError("error getting Table client rect in getMetrics()");
+
+	m->imageWidth = GetSystemMetrics(SM_CXSMICON);
+	m->imageHeight = GetSystemMetrics(SM_CYSMICON);
+
 	release = FALSE;
 	if (dc == NULL) {
 		dc = GetDC(t->hwnd);
 		if (dc == NULL)
-			return logLastError("error getting Table DC for rowHeight()");
+			return logLastError("error getting Table DC in getMetrics()");
 		release = TRUE;
 	}
 	if (select) {
@@ -31,8 +38,13 @@ HRESULT textHeight(struct table *t, HDC dc, BOOL select, LONG *height)
 		if (hr != S_OK)
 			return hr;
 	}
+
 	if (GetTextMetricsW(dc, &tm) == 0)
-		return logLastError("error getting text metrics for rowHeight()");
+		return logLastError("error getting text metrics in getMetrics()");
+	m->textHeight = tm.tmHeight;
+
+	// TODO compute checkbox height here?
+
 	if (select) {
 		hr = deselectFont(dc, prevfont, newfont);
 		if (hr != S_OK)
@@ -40,26 +52,14 @@ HRESULT textHeight(struct table *t, HDC dc, BOOL select, LONG *height)
 	}
 	if (release)
 		if (ReleaseDC(t->hwnd, dc) == 0)
-			return logLastError("error releasing Table DC for rowHeight()");
-	*height = tm.tmHeight;
-	return S_OK;
-}
+			return logLastError("error releasing Table DC in getMetrics()");
 
-// TODO omit column types that are not present?
-// TODO compute checkbox height here?
-HRESULT rowHeight(struct table *t, HDC dc, BOOL select, LONG *height)
-{
-	LONG tmHeight;
-	HRESULT hr;
-
-	// do this first to avoid overwriting height before an error case
-	hr = textHeight(t, dc, select, &tmHeight);
-	if (hr != S_OK)
-		return hr;
-	*height = tableImageHeight();		// start with this to avoid two function calls
-	if (*height < tmHeight)
-		*height = tmHeight;
-	if (*height < t->checkboxHeight)
-		*height = t->checkboxHeight;
+	// TODO omit column types that are not present?
+	m->rowHeight = m->textHeight;
+	if (m->rowHeight < m->imageHeight)
+		m->rowHeight = m->imageHeight;
+	// TODO move to metrics
+	if (m->rowHeight < t->checkboxHeight)
+		m->rowHeight = t->checkboxHeight;
 	return S_OK;
 }

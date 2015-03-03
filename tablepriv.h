@@ -86,14 +86,13 @@ struct metrics {
 	RECT client;
 	LONG rowHeight;
 	LONG textHeight;
+	int imageWidth;
+	int imageHeight;
 	SIZE checkboxSize;
 };
 extern HRESULT columnWidth(struct table *, intmax_t, LONG *);
-extern HRESULT textHeight(struct table *, HDC, BOOL, LONG *);
-#define tableImageWidth() GetSystemMetrics(SM_CXSMICON)
-#define tableImageHeight() GetSystemMetrics(SM_CYSMICON)
-extern HRESULT rowHeight(struct table *, HDC, BOOL, LONG *);
-#define rowht(t, p) rowHeight(t, NULL, TRUE, p)
+extern HRESULT getMetrics(struct table *, HDC, BOOL, struct metrics *);
+#define metrics(t, m) getMetrics(t, NULL, TRUE, m)
 
 // coord.c
 struct rowcol {

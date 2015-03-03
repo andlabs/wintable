@@ -33,6 +33,7 @@ HRESULT doselect(struct table *t, intmax_t row, intmax_t column)
 			return hr;
 	}
 
+/* TODO migrate
 	// now redraw the old and new /rows/
 	// we do this after scrolling so the rectangles to be invalidated make sense
 	r.left = client.left;
@@ -50,34 +51,23 @@ HRESULT doselect(struct table *t, intmax_t row, intmax_t column)
 		if (InvalidateRect(t->hwnd, &r, TRUE) == 0)
 			return panicLastError("error queueing newly selected row for redraw in doselect()");
 	}
+*/
 
-	// TODO what about deselect/defocus?
-	// TODO notify on the old row too?
-	NotifyWinEvent(EVENT_OBJECT_SELECTION, t->hwnd, OBJID_CLIENT, t->selectedRow);
-	// TODO send EVENT_OBJECT_STATECHANGED too?
-	// TODO send EVENT_OBJECT_FOCUS
-
-	// TODO before or after NotifyWinEvent()? (see what other things I'm doing)
-	notify(t, tableNotificationSelectionChanged, t->selectedRow, t->selectedColumn, 0);
-
-	return 0;
+	return S_OK;
 }
 
 // TODO which WM_xBUTTONDOWNs?
 // TODO what if any of these functions fail?
-HANDLER(mouseDownSelectHandler)
+EVENTHANDLER(mouseDownSelectHandler)
 {
 	struct rowcol rc;
-	DWORD le;
+	HRESULT hr;
 
-	le = lParamToRowColumn(t, lParam, &rc);
-	if (le != 0)
-		;	// TODO
+	hr = lParamToRowColumn(t, lParam, &rc);
+	if (hr != S_OK)
+		return FALSE;
 	// don't check if lParamToRowColumn() returned row -1 or column -1; we want deselection behavior
 	doselect(t, rc.row, rc.column);
-	// TODO separate this from here
-	checkboxMouseDownHandler(t, uMsg, wParam, lParam, lResult);
-	*lResult = 0;
 	return TRUE;
 }
 
@@ -127,7 +117,7 @@ TODO what happens if page up and page down are pressed with an item selected and
 */
 
 // TODO what if any of these functions fail
-HANDLER(keyDownSelectHandler)
+EVENTHANDLER(keyDownSelectHandler)
 {
 	intmax_t row;
 	intmax_t column;
@@ -186,7 +176,7 @@ HANDLER(keyDownSelectHandler)
 			row = 0;
 			column = 0;
 		} else {
-			row = t->vscrollpos;
+			row = firstVisible(t);
 			if (row == t->selectedRow)
 				// TODO investigate why the - 1 is needed here and below
 				// TODO if this is a misunderstanding of how t->vpagesize works, figure out what happens if there is no partially visible row, and what is supposed to happen
@@ -197,13 +187,13 @@ HANDLER(keyDownSelectHandler)
 		break;
 	case VK_NEXT:
 		if (row == -1) {
-			row = t->vscrollpos + t->vpagesize - 1;
+			row = firstVisible(t) + t->vpagesize - 1;
 			// TODO ensusre this is the case with the real list view
 			if (row >= t->count)
 				row = t->count - 1;
 			column = 0;
 		} else {
-			row = t->vscrollpos + t->vpagesize - 1;
+			row = firstVisible(t) + t->vpagesize - 1;
 			if (row == t->selectedRow)
 				row += t->vpagesize - 1;
 			if (row >= t->count)
@@ -214,6 +204,5 @@ HANDLER(keyDownSelectHandler)
 		return FALSE;
 	}
 	doselect(t, row, column);
-	*lResult = 0;
 	return TRUE;
 }

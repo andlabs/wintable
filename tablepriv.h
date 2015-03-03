@@ -187,4 +187,5 @@ extern HRESULT updateAll(struct table *);
 extern HANDLER(drawHandlers);
 
 // visibility.c
+extern intmax_t firstVisible(struct table *);
 extern HRESULT ensureVisible(struct table *, struct metrics *, struct rowcol);

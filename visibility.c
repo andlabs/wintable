@@ -4,6 +4,11 @@
 // as it turns out, t->yOrigin IS the first visible row; this is a good thing
 // this is because t->yOrigin cannot be negative after all; see scroll.c
 
+intmax_t firstVisible(struct table *t)
+{
+	return t->yOrigin;
+}
+
 HRESULT ensureVisible(struct table *t, struct metrics *m, struct rowcol rc)
 {
 	RECT r;

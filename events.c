@@ -36,6 +36,7 @@ EVENTHANDLER(mouseDownFocusHandler)
 static const eventhandlerfunc lbuttonDownHandlers[] = {
 	mouseDownFocusHandler,
 //TODO	mouseDownSelectHandler,
+//TODO	checkboxMouseDownHandler,
 	NULL,
 };
 

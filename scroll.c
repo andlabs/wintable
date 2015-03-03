@@ -9,8 +9,9 @@ HRESULT scrollto(struct table *t, int which, struct scrollParams *p, intmax_t po
 	HRESULT hr;
 
 	// note that the pos < 0 check is /after/ the p->length - p->pagesize check
-	// this is actually a bug in Raymond Chen's original algorithm: if there are fewer than a page's worth of items, p->length - p->pagesize will be negative and our items draw at the bottom of the window
+	// it used to be /before/; this was actually a bug in Raymond Chen's original algorithm: if there are fewer than a page's worth of items, p->length - p->pagesize will be negative and our items draw at the bottom of the window
 	// this SHOULD have the same effect with that bug fixed and no others introduced... (thanks to devin on irc.badnik.net for confirming this logic)
+	// TODO further confirmation would also be good
 	if (pos > p->length - p->pagesize)
 		pos = p->length - p->pagesize;
 	if (pos < 0)

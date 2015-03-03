@@ -13,17 +13,19 @@ static HRESULT doAdjustRect(struct table *t, struct metrics *m, RECT *r, intmax_
 	if (unadjust)
 		yOffset = -yOffset;
 	if (OffsetRect(r, t->xOrigin, yOffset) == 0)
-		return logLastError("error adjusting cliprect to Table scroll origin in draw()");
+		return logLastError("error adjusting cliprect to Table scroll origin in doAdjustRect()");
 	if (yOffsetOut != NULL)
 		*yOffsetOut = yOffset;
 	return S_OK;
 }
 
+// takes r and moves it to the position it would be in the scroll area
 HRESULT adjustRect(struct table *t, struct metrics *m, RECT *r, intmax_t *yOffsetOut)
 {
 	return doAdjustRect(t, m, r, yOffsetOut, FALSE);
 }
 
+// takes r, which should have been adjusted by adjustRect(), and undoes the adjustment
 HRESULT unadjustRect(struct table *t, struct metrics *m, RECT *r)
 {
 	return doAdjustRect(t, m, r, NULL, TRUE);

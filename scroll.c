@@ -8,10 +8,13 @@ HRESULT scrollto(struct table *t, int which, struct scrollParams *p, intmax_t po
 	intmax_t xamount, yamount;
 	HRESULT hr;
 
-	if (pos < 0)
-		pos = 0;
+	// note that the pos < 0 check is /after/ the p->length - p->pagesize check
+	// this is actually a bug in Raymond Chen's original algorithm: if there are fewer than a page's worth of items, p->length - p->pagesize will be negative and our items draw at the bottom of the window
+	// this SHOULD have the same effect with that bug fixed and no others introduced... (thanks to devin on irc.badnik.net for confirming this logic)
 	if (pos > p->length - p->pagesize)
 		pos = p->length - p->pagesize;
+	if (pos < 0)
+		pos = 0;
 
 	// we don't want to scroll the header
 	if (GetClientRect(t->hwnd, &scrollArea) == 0)

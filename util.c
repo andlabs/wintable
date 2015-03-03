@@ -12,16 +12,17 @@ BOOL runHandlers(const handlerfunc list[], struct table *t, UINT uMsg, WPARAM wP
 }
 
 // TODO move into events.h?
-// TODO make this take in the correct LRESULT to return if at least one handler worked and pass NULL to all the handlers
-BOOL runEventHandlers(const handlerfunc list[], struct table *t, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT *lResult)
+BOOL runEventHandlers(const eventhandlerfunc list[], struct table *t, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT *lResult, LRESULT returnWhat)
 {
-	const handlerfunc *p;
+	const eventhandlerfunc *p;
 	BOOL handled = FALSE;
 
 	// TODO make sure lResult is consistent
 	for (p = list; *p != NULL; p++)
-		if ((*(*p))(t, uMsg, wParam, lParam, lResult))
+		if ((*(*p))(t, uMsg, wParam, lParam))
 			handled = TRUE;
+	if (handled)
+		*lResult = returnWhat;
 	return handled;
 }
 

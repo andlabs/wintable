@@ -62,8 +62,11 @@ struct table {
 	struct tableAcc *firstAcc;
 };
 
+// TODO move into the appropriate sections below
 typedef BOOL (*handlerfunc)(struct table *, UINT, WPARAM, LPARAM, LRESULT *);
 #define HANDLER(name) BOOL name(struct table *t, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT *lResult)
+typedef BOOL (*eventhandlerfunc)(struct table *, UINT, WPARAM, LPARAM);
+#define EVENTHANDLER(name) BOOL name(struct table *t, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 // debug.c
 extern HRESULT logLastError(const char *);
@@ -77,7 +80,7 @@ extern void tableFree(void *);
 
 // util.c
 extern BOOL runHandlers(const handlerfunc[], struct table *, UINT, WPARAM, LPARAM, LRESULT *);
-extern BOOL runEventHandlers(const handlerfunc[], struct table *, UINT, WPARAM, LPARAM, LRESULT *);
+extern BOOL runEventHandlers(const eventhandlerfunc[], struct table *, UINT, WPARAM, LPARAM, LRESULT *, LRESULT);
 extern HRESULT selectFont(struct table *, HDC, HFONT *, HFONT *);
 extern HRESULT deselectFont(HDC, HFONT, HFONT);
 
@@ -146,13 +149,13 @@ extern HRESULT headerAddColumn(struct table *, WCHAR *);
 extern HANDLER(headerNotifyHandler);
 
 // events.c
-extern HANDLER(mouseDownFocusHandler);
+extern EVENTHANDLER(mouseDownFocusHandler);
 extern HANDLER(eventHandlers);
 
 // select.c
 extern DWORD doselect(struct table *, intmax_t, intmax_t);
-extern HANDLER(mouseDownSelectHandler);
-extern HANDLER(keyDownSelectHandler);
+extern EVENTHANDLER(mouseDownSelectHandler);
+extern EVENTHANDLER(keyDownSelectHandler);
 
 // checkboxes.c
 enum {
@@ -164,10 +167,10 @@ enum {
 extern HRESULT drawCheckbox(struct table *, HDC, RECT *, int);
 extern HRESULT freeCheckboxThemeData(struct table *);
 extern HRESULT loadCheckboxThemeData(struct table *);
-extern HANDLER(checkboxMouseMoveHandler);
-extern HANDLER(checkboxMouseDownHandler);
-extern HANDLER(checkboxMouseUpHandler);
-extern HANDLER(checkboxCaptureChangedHandler);
+extern EVENTHANDLER(checkboxMouseMoveHandler);
+extern EVENTHANDLER(checkboxMouseDownHandler);
+extern EVENTHANDLER(checkboxMouseUpHandler);
+extern EVENTHANDLER(checkboxCaptureChangedHandler);
 
 // resize.c
 extern HANDLER(resizeHandler);

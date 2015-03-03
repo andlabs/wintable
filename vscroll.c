@@ -3,17 +3,17 @@
 
 static HRESULT vscrollParams(struct table *t, struct scrollParams *p)
 {
-	LONG rh;
+	struct metrics m;
 	HRESULT hr;
 
 	ZeroMemory(p, sizeof (struct scrollParams));
 	p->pos = &(t->yOrigin);
 	p->pagesize = t->vpagesize;
 	p->length = t->count;
-	hr = rowht(t, &rh);
+	hr = metrics(t, &m);
 	if (hr != S_OK)
 		return hr;
-	p->scale = rh;
+	p->scale = m.rowHeight;
 	p->post = NULL;
 	p->wheelCarry = &(t->vwheelCarry);
 	return S_OK;

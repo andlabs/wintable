@@ -31,7 +31,7 @@ static HRESULT drawTextCell(struct table *t, HDC dc, struct drawCellParams *p, R
 {
 	WCHAR *text;
 
-	toCellContentRect(t, r, p->xoff, 0, p.m->textHeight);
+	toCellContentRect(t, r, p->xoff, 0, p->m->textHeight);
 	if (SetTextColor(dc, GetSysColor(textColor)) == CLR_INVALID)
 		return logLastError("error setting Table cell text color");
 	if (SetBkMode(dc, TRANSPARENT) == 0)
@@ -54,7 +54,7 @@ static HRESULT drawImageCell(struct table *t, HDC dc, struct drawCellParams *p, 
 
 	// only call tableImageWidth() and tableImageHeight() here in case it changes partway through
 	// we can get the values back out with basic subtraction (r->right - r->left/r->bottom - r->top)
-	toCellContentRect(t, r, p->xoff, p.m->imageWidth, p.m->imageHeight);
+	toCellContentRect(t, r, p->xoff, p->m->imageWidth, p->m->imageHeight);
 
 	bitmap = (HBITMAP) notify(t, tableNotificationGetCellData, p->row, p->column, 0);
 	ZeroMemory(&bi, sizeof (BITMAP));
@@ -94,7 +94,7 @@ static HRESULT drawCheckboxCell(struct table *t, HDC dc, struct drawCellParams *
 	POINT pt;
 	int cbState;
 
-//TODO	toCellContentRect(t, r, p->xoff, p->m.checkboxSize.cx, p->m.checkboxSize.cy);
+//TODO	toCellContentRect(t, r, p->xoff, p->m->checkboxSize.cx, p->m->checkboxSize.cy);
 	toCheckboxRect(t, r, p->xoff);
 	cbState = 0;
 	if (isCheckboxChecked(t, p->row, p->column))
@@ -262,7 +262,7 @@ HANDLER(drawHandlers)
 		dc = (HDC) wParam;
 		// TODO fail here
 		// TODO adjust draw() so we don't call GetClientRect() twice
-		if (GetClientRect(t->hwnd, &client) == 0)
+		if (GetClientRect(t->hwnd, &r) == 0)
 			logLastError("error getting client rect for Table painting");
 	}
 	draw(t, dc, r);

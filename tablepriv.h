@@ -185,3 +185,6 @@ extern HRESULT updateAll(struct table *);
 
 // draw.c
 extern HANDLER(drawHandlers);
+
+// visibility.c
+extern HRESULT ensureVisible(struct table *, struct metrics *, struct rowcol);

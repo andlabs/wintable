@@ -9,19 +9,13 @@
 // damn winsock
 // TODO rewrite this to make error handling more sane
 // TODO should failure to scroll really be fatal to selection?
-DWORD doselect(struct table *t, intmax_t row, intmax_t column)
+HRESULT doselect(struct table *t, intmax_t row, intmax_t column)
 {
-	RECT r, client;
+	struct metrics *m;
 	intmax_t oldrow;
-	LONG width, height;
 	struct rowcol rc;
-	BOOL dovscroll;
 	intmax_t i;
-	intmax_t xpos;
-	LONG clientWidth;
-	DWORD le;
-	BOOL visible;
-	LONG cwid;
+	HRESULT hr;
 
 	// check existing selection to see if it's valid
 	if (t->selectedRow == -1 && t->selectedColumn != -1)
@@ -58,62 +52,6 @@ DWORD doselect(struct table *t, intmax_t row, intmax_t column)
 	// only scroll if we selected something
 	if (t->selectedRow == -1 || t->selectedColumn == -1)
 		goto noScroll;
-
-	// first vertically scroll to the new row to make it fully visible (or as visible as possible)
-	if (t->selectedRow < t->vscrollpos) {
-		le = vscrollto(t, t->selectedRow);
-		if (le != 0)
-			return le;
-	} else {
-		rc.row = t->selectedRow;
-		rc.column = t->selectedColumn;
-		// first assume entirely outside the client area
-		dovscroll = TRUE;
-		le = rowColumnToClientRect(t, rc, &r, &visible);
-		if (le != 0)
-			return le;
-		if (visible)
-			// partially outside the client area?
-			if (r.bottom <= client.bottom)		// <= here since we are comparing bottoms (which are the first pixels outside the rectangle)
-				dovscroll = FALSE;
-		if (dovscroll) {
-			le = vscrollto(t, t->selectedRow - t->vpagesize + 1);			// + 1 because apparently just t->selectedRow - t->vpagesize results in no scrolling (t->selectedRow - t->vpagesize == t->vscrollpos)...
-			if (le != 0)
-				return le;
-		}
-	}
-
-	// now see if the cell we want is to the left of offscreen, in which case scroll to its x-position
-	xpos = 0;
-	for (i = 0; i < t->selectedColumn; i++) {
-		le = columnWidth(t, i, &cwid);
-		if (le != 0)
-			return le;
-		xpos += cwid;
-	}
-	if (xpos < t->hscrollpos) {
-		le = hscrollto(t, xpos);
-		if (le != 0)
-			return le;
-	} else {
-		// if the full cell is not visible, scroll to the right just enough to make it fully visible (or as visible as possible)
-		le = columnWidth(t, t->selectedColumn, &width);
-		if (le != 0)
-			return le;
-		clientWidth = client.right - client.left;
-		if (xpos + width > t->hscrollpos + clientWidth)			// > because both sides deal with the first pixel outside
-			// if the column is too wide, then just make it occupy the whole visible area (left-aligned)
-			if (width > clientWidth) {			// TODO >= ?
-				le = hscrollto(t, xpos);
-				if (le != 0)
-					return le;
-			} else {
-				// TODO don't use t->hpagesize here? depends if other code uses it
-				le = hscrollto(t, (xpos + width) - t->hpagesize);
-				if (le != 0)
-					return le;
-			}
-	}
 
 noScroll:
 	// now redraw the old and new /rows/

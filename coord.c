@@ -1,7 +1,7 @@
 // 4 december 2014
 #include "tablepriv.h"
 
-static HRESULT doAdjustRect(struct table *t, struct metrics *m, RECT *r, intptr_t *yOffsetOut, BOOL unadjust)
+static HRESULT doAdjustRect(struct table *t, struct metrics *m, RECT *r, intmax_t *yOffsetOut, BOOL unadjust)
 {
 	intmax_t yOffset;
 
@@ -9,10 +9,10 @@ static HRESULT doAdjustRect(struct table *t, struct metrics *m, RECT *r, intptr_
 	// we need to get cliprect to be in a position where (0, header height) is row 0
 	// we can get row 0 at (0, 0) by moving cliprect down the number of pixels in all the rows above the current Y origin value
 	// TODO explain why we subtract t->headerHeight
-	yOffset = t->yOrigin * p.height - t->headerHeight;
+	yOffset = t->yOrigin * m->rowHeight - t->headerHeight;
 	if (unadjust)
 		yOffset = -yOffset;
-	if (OffsetRect(&r, t->xOrigin, yOffset) == 0)
+	if (OffsetRect(r, t->xOrigin, yOffset) == 0)
 		return logLastError("error adjusting cliprect to Table scroll origin in draw()");
 	if (yOffsetOut != NULL)
 		*yOffsetOut = yOffset;
@@ -56,7 +56,7 @@ HRESULT clientCoordToRowColumn(struct table *t, POINT pt, struct rowcol *rc)
 	hr = metrics(t, &m);
 	if (hr != S_OK)
 		return hr;
-	hr = adjustRect(t, &m, &(m.client));
+	hr = adjustRect(t, &m, &(m.client), NULL);
 	if (hr != S_OK)
 		return hr;
 	hr = adjustPoint(t, &m, &pt);
@@ -78,12 +78,11 @@ HRESULT clientCoordToRowColumn(struct table *t, POINT pt, struct rowcol *rc)
 			return hr;
 		pt.x -= cwid;
 		// use <, not <=, here:
-		// assume r.left == 0;
 		// given the first column is 100 wide,
 		// pt.x == 0 (first pixel of col 0) -> p.x - 100 == -100 < 0 -> break
 		// pt.x == 99 (last pixel of col 0) -> p.x - 100 == -1 < 0 -> break
 		// pt.x == 100 (first pixel of col 1) -> p.x - 100 == 0 >= 0 -> next column
-		if (pt.x < r.left)
+		if (pt.x < 0)
 			break;
 		rc->column++;
 	}
@@ -123,7 +122,7 @@ HRESULT rowColumnToClientRect(struct table *t, struct rowcol rc, RECT *r)
 	hr = metrics(t, &m);
 	if (hr != S_OK)
 		return hr;
-	hr = adjustRect(t, m, &(m.client), NULL);
+	hr = adjustRect(t, &m, &(m.client), NULL);
 	if (hr != S_OK)
 		return hr;
 
@@ -146,7 +145,7 @@ HRESULT rowColumnToClientRect(struct table *t, struct rowcol rc, RECT *r)
 		goto invisible;
 
 	// and now we need to return to raw coordinates
-	hr = unadjustRect(t, m, &out);
+	hr = unadjustRect(t, &m, &out);
 	if (hr != S_OK)
 		return hr;
 	*r = out;

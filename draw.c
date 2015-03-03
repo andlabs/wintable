@@ -22,15 +22,16 @@ struct drawCellParams {
 	LONG x;
 	LONG y;
 	LONG width;		// of column
-	LONG height;		// rowHeight()
+	LONG height;		// struct metrics.rowHeight
 	LRESULT xoff;		// result of HDM_GETBITMAPMARGIN
+	struct metrics *m;
 };
 
 static HRESULT drawTextCell(struct table *t, HDC dc, struct drawCellParams *p, RECT *r, int textColor)
 {
 	WCHAR *text;
 
-	toCellContentRect(t, r, p->xoff, 0, 0);		// TODO get the text height
+	toCellContentRect(t, r, p->xoff, 0, p.m->textHeight);
 	if (SetTextColor(dc, GetSysColor(textColor)) == CLR_INVALID)
 		return logLastError("error setting Table cell text color");
 	if (SetBkMode(dc, TRANSPARENT) == 0)
@@ -53,7 +54,7 @@ static HRESULT drawImageCell(struct table *t, HDC dc, struct drawCellParams *p, 
 
 	// only call tableImageWidth() and tableImageHeight() here in case it changes partway through
 	// we can get the values back out with basic subtraction (r->right - r->left/r->bottom - r->top)
-	toCellContentRect(t, r, p->xoff, tableImageWidth(), tableImageHeight());
+	toCellContentRect(t, r, p->xoff, p.m->imageWidth, p.m->imageHeight);
 
 	bitmap = (HBITMAP) notify(t, tableNotificationGetCellData, p->row, p->column, 0);
 	ZeroMemory(&bi, sizeof (BITMAP));
@@ -93,6 +94,7 @@ static HRESULT drawCheckboxCell(struct table *t, HDC dc, struct drawCellParams *
 	POINT pt;
 	int cbState;
 
+//TODO	toCellContentRect(t, r, p->xoff, p->m.checkboxSize.cx, p->m.checkboxSize.cy);
 	toCheckboxRect(t, r, p->xoff);
 	cbState = 0;
 	if (isCheckboxChecked(t, p->row, p->column))
@@ -170,10 +172,11 @@ static HRESULT drawCell(struct table *t, HDC dc, struct drawCellParams *p)
 
 // TODO use cliprect
 // TODO abort whole drawing if one cell fails?
-static HRESULT draw(struct table *t, HDC dc, RECT cliprect, RECT client)
+static HRESULT draw(struct table *t, HDC dc, RECT cliprect)
 {
 	intmax_t i, j;
 	HFONT prevfont, newfont;
+	struct metrics m;
 	struct drawCellParams p;
 	HRESULT hr;
 	intmax_t startRow, endRow;
@@ -183,13 +186,13 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect, RECT client)
 	hr = selectFont(t, dc, &newfont, &prevfont);
 	if (hr != S_OK)
 		return hr;
-
-	client.top += t->headerHeight;
-
-	ZeroMemory(&p, sizeof (struct drawCellParams));
-	hr = rowHeight(t, dc, FALSE, &(p.height));
+	hr = getMetrics(t, dc, FALSE, &m);
 	if (hr != S_OK)
 		return hr;
+
+	ZeroMemory(&p, sizeof (struct drawCellParams));
+	p.height = m.rowHeight;
+	p.m = &m;		// TODO move after the next line?
 	p.xoff = SendMessageW(t->header, HDM_GETBITMAPMARGIN, 0, 0);
 
 	// see http://blogs.msdn.com/b/oldnewthing/archive/2003/07/31/54601.aspx
@@ -246,14 +249,10 @@ HANDLER(drawHandlers)
 {
 	HDC dc;
 	PAINTSTRUCT ps;
-	RECT client;
 	RECT r;
 
 	if (uMsg != WM_PAINT && uMsg != WM_PRINTCLIENT)
 		return FALSE;
-	// TODO fail here
-	if (GetClientRect(t->hwnd, &client) == 0)
-		logLastError("error getting client rect for Table painting");
 	if (uMsg == WM_PAINT) {
 		dc = BeginPaint(t->hwnd, &ps);
 		if (dc == NULL)
@@ -261,9 +260,12 @@ HANDLER(drawHandlers)
 		r = ps.rcPaint;
 	} else {
 		dc = (HDC) wParam;
-		r = client;
+		// TODO fail here
+		// TODO adjust draw() so we don't call GetClientRect() twice
+		if (GetClientRect(t->hwnd, &client) == 0)
+			logLastError("error getting client rect for Table painting");
 	}
-	draw(t, dc, r, client);
+	draw(t, dc, r);
 	if (uMsg == WM_PAINT)
 		EndPaint(t->hwnd, &ps);
 	// this is correct for WM_PRINTCLIENT; see http://stackoverflow.com/a/27362258/3408572

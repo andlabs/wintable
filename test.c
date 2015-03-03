@@ -10,6 +10,7 @@
 
 HWND tablehwnd = NULL;
 BOOL msgfont = FALSE;
+BOOL sixrows = FALSE;
 
 HBITMAP mkbitmap(void);
 
@@ -43,6 +44,8 @@ BOOL mainwinCreate(HWND hwnd, LPCREATESTRUCT lpcs)
 		SendMessageW(tablehwnd, WM_SETFONT, (WPARAM) font, TRUE);
 	}
 	c = 100;
+	if (sixrows)
+		c = 6;
 	SendMessageW(tablehwnd, tableSetRowCount, 0, (LPARAM) (&c));
 	row = 2;
 	col = 1;
@@ -127,7 +130,10 @@ int main(int argc, char *argv[])
 	WNDCLASSW wc;
 
 	if (argc != 1)
-		msgfont = TRUE;
+		if (strcmp(argv[1], "6") == 0)
+			sixrows = TRUE;
+		else
+			msgfont = TRUE;
 	ZeroMemory(&icc, sizeof (INITCOMMONCONTROLSEX));
 	icc.dwSize = sizeof (INITCOMMONCONTROLSEX);
 	icc.dwICC = ICC_LISTVIEW_CLASSES;

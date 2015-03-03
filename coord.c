@@ -1,46 +1,84 @@
 // 4 december 2014
 #include "tablepriv.h"
 
-/*
-TODO MIGRATE
+static HRESULT doAdjustRect(struct table *t, struct metrics *m, RECT *r, intptr_t *yOffsetOut, BOOL unadjust)
+{
+	intmax_t yOffset;
 
-// TODO these functions rely on t->firstVisible being > 0; this causes problems for our drawing and scrolling logic, so that will have to change...
+	// see http://blogs.msdn.com/b/oldnewthing/archive/2003/07/31/54601.aspx
+	// we need to get cliprect to be in a position where (0, header height) is row 0
+	// we can get row 0 at (0, 0) by moving cliprect down the number of pixels in all the rows above the current Y origin value
+	// TODO explain why we subtract t->headerHeight
+	yOffset = t->yOrigin * p.height - t->headerHeight;
+	if (unadjust)
+		yOffset = -yOffset;
+	if (OffsetRect(&r, t->xOrigin, yOffset) == 0)
+		return logLastError("error adjusting cliprect to Table scroll origin in draw()");
+	if (yOffsetOut != NULL)
+		*yOffsetOut = yOffset;
+	return S_OK;
+}
 
-// TODO call erroring functions before returning anything else?
-DWORD clientCoordToRowColumn(struct table *t, POINT pt, struct rowcol *rc)
+HRESULT adjustRect(struct table *t, struct metrics *m, RECT *r, intmax_t *yOffsetOut)
+{
+	return doAdjustRect(t, m, r, yOffsetOut, FALSE);
+}
+
+HRESULT unadjustRect(struct table *t, struct metrics *m, RECT *r)
+{
+	return doAdjustRect(t, m, r, NULL, TRUE);
+}
+
+HRESULT adjustPoint(struct table *t, struct metrics *m, POINT *pt)
 {
 	RECT r;
+	HRESULT hr;
+
+	r.left = pt->x;
+	r.top = pt->y;
+	r.right = pt->x + 2;		// arbitrary number to make a non-empty rect; these fields will be ignored
+	r.bottom = pt->y + 2;
+	hr = adjustRect(t, m, &r, NULL);
+	if (hr != S_OK)
+		return hr;
+	pt->x = r.left;
+	pt->y = r.top;
+	return S_OK;
+}
+
+HRESULT clientCoordToRowColumn(struct table *t, POINT pt, struct rowcol *rc)
+{
+	struct metrics m;
 	intmax_t i;
-	LONG height;
-	DWORD le;
+	HRESULT hr;
 	LONG cwid;
 
-	if (GetClientRect(t->hwnd, &r) == 0)
-		return panicLastError("error getting Table client rect in clientCoordToRowColumn()");
-	r.top += t->headerHeight;
-	if (PtInRect(&r, pt) == 0)
+	hr = metrics(t, &m);
+	if (hr != S_OK)
+		return hr;
+	hr = adjustRect(t, &m, &(m.client));
+	if (hr != S_OK)
+		return hr;
+	hr = adjustPoint(t, &m, &pt);
+	if (hr != S_OK)
+		return hr;
+	if (PtInRect(&(m.client), pt) == 0)
 		goto outside;
 
 	// the row is easy
-	le = rowht(t, &height);
-	if (le != 0)
-		return le;
-	pt.y -= t->headerHeight;
-	rc->row = (pt.y / height) + t->vscrollpos;
+	rc->row = pt.y / m.rowHeight;
 	if (rc->row >= t->count)
 		goto outside;
 
-	// the column... not so much
-	// we scroll p.x, then subtract column widths until we cross the left edge of the control
-	pt.x += t->hscrollpos;
+	// the column... still easy, just tedious
 	rc->column = 0;
 	for (i = 0; i < t->nColumns; i++) {
-		le = columnWidth(t, i, &cwid);
-		if (le != 0)
-			return le;
+		hr = columnWidth(t, i, &cwid);
+		if (hr != S_OK)
+			return hr;
 		pt.x -= cwid;
 		// use <, not <=, here:
-		// assume r.left and t->hscrollpos == 0;
+		// assume r.left == 0;
 		// given the first column is 100 wide,
 		// pt.x == 0 (first pixel of col 0) -> p.x - 100 == -100 < 0 -> break
 		// pt.x == 99 (last pixel of col 0) -> p.x - 100 == -1 < 0 -> break
@@ -52,16 +90,16 @@ DWORD clientCoordToRowColumn(struct table *t, POINT pt, struct rowcol *rc)
 	if (rc->column >= t->nColumns)
 		goto outside;
 
-	return 0;
+	return S_OK;
 
 outside:
 	rc->row = -1;
 	rc->column = -1;
-	return 0;
+	return S_OK;
 }
 
 // same as client coordinates, but stored in a lParam (like the various mouse messages provide)
-DWORD lParamToRowColumn(struct table *t, LPARAM lParam, struct rowcol *rc)
+HRESULT lParamToRowColumn(struct table *t, LPARAM lParam, struct rowcol *rc)
 {
 	POINT pt;
 
@@ -70,68 +108,55 @@ DWORD lParamToRowColumn(struct table *t, LPARAM lParam, struct rowcol *rc)
 	return clientCoordToRowColumn(t, pt, rc);
 }
 
-// returns TRUE if the row is visible (even partially visible) and thus has a rectangle in the client area; FALSE otherwise
+// returns S_OK if the row is visible (even partially visible) and thus has a rectangle in the client area; S_FALSE otherwise
+// if S_FALSE is returned, r is unchanged (TODO really?)
 // TODO provide a way to intersect with the visible client rect area
-// TODO call erroring functions before returning anything else?
-DWORD rowColumnToClientRect(struct table *t, struct rowcol rc, RECT *r, BOOL *visible)
+HRESULT rowColumnToClientRect(struct table *t, struct rowcol rc, RECT *r)
 {
-	RECT client;
-	RECT out;			// don't change r if we return FALSE
-	LONG height;
-	intmax_t xpos;
+	struct metrics m;
+	RECT out;			// don't change r if we return S_FALSE
+	RECT intersected;
 	intmax_t i;
-	DWORD le;
+	HRESULT hr;
 	LONG cwid;
 
-	if (rc.row < t->vscrollpos)
-		goto invisible;
-	rc.row -= t->vscrollpos;		// align with client.top
+	hr = metrics(t, &m);
+	if (hr != S_OK)
+		return hr;
+	hr = adjustRect(t, m, &(m.client), NULL);
+	if (hr != S_OK)
+		return hr;
 
-	if (GetClientRect(t->hwnd, &client) == 0)
-		return panicLastError("error getting Table client rect in rowColumnToClientRect()");
-	client.top += t->headerHeight;
-
-	le = rowht(t, &height);
-	if (le != 0)
-		return le;
-	out.top = client.top + (rc.row * height);
-	if (out.top >= client.bottom)			// >= because RECT.bottom is the first pixel outside the rectangle
-		goto invisible;
-	out.bottom = out.top + height;
-
-	// and again the columns are the hard part
-	// so we start with client.left - t->hscrollpos, then keep adding widths until we get to the column we want
-	xpos = client.left - t->hscrollpos;
+	// get the whole rectangle for the cell now
+	out.left = 0;
 	for (i = 0; i < rc.column; i++) {
-		le = columnWidth(t, i, &cwid);
-		if (le != 0)
-			return le;
-		xpos += cwid;
+		hr = columnWidth(t, i, &cwid);
+		if (hr != S_OK)
+			return hr;
+		out.left += cwid;
 	}
-	// did we stray too far to the right? if so it's not visible
-	if (xpos >= client.right)		// >= because RECT.right is the first pixel outside the rectangle
-		goto invisible;
-	out.left = xpos;
-	le = columnWidth(t, rc.column, &cwid);
-	if (le != 0)
-		return le;
-	out.right = xpos + cwid;
-	// and is this too far to the left?
-	if (out.right < client.left)		// < because RECT.left is the first pixel inside the rect
+	out.top = rc.row * m.rowHeight;
+	hr = columnWidth(t, rc.column, &cwid);
+	if (hr != S_OK)
+		return hr;
+	out.right = out.left + cwid;
+	out.bottom = out.top + m.rowHeight;
+
+	if (IntersectRect(&intersected, &(m.client), &out) == 0)
 		goto invisible;
 
+	// and now we need to return to raw coordinates
+	hr = unadjustRect(t, m, &out);
+	if (hr != S_OK)
+		return hr;
 	*r = out;
-	*visible = TRUE;
-	return 0;
+	return S_OK;
 
 invisible:
-	*visible = FALSE;
-	return 0;
+	return S_FALSE;
 }
 
 // TODO idealCoordToRowColumn/rowColumnToIdealCoord?
-
-*/
 
 void toCellContentRect(struct table *t, RECT *r, LRESULT xoff, intmax_t width, intmax_t height)
 {

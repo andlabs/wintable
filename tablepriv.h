@@ -95,13 +95,16 @@ extern HRESULT getMetrics(struct table *, HDC, BOOL, struct metrics *);
 #define metrics(t, m) getMetrics(t, NULL, TRUE, m)
 
 // coord.c
+extern HRESULT adjustRect(struct table *, struct metrics *, RECT *, intmax_t *);
+extern HRESULT unadjustRect(struct table *, struct metrics *, RECT *);
+extern HRESULT adjustPoint(struct table *, struct metrics *, POINT *);
 struct rowcol {
 	intmax_t row;
 	intmax_t column;
 };
-extern DWORD clientCoordToRowColumn(struct table *, POINT, struct rowcol *);
-extern DWORD lParamToRowColumn(struct table *, LPARAM, struct rowcol *);
-extern DWORD rowColumnToClientRect(struct table *, struct rowcol, RECT *, BOOL *);
+extern HRESULT clientCoordToRowColumn(struct table *, POINT, struct rowcol *);
+extern HRESULT lParamToRowColumn(struct table *, LPARAM, struct rowcol *);
+extern HRESULT rowColumnToClientRect(struct table *, struct rowcol, RECT *);
 extern void toCellContentRect(struct table *, RECT *, LRESULT, intmax_t, intmax_t);
 #define toCheckboxRect(t, r, xoff) toCellContentRect(t, r, xoff, t->checkboxWidth, t->checkboxHeight)
 

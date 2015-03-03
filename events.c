@@ -5,7 +5,7 @@
 // TODO make these function names consistent
 
 static const handlerfunc keyDownHandlers[] = {
-	keyDownSelectHandler,
+//TODO	keyDownSelectHandler,
 	NULL,
 };
 
@@ -18,7 +18,7 @@ static const handlerfunc charHandlers[] = {
 };
 
 static const handlerfunc mouseMoveHandlers[] = {
-	checkboxMouseMoveHandler,
+//TODO	checkboxMouseMoveHandler,
 	NULL,
 };
 
@@ -37,17 +37,17 @@ HANDLER(mouseDownFocusHandler)
 
 static const handlerfunc lbuttonDownHandlers[] = {
 	mouseDownFocusHandler,
-	mouseDownSelectHandler,
+//TODO	mouseDownSelectHandler,
 	NULL,
 };
 
 static const handlerfunc lbuttonUpHandlers[] = {
-	checkboxMouseUpHandler,
+//TODO	checkboxMouseUpHandler,
 	NULL,
 };
 
 static const handlerfunc captureChangedHandlers[] = {
-	checkboxCaptureChangedHandler,
+//TODO	checkboxCaptureChangedHandler,
 	NULL,
 };
 

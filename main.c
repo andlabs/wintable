@@ -2,7 +2,7 @@
 #include "tablepriv.h"
 
 static const handlerfunc handlers[] = {
-//TODO	eventHandlers,
+	eventHandlers,
 	childrenHandlers,
 	resizeHandler,
 	drawHandlers,

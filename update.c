@@ -9,16 +9,16 @@
 // TODO actually use redraw here
 HRESULT update(struct table *t, BOOL redraw)
 {
-	RECT client;
+	struct metrics m;
 	intmax_t i;
 	intmax_t height;
 	HRESULT hr;
 	LONG width;
-	LONG rh;
 
-	// before we do anything we need the client rect
-	if (GetClientRect(t->hwnd, &client) == 0)
-		return logLastError("error getting Table client rect in update()");
+	// before we do anything we need the various metrics
+	hr = metrics(t, &m);
+	if (hr != S_OK)
+		return hr;
 
 	// the first step is to figure out how wide the whole table is
 	// TODO count dividers?
@@ -31,7 +31,7 @@ HRESULT update(struct table *t, BOOL redraw)
 	}
 
 	// now we need to figure out how much of the width of the table can be seen at once
-	t->hpagesize = client.right - client.left;
+	t->hpagesize = m.client.right - m.client.left;
 	// this part is critical: if we resize the columns to less than the client area width, then the following hscrollby() will make t->hscrollpos negative, which does very bad things
 	// we do this regardless of which of the two has changed, just to be safe
 	if (t->hpagesize > t->width)
@@ -45,13 +45,10 @@ HRESULT update(struct table *t, BOOL redraw)
 
 	// now that we have the new height of the header, we can fix up vertical scrolling
 	// so let's take the header height away from the client area
-	client.top += t->headerHeight;
+	m.client.top += t->headerHeight;
 	// and update our page size appropriately
-	height = client.bottom - client.top;
-	hr = rowht(t, &rh);
-	if (hr != S_OK)
-		return hr;
-	t->vpagesize = height / rh;
+	height = m.client.bottom - m.client.top;
+	t->vpagesize = height / m.rowHeight;
 	// and do a dummy vertical scroll to apply that
 	hr = vscrollby(t, 0);
 	if (hr != S_OK)

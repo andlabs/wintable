@@ -22,7 +22,7 @@ HRESULT getMetrics(struct table *t, HDC dc, BOOL select, struct metrics *m)
 
 	if (GetClientRect(t->hwnd, &(m->client)) == 0)
 		return logLastError("error getting Table client rect in getMetrics()");
-	// TODO adjust by t->headerHeight?
+	// don't adjust by t->headerHeight; update() needs to do that itself
 
 	m->imageWidth = GetSystemMetrics(SM_CXSMICON);
 	m->imageHeight = GetSystemMetrics(SM_CYSMICON);

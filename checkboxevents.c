@@ -1,8 +1,7 @@
 // 16 august 2014
 #include "tablepriv.h"
 
-// TODO
-#define panic(...) abort()
+// TODO wait did we really need WM_MOUSELEAVE after all?
 
 // TODO http://stackoverflow.com/a/22695333/3408572
 

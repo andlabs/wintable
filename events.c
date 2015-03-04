@@ -62,6 +62,8 @@ HANDLER(eventHandlers)
 	struct metrics *m;
 	HRESULT hr;
 
+	// note that the metrics computing is in each case statement, not here
+	// this is just in case the message isn't an event message, since we can't send the metrics back out
 	switch (uMsg) {
 #define eventHandler(msg, array, returnWhat) \
 	case msg: \

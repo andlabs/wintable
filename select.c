@@ -3,16 +3,11 @@
 
 // damn winsock
 // TODO should failure to ensure visible really be fatal to selection?
-HRESULT doselect(struct table *t, intmax_t row, intmax_t column)
+HRESULT doselect(struct table *t, struct metrics *m, intmax_t row, intmax_t column)
 {
-	struct metrics m;
 	intmax_t oldrow;
 	struct rowcol rc;
 	HRESULT hr;
-
-	hr = metrics(t, &m);
-	if (hr != S_OK)
-		return hr;
 
 	oldrow = t->selectedRow;
 	t->selectedRow = row;
@@ -54,7 +49,7 @@ EVENTHANDLER(mouseDownSelectHandler)
 	if (hr != S_OK)
 		return FALSE;
 	// don't check if lParamToRowColumn() returned row -1 or column -1; we want deselection behavior
-	doselect(t, rc.row, rc.column);
+	doselect(t, m, rc.row, rc.column);
 	return TRUE;
 }
 
@@ -190,6 +185,6 @@ EVENTHANDLER(keyDownSelectHandler)
 	default:
 		return FALSE;
 	}
-	doselect(t, row, column);
+	doselect(t, m, row, column);
 	return TRUE;
 }

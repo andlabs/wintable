@@ -151,7 +151,7 @@ extern EVENTHANDLER(mouseDownFocusHandler);
 extern HANDLER(eventHandlers);
 
 // select.c
-extern HRESULT doselect(struct table *, intmax_t, intmax_t);
+extern HRESULT doselect(struct table *, struct metrics *, intmax_t, intmax_t);
 extern EVENTHANDLER(mouseDownSelectHandler);
 extern EVENTHANDLER(keyDownSelectHandler);
 

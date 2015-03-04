@@ -157,7 +157,7 @@ extern HRESULT doselect(struct table *, intmax_t, intmax_t);
 extern EVENTHANDLER(mouseDownSelectHandler);
 extern EVENTHANDLER(keyDownSelectHandler);
 
-// checkboxes.c
+// checkboxdraw.c
 enum {
 	checkboxStateChecked = 1 << 0,
 	checkboxStateHot = 1 << 1,
@@ -167,6 +167,8 @@ enum {
 extern HRESULT drawCheckbox(struct table *, HDC, RECT *, int);
 extern HRESULT freeCheckboxThemeData(struct table *);
 extern HRESULT loadCheckboxThemeData(struct table *);
+
+// checkboxevents.c
 extern EVENTHANDLER(checkboxMouseMoveHandler);
 extern EVENTHANDLER(checkboxMouseDownHandler);
 extern EVENTHANDLER(checkboxMouseUpHandler);

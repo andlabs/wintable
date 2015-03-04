@@ -1,9 +1,6 @@
 // 16 august 2014
 #include "tablepriv.h"
 
-// TODO
-#define panic(...) abort()
-
 // TODO http://stackoverflow.com/a/22695333/3408572
 
 static UINT dfcState(int cbstate)
@@ -20,11 +17,11 @@ static UINT dfcState(int cbstate)
 	return ret;
 }
 
-static DWORD drawFrameControlCheckbox(HDC dc, RECT *r, int cbState)
+static HRESULT drawFrameControlCheckbox(HDC dc, RECT *r, int cbState)
 {
 	if (DrawFrameControl(dc, r, DFC_BUTTON, dfcState(cbState)) == 0)
-		return panicLastError("error drawing Table checkbox image with DrawFrameControl()");
-	return 0;
+		return logLastError("error drawing Table checkbox image with DrawFrameControl()");
+	return S_OK;
 }
 
 static HRESULT getFrameControlCheckboxSize(HDC dc, int *width, int *height)
@@ -49,42 +46,41 @@ static int themestates[checkboxnStates] = {
 
 static HRESULT getStateSize(HDC dc, int cbState, HTHEME theme, SIZE *s)
 {
-	// TODO rename this and all future instances to hr
-	HRESULT res;
+	HRESULT hr;
 
-	res = GetThemePartSize(theme, dc, BP_CHECKBOX, themestates[cbState], NULL, TS_DRAW, s);
-	if (res != S_OK)
-		return panicHRESULT("error getting theme part size for Table checkboxes", res);
-	return res;
+	hr = GetThemePartSize(theme, dc, BP_CHECKBOX, themestates[cbState], NULL, TS_DRAW, s);
+	if (hr != S_OK)
+		return logHRESULT("error getting theme part size for Table checkboxes", hr);
+	return S_OK;
 }
 
 static HRESULT drawThemeCheckbox(HDC dc, RECT *r, int cbState, HTHEME theme)
 {
-	HRESULT res;
+	HRESULT hr;
 
-	res = DrawThemeBackground(theme, dc, BP_CHECKBOX, themestates[cbState], r, NULL);
-	if (res != S_OK)
-		return panicHRESULT("error drawing Table checkbox image from theme", res);
-	return res;
+	hr = DrawThemeBackground(theme, dc, BP_CHECKBOX, themestates[cbState], r, NULL);
+	if (hr != S_OK)
+		return logHRESULT("error drawing Table checkbox image from theme", hr);
+	return S_OK;
 }
 
 static HRESULT getThemeCheckboxSize(HDC dc, int *width, int *height, HTHEME theme)
 {
-	HRESULT res;
+	HRESULT hr;
 	SIZE size;
 	int cbState;
 
-	res = getStateSize(dc, 0, theme, &size);
-	if (res != S_OK)
-		return res;
+	hr = getStateSize(dc, 0, theme, &size);
+	if (hr != S_OK)
+		return hr;
 	for (cbState = 1; cbState < checkboxnStates; cbState++) {
 		SIZE against;
 
-		res = getStateSize(dc, cbState, theme, &against);
-		if (res != S_OK)
-			return res;
+		hr = getStateSize(dc, cbState, theme, &against);
+		if (hr != S_OK)
+			return hr;
 		if (size.cx != against.cx || size.cy != against.cy)
-			panic("size mismatch in Table checkbox states");
+			return logLastError("size mismatch in Table checkbox states");		// TODO
 	}
 	*width = (int) size.cx;
 	*height = (int) size.cy;
@@ -93,25 +89,20 @@ static HRESULT getThemeCheckboxSize(HDC dc, int *width, int *height, HTHEME them
 
 HRESULT drawCheckbox(struct table *t, HDC dc, RECT *r, int cbState)
 {
-	DWORD le;
-
 	if (t->theme != NULL)
 		return drawThemeCheckbox(dc, r, cbState, t->theme);
-	le = drawFrameControlCheckbox(dc, r, cbState);
-	if (le != 0)
-		return HRESULT_FROM_WIN32(le);
-	return S_OK;
+	return drawFrameControlCheckbox(dc, r, cbState);
 }
 
 // TODO really panic on failure?
 HRESULT freeCheckboxThemeData(struct table *t)
 {
 	if (t->theme != NULL) {
-		HRESULT res;
+		HRESULT hr;
 
-		res = CloseThemeData(t->theme);
-		if (res != S_OK)
-			return panicHRESULT("error closing Table checkbox theme", res);
+		hr = CloseThemeData(t->theme);
+		if (hr != S_OK)
+			return logHRESULT("error closing Table checkbox theme", hr);
 		t->theme = NULL;
 	}
 	return S_OK;
@@ -128,7 +119,7 @@ HRESULT loadCheckboxThemeData(struct table *t)
 		return hr;
 	dc = GetDC(t->hwnd);
 	if (dc == NULL)
-		return panicLastErrorAsHRESULT("error getting Table DC for loading checkbox theme data");
+		return logLastError("error getting Table DC for loading checkbox theme data");
 	// ignore error; if it can't be done, we can fall back to DrawFrameControl()
 	if (t->theme == NULL)		// try to open the theme
 		t->theme = OpenThemeData(t->hwnd, L"button");
@@ -139,6 +130,6 @@ HRESULT loadCheckboxThemeData(struct table *t)
 	if (hr != S_OK)
 		return hr;
 	if (ReleaseDC(t->hwnd, dc) == 0)
-		return panicLastErrorAsHRESULT("error releasing Table DC for loading checkbox theme data");
+		return logLastError("error releasing Table DC for loading checkbox theme data");
 	return S_OK;
 }

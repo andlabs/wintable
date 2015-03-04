@@ -40,7 +40,7 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 			makeHeader(t, cs->hInstance);
 			t->selectedRow = -1;
 			t->selectedColumn = -1;
-//TODO			loadCheckboxThemeData(t);
+			loadCheckboxThemeData(t);
 			SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR) t);
 		}
 		// even if we did the above, fall through
@@ -49,7 +49,7 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 	if (uMsg == WM_DESTROY) {
 		// TODO free appropriate (after figuring this part out) components of t
 //TODO		invalidateTableAccs(t);
-//TODO		freeCheckboxThemeData(t);
+		freeCheckboxThemeData(t);
 		destroyHeader(t);
 		tableFree(t);//TODO, "error allocating internal Table data structure");
 		return DefWindowProcW(hwnd, uMsg, wParam, lParam);

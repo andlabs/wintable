@@ -87,8 +87,6 @@ static HRESULT drawImageCell(struct table *t, HDC dc, struct drawCellParams *p, 
 	return S_OK;
 }
 
-/*
-TODO
 static HRESULT drawCheckboxCell(struct table *t, HDC dc, struct drawCellParams *p, RECT *r)
 {
 	POINT pt;
@@ -110,7 +108,6 @@ static HRESULT drawCheckboxCell(struct table *t, HDC dc, struct drawCellParams *
 	}
 	return drawCheckbox(t, dc, r, cbState);
 }
-*/
 
 // TODO really abort on error?
 static HRESULT drawCell(struct table *t, HDC dc, struct drawCellParams *p)
@@ -155,12 +152,12 @@ static HRESULT drawCell(struct table *t, HDC dc, struct drawCellParams *p)
 		if (hr != S_OK)
 			return hr;
 		break;
-/*TODO	case tableColumnCheckbox:
+	case tableColumnCheckbox:
 		hr = drawCheckboxCell(t, dc, p, &r);
 		if (hr != S_OK)
 			return hr;
 		break;
-*/	}
+	}
 
 	// TODO in front of or behind the cell contents?
 	if (t->selectedRow == p->row && t->selectedColumn == p->column)

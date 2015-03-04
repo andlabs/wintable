@@ -163,6 +163,7 @@ enum {
 	checkboxnStates = 1 << 3,
 };
 extern HRESULT drawCheckbox(struct table *, HDC, RECT *, int);
+extern HRESULT getCheckboxSize(struct table *, HDC, int *, int *);
 extern HRESULT freeCheckboxThemeData(struct table *);
 extern HRESULT loadCheckboxThemeData(struct table *);
 

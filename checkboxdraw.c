@@ -94,6 +94,13 @@ HRESULT drawCheckbox(struct table *t, HDC dc, RECT *r, int cbState)
 	return drawFrameControlCheckbox(dc, r, cbState);
 }
 
+HRESULT getCheckboxSize(struct table *t, HDC dc, int *width, int *height)
+{
+	if (t->theme != NULL)
+		return getThemeCheckboxSize(dc, width, height, t->theme);
+	return getFrameControlCheckboxSize(dc, width, height);
+}
+
 // TODO really panic on failure?
 HRESULT freeCheckboxThemeData(struct table *t)
 {
@@ -111,25 +118,13 @@ HRESULT freeCheckboxThemeData(struct table *t)
 // TODO really panic on failure to ReleaseDC()?
 HRESULT loadCheckboxThemeData(struct table *t)
 {
-	HDC dc;
 	HRESULT hr;
 
 	hr = freeCheckboxThemeData(t);
 	if (hr != S_OK)
 		return hr;
-	dc = GetDC(t->hwnd);
-	if (dc == NULL)
-		return logLastError("error getting Table DC for loading checkbox theme data");
 	// ignore error; if it can't be done, we can fall back to DrawFrameControl()
 	if (t->theme == NULL)		// try to open the theme
 		t->theme = OpenThemeData(t->hwnd, L"button");
-	if (t->theme != NULL)		// use the theme
-		hr = getThemeCheckboxSize(dc, &(t->checkboxWidth), &(t->checkboxHeight), t->theme);
-	else						// couldn't open; fall back
-		hr = getFrameControlCheckboxSize(dc, &(t->checkboxWidth), &(t->checkboxHeight));
-	if (hr != S_OK)
-		return hr;
-	if (ReleaseDC(t->hwnd, dc) == 0)
-		return logLastError("error releasing Table DC for loading checkbox theme data");
 	return S_OK;
 }

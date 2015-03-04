@@ -44,7 +44,11 @@ HRESULT getMetrics(struct table *t, HDC dc, BOOL select, struct metrics *m)
 		return logLastError("error getting text metrics in getMetrics()");
 	m->textHeight = tm.tmHeight;
 
-	// TODO compute checkbox height here?
+	// compute checkbox size here since GetThemePartSize() requires an HDC
+	// (we could assume that it doesn't need to select a font in, but let's play by its rules just to be safe)
+	hr = getCheckboxSize(t, dc, &(m->checkboxWidth), &(m->checkboxHeight);
+	if (hr != S_OK)
+		return hr;
 
 	if (select) {
 		hr = deselectFont(dc, prevfont, newfont);

@@ -8,7 +8,6 @@ HRESULT doselect(struct table *t, intmax_t row, intmax_t column)
 	struct metrics m;
 	intmax_t oldrow;
 	struct rowcol rc;
-	intmax_t i;
 	HRESULT hr;
 
 	hr = metrics(t, &m);

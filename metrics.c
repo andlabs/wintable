@@ -46,7 +46,7 @@ HRESULT getMetrics(struct table *t, HDC dc, BOOL select, struct metrics *m)
 
 	// compute checkbox size here since GetThemePartSize() requires an HDC
 	// (we could assume that it doesn't need to select a font in, but let's play by its rules just to be safe)
-	hr = getCheckboxSize(t, dc, &(m->checkboxWidth), &(m->checkboxHeight);
+	hr = getCheckboxSize(t, dc, &(m->checkboxWidth), &(m->checkboxHeight));
 	if (hr != S_OK)
 		return hr;
 
@@ -63,8 +63,7 @@ HRESULT getMetrics(struct table *t, HDC dc, BOOL select, struct metrics *m)
 	m->rowHeight = m->textHeight;
 	if (m->rowHeight < m->imageHeight)
 		m->rowHeight = m->imageHeight;
-	// TODO move to metrics
-	if (m->rowHeight < t->checkboxHeight)
-		m->rowHeight = t->checkboxHeight;
+	if (m->rowHeight < m->checkboxHeight)
+		m->rowHeight = m->checkboxHeight;
 	return S_OK;
 }

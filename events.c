@@ -4,7 +4,7 @@
 // TODO make these function names consistent
 
 static const eventhandlerfunc keyDownHandlers[] = {
-//TODO	keyDownSelectHandler,
+	keyDownSelectHandler,
 	NULL,
 };
 
@@ -35,7 +35,7 @@ EVENTHANDLER(mouseDownFocusHandler)
 
 static const eventhandlerfunc lbuttonDownHandlers[] = {
 	mouseDownFocusHandler,
-//TODO	mouseDownSelectHandler,
+	mouseDownSelectHandler,
 //TODO	checkboxMouseDownHandler,
 	NULL,
 };

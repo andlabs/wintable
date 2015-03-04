@@ -153,7 +153,7 @@ extern EVENTHANDLER(mouseDownFocusHandler);
 extern HANDLER(eventHandlers);
 
 // select.c
-extern DWORD doselect(struct table *, intmax_t, intmax_t);
+extern HRESULT doselect(struct table *, intmax_t, intmax_t);
 extern EVENTHANDLER(mouseDownSelectHandler);
 extern EVENTHANDLER(keyDownSelectHandler);
 
@@ -189,3 +189,4 @@ extern HANDLER(drawHandlers);
 // visibility.c
 extern intmax_t firstVisible(struct table *);
 extern HRESULT ensureVisible(struct table *, struct metrics *, struct rowcol);
+extern HRESULT queueRedrawRow(struct table *, struct metrics *, intmax_t);

@@ -1,11 +1,6 @@
 // 13 december 2014
 #include "tablepriv.h"
 
-// TODO
-#define panic(...) abort()
-
-// TODO rewrite this messy file in general
-
 // damn winsock
 // TODO should failure to ensure visible really be fatal to selection?
 HRESULT doselect(struct table *t, intmax_t row, intmax_t column)
@@ -33,25 +28,18 @@ HRESULT doselect(struct table *t, intmax_t row, intmax_t column)
 			return hr;
 	}
 
-/* TODO migrate
 	// now redraw the old and new /rows/
 	// we do this after scrolling so the rectangles to be invalidated make sense
-	r.left = client.left;
-	r.right = client.right;
-	if (oldrow != -1 && oldrow >= t->vscrollpos) {
-		r.top = client.top + ((oldrow - t->vscrollpos) * height);
-		r.bottom = r.top + height;
-		if (InvalidateRect(t->hwnd, &r, TRUE) == 0)
-			return panicLastError("error queueing previously selected row for redraw in doselect()");
+	if (oldrow != -1) {
+		hr = queueRedrawRow(t, &m, oldrow);
+		if (hr != S_OK)
+			return hr;
 	}
-	// t->selectedRow must be visible by this point; we scrolled to it
-	if (t->selectedRow != -1 && t->selectedRow != oldrow) {
-		r.top = client.top + ((t->selectedRow - t->vscrollpos) * height);
-		r.bottom = r.top + height;
-		if (InvalidateRect(t->hwnd, &r, TRUE) == 0)
-			return panicLastError("error queueing newly selected row for redraw in doselect()");
+	if (t->selectedRow != -1) {
+		hr = queueRedrawRow(t, &m, t->selectedRow);
+		if (hr != S_OK)
+			return hr;
 	}
-*/
 
 	return S_OK;
 }

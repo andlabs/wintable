@@ -19,3 +19,4 @@ TODO
 - make sure all arithmetic operations are strongly typed
 - http://blogs.msdn.com/b/oldnewthing/archive/2006/01/03/508694.aspx both the double buffering and the RDC fix?
 - use an array of column offsets from 0 instead of looping each time?
+- see if there are any places metrics are computed more than once and fix them (mouse down handler for selections?)

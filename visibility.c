@@ -16,6 +16,7 @@ HRESULT ensureVisible(struct table *t, struct metrics *m, struct rowcol rc)
 	intmax_t xpos;
 	LONG clientWidth;
 	LONG cwid;
+	intmax_t i;
 	HRESULT hr;
 
 	// first vertically scroll to the selected row to make it fully visible (or as visible as possible)
@@ -75,5 +76,23 @@ HRESULT ensureVisible(struct table *t, struct metrics *m, struct rowcol rc)
 			}
 	}
 
+	return S_OK;
+}
+
+// TODO keep here?
+HRESULT queueRedrawRow(struct table *t, struct metrics *m, intmax_t row)
+{
+	RECT r;
+
+	if (row < t->yOrigin)		// too high
+		return S_OK;
+	// TODO check too low
+	row -= t->yOrigin;
+	r.top = row * m->rowHeight + t->headerHeight;
+	r.bottom = r.top + m->rowHeight;
+	r.left = m->client.left;
+	r.right = m->client.right;
+	if (InvalidateRect(t->hwnd, &r, TRUE) == 0)
+		return logLastError("error queueing Table row for redraw in queueRowRedraw()");
 	return S_OK;
 }

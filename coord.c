@@ -50,23 +50,21 @@ HRESULT adjustPoint(struct table *t, struct metrics *m, POINT *pt)
 	return S_OK;
 }
 
-HRESULT clientCoordToRowColumn(struct table *t, POINT pt, struct rowcol *rc)
+HRESULT clientCoordToRowColumn(struct table *t, struct metrics *m, POINT pt, struct rowcol *rc)
 {
-	struct metrics m;
+	RECT client;		// don't change m
 	intmax_t i;
 	HRESULT hr;
 	LONG cwid;
 
-	hr = metrics(t, &m);
+	client = m->client;
+	hr = adjustRect(t, m, &client, NULL);
 	if (hr != S_OK)
 		return hr;
-	hr = adjustRect(t, &m, &(m.client), NULL);
+	hr = adjustPoint(t, m, &pt);
 	if (hr != S_OK)
 		return hr;
-	hr = adjustPoint(t, &m, &pt);
-	if (hr != S_OK)
-		return hr;
-	if (PtInRect(&(m.client), pt) == 0)
+	if (PtInRect(&client, pt) == 0)
 		goto outside;
 
 	// the row is easy
@@ -102,31 +100,29 @@ outside:
 }
 
 // same as client coordinates, but stored in a lParam (like the various mouse messages provide)
-HRESULT lParamToRowColumn(struct table *t, LPARAM lParam, struct rowcol *rc)
+HRESULT lParamToRowColumn(struct table *t, struct metrics *m, LPARAM lParam, struct rowcol *rc)
 {
 	POINT pt;
 
 	pt.x = GET_X_LPARAM(lParam);
 	pt.y = GET_Y_LPARAM(lParam);
-	return clientCoordToRowColumn(t, pt, rc);
+	return clientCoordToRowColumn(t, m, pt, rc);
 }
 
 // returns S_OK if the row is visible (even partially visible) and thus has a rectangle in the client area; S_FALSE otherwise
 // if S_FALSE is returned, r is unchanged (TODO really?)
 // TODO provide a way to intersect with the visible client rect area
-HRESULT rowColumnToClientRect(struct table *t, struct rowcol rc, RECT *r)
+HRESULT rowColumnToClientRect(struct table *t, struct metrics *m, struct rowcol rc, RECT *r)
 {
-	struct metrics m;
+	RECT client;		// don't change m
 	RECT out;			// don't change r if we return S_FALSE
 	RECT intersected;
 	intmax_t i;
 	HRESULT hr;
 	LONG cwid;
 
-	hr = metrics(t, &m);
-	if (hr != S_OK)
-		return hr;
-	hr = adjustRect(t, &m, &(m.client), NULL);
+	client = m->client;
+	hr = adjustRect(t, m, &client, NULL);
 	if (hr != S_OK)
 		return hr;
 
@@ -145,11 +141,11 @@ HRESULT rowColumnToClientRect(struct table *t, struct rowcol rc, RECT *r)
 	out.right = out.left + cwid;
 	out.bottom = out.top + m.rowHeight;
 
-	if (IntersectRect(&intersected, &(m.client), &out) == 0)
+	if (IntersectRect(&intersected, &client, &out) == 0)
 		goto invisible;
 
 	// and now we need to return to raw coordinates
-	hr = unadjustRect(t, &m, &out);
+	hr = unadjustRect(t, m, &out);
 	if (hr != S_OK)
 		return hr;
 	*r = out;

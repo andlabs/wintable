@@ -27,7 +27,7 @@ HRESULT ensureVisible(struct table *t, struct metrics *m, struct rowcol rc)
 	} else {
 		// first assume entirely outside the client area
 		dovscroll = TRUE;
-		hr = rowColumnToClientRect(t, rc, &r);
+		hr = rowColumnToClientRect(t, m, rc, &r);
 		if (hr != S_OK && hr != S_FALSE)
 			return hr;
 		if (hr == S_OK)

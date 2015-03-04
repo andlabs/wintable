@@ -104,9 +104,9 @@ struct rowcol {
 	intmax_t row;
 	intmax_t column;
 };
-extern HRESULT clientCoordToRowColumn(struct table *, POINT, struct rowcol *);
-extern HRESULT lParamToRowColumn(struct table *, LPARAM, struct rowcol *);
-extern HRESULT rowColumnToClientRect(struct table *, struct rowcol, RECT *);
+extern HRESULT clientCoordToRowColumn(struct table *, struct metrics *, POINT, struct rowcol *);
+extern HRESULT lParamToRowColumn(struct table *, struct metrics *, LPARAM, struct rowcol *);
+extern HRESULT rowColumnToClientRect(struct table *, struct metrics *, struct rowcol, RECT *);
 extern void toCellContentRect(struct table *, RECT *, LRESULT, intmax_t, intmax_t);
 
 // scroll.c

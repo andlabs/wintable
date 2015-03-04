@@ -63,8 +63,8 @@ struct table {
 // TODO move into the appropriate sections below
 typedef BOOL (*handlerfunc)(struct table *, UINT, WPARAM, LPARAM, LRESULT *);
 #define HANDLER(name) BOOL name(struct table *t, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT *lResult)
-typedef BOOL (*eventhandlerfunc)(struct table *, UINT, WPARAM, LPARAM);
-#define EVENTHANDLER(name) BOOL name(struct table *t, UINT uMsg, WPARAM wParam, LPARAM lParam)
+typedef BOOL (*eventhandlerfunc)(struct table *, struct metrics *, UINT, WPARAM, LPARAM);
+#define EVENTHANDLER(name) BOOL name(struct table *t, struct metrics *m, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 // debug.c
 extern HRESULT logLastError(const char *);
@@ -78,7 +78,7 @@ extern void tableFree(void *);
 
 // util.c
 extern BOOL runHandlers(const handlerfunc[], struct table *, UINT, WPARAM, LPARAM, LRESULT *);
-extern BOOL runEventHandlers(const eventhandlerfunc[], struct table *, UINT, WPARAM, LPARAM, LRESULT *, LRESULT);
+extern BOOL runEventHandlers(const eventhandlerfunc[], struct table *, struct metrics *, UINT, WPARAM, LPARAM, LRESULT *, LRESULT);
 extern HRESULT selectFont(struct table *, HDC, HFONT *, HFONT *);
 extern HRESULT deselectFont(HDC, HFONT, HFONT);
 

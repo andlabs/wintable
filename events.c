@@ -56,12 +56,19 @@ static const eventhandlerfunc mouseWheelHandlers[] = {
 
 // TODO WM_MOUSEHOVER, other mouse buttons
 
+// TODO what to do if metrics() fails?
 HANDLER(eventHandlers)
 {
+	struct metrics *m;
+	HRESULT hr;
+
 	switch (uMsg) {
 #define eventHandler(msg, array, returnWhat) \
 	case msg: \
-		return runEventHandlers(array, t, uMsg, wParam, lParam, lResult, returnWhat);
+		hr = metrics(t, &m); \
+		if (hr != S_OK) \
+			return FALSE; \
+		return runEventHandlers(array, t, m, uMsg, wParam, lParam, lResult, returnWhat);
 	eventHandler(WM_KEYDOWN, keyDownHandlers, 0)
 	eventHandler(WM_KEYUP, keyUpHandlers, 0)
 	eventHandler(WM_CHAR, charHandlers, 0)

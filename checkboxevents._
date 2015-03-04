@@ -5,6 +5,27 @@
 
 // TODO http://stackoverflow.com/a/22695333/3408572
 
+// returns S_FALSE if we're outside the client rect or not in a checkbox
+static HRESULT lParamToCheckbox(struct table *t, struct metrics *m, LPARAM lParam, struct rowcol *rc, RECT *rCell, RECT *rCheckbox)
+{
+	HRESULT hr;
+
+	// TODO does this make sure we're not in the client rect?
+	hr = lParamToRowColumn(t, m, lParam, rc);
+	if (hr != S_OK)
+		return hr;
+	if (rc->row == -1 || rc->column == -1)
+		return S_FALSE;
+	if (t->columnTypes[rc->column] != tableColumnCheckbox)
+		return S_FALSE;
+	hr = rowColumnToClientRect(t, m, *rc, rCell);
+	if (hr != S_OK)			// handles the S_FALSE case
+		return hr;
+	*rCheckbox = *rCell;
+	toCellContentRect(t, rCheckbox, 0, m->checkboxWidth, m->checkboxHeight);
+	return S_OK;
+}
+
 // TODO what happens if any of these functions fail?
 EVENTHANDLER(checkboxMouseMoveHandler)
 {

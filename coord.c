@@ -68,7 +68,7 @@ HRESULT clientCoordToRowColumn(struct table *t, struct metrics *m, POINT pt, str
 		goto outside;
 
 	// the row is easy
-	rc->row = pt.y / m.rowHeight;
+	rc->row = pt.y / m->rowHeight;
 	if (rc->row >= t->count)
 		goto outside;
 
@@ -134,12 +134,12 @@ HRESULT rowColumnToClientRect(struct table *t, struct metrics *m, struct rowcol 
 			return hr;
 		out.left += cwid;
 	}
-	out.top = rc.row * m.rowHeight;
+	out.top = rc.row * m->rowHeight;
 	hr = columnWidth(t, rc.column, &cwid);
 	if (hr != S_OK)
 		return hr;
 	out.right = out.left + cwid;
-	out.bottom = out.top + m.rowHeight;
+	out.bottom = out.top + m->rowHeight;
 
 	if (IntersectRect(&intersected, &client, &out) == 0)
 		goto invisible;

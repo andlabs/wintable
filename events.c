@@ -59,7 +59,7 @@ static const eventhandlerfunc mouseWheelHandlers[] = {
 // TODO what to do if metrics() fails?
 HANDLER(eventHandlers)
 {
-	struct metrics *m;
+	struct metrics m;
 	HRESULT hr;
 
 	// note that the metrics computing is in each case statement, not here
@@ -70,7 +70,7 @@ HANDLER(eventHandlers)
 		hr = metrics(t, &m); \
 		if (hr != S_OK) \
 			return FALSE; \
-		return runEventHandlers(array, t, m, uMsg, wParam, lParam, lResult, returnWhat);
+		return runEventHandlers(array, t, &m, uMsg, wParam, lParam, lResult, returnWhat);
 	eventHandler(WM_KEYDOWN, keyDownHandlers, 0)
 	eventHandler(WM_KEYUP, keyUpHandlers, 0)
 	eventHandler(WM_CHAR, charHandlers, 0)

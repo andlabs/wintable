@@ -60,6 +60,8 @@ struct table {
 	struct tableAcc *firstAcc;
 };
 
+struct metrics;		// needed for below; TODO make this unnecessary
+
 // TODO move into the appropriate sections below
 typedef BOOL (*handlerfunc)(struct table *, UINT, WPARAM, LPARAM, LRESULT *);
 #define HANDLER(name) BOOL name(struct table *t, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT *lResult)

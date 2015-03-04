@@ -17,7 +17,7 @@ HRESULT doselect(struct table *t, struct metrics *m, intmax_t row, intmax_t colu
 	if (t->selectedRow != -1 || t->selectedColumn != -1) {
 		rc.row = t->selectedRow;
 		rc.column = t->selectedColumn;
-		hr = ensureVisible(t, &m, rc);
+		hr = ensureVisible(t, m, rc);
 		if (hr != S_OK)
 			return hr;
 	}
@@ -25,12 +25,12 @@ HRESULT doselect(struct table *t, struct metrics *m, intmax_t row, intmax_t colu
 	// now redraw the old and new /rows/
 	// we do this after scrolling so the rectangles to be invalidated make sense
 	if (oldrow != -1) {
-		hr = queueRedrawRow(t, &m, oldrow);
+		hr = queueRedrawRow(t, m, oldrow);
 		if (hr != S_OK)
 			return hr;
 	}
 	if (t->selectedRow != -1) {
-		hr = queueRedrawRow(t, &m, t->selectedRow);
+		hr = queueRedrawRow(t, m, t->selectedRow);
 		if (hr != S_OK)
 			return hr;
 	}
@@ -45,7 +45,7 @@ EVENTHANDLER(mouseDownSelectHandler)
 	struct rowcol rc;
 	HRESULT hr;
 
-	hr = lParamToRowColumn(t, lParam, &rc);
+	hr = lParamToRowColumn(t, m, lParam, &rc);
 	if (hr != S_OK)
 		return FALSE;
 	// don't check if lParamToRowColumn() returned row -1 or column -1; we want deselection behavior

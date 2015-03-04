@@ -92,8 +92,7 @@ static HRESULT drawCheckboxCell(struct table *t, HDC dc, struct drawCellParams *
 	POINT pt;
 	int cbState;
 
-//TODO	toCellContentRect(t, r, p->xoff, p->m->checkboxSize.cx, p->m->checkboxSize.cy);
-	toCheckboxRect(t, r, p->xoff);
+	toCellContentRect(t, r, p->xoff, p->m->checkboxWidth, p->m->checkboxHeight);
 	cbState = 0;
 	if (isCheckboxChecked(t, p->row, p->column))
 		cbState |= checkboxStateChecked;

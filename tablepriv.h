@@ -52,8 +52,6 @@ struct table {
 	intmax_t selectedRow;
 	intmax_t selectedColumn;
 	HTHEME theme;
-	int checkboxWidth;
-	int checkboxHeight;
 	BOOL checkboxMouseOverLast;
 	LPARAM checkboxMouseOverLastPoint;
 	BOOL checkboxMouseDown;
@@ -91,7 +89,8 @@ struct metrics {
 	LONG textHeight;
 	int imageWidth;
 	int imageHeight;
-	SIZE checkboxSize;
+	int checkboxWidth;
+	int checkboxHeight;
 };
 extern HRESULT columnWidth(struct table *, intmax_t, LONG *);
 extern HRESULT getMetrics(struct table *, HDC, BOOL, struct metrics *);
@@ -109,7 +108,6 @@ extern HRESULT clientCoordToRowColumn(struct table *, POINT, struct rowcol *);
 extern HRESULT lParamToRowColumn(struct table *, LPARAM, struct rowcol *);
 extern HRESULT rowColumnToClientRect(struct table *, struct rowcol, RECT *);
 extern void toCellContentRect(struct table *, RECT *, LRESULT, intmax_t, intmax_t);
-#define toCheckboxRect(t, r, xoff) toCellContentRect(t, r, xoff, t->checkboxWidth, t->checkboxHeight)
 
 // scroll.c
 struct scrollParams {

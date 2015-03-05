@@ -32,10 +32,30 @@ EVENTHANDLER(checkboxMouseMoveHandler)
 	// TODO see http://stackoverflow.com/a/28731761/3408572
 	// TODO when rewriting, handle captures/the possibility that the mouse may not be in the client rect
 
-$	if the mouse was previously in the client rect
-$		redraw the cell at the previous mouse position
-$	mark the mouse as being in the client rect
-$	redraw the cell at the current mouse position
+	struct rowcol rc;
+	RECT rCell, rCheckbox;
+	HRESULT hr;
+
+	// we don't need to do any sort of logic to figure out what specifically to draw here
+	// the drawing code will figure that out
+	// we simply need to mark the old and new cells for redraw
+	if (t->checkboxMouseMoved) {		// mark the previous cell in case we've changed cells
+		hr = lParamToCheckbox(t, m, t->checkboxMouseMoveLPARAM, &rc, &rCell, &rCheck);
+		if (hr != S_OK && hr != S_FALSE)
+			;	// TODO
+		if (hr != S_FALSE)
+			if (InvalidateRect(t->hwnd, &rCell, TRUE) == 0)
+				;	// TODO
+	}
+	t->checkboxMouseMoved = TRUE;
+	t->checkboxMouseMoveLPARAM = lParam;
+	// TODO see if we need to get rid of code duplication here
+	hr = lParamToCheckbox(t, m, t->checkboxMouseMoveLPARAM, &rc, &rCell, &rCheck);
+	if (hr != S_OK && hr != S_FALSE)
+		;	// TODO
+	if (hr != S_FALSE)
+		if (InvalidateRect(t->hwnd, &rCell, TRUE) == 0)
+			;	// TODO
 	return TRUE;
 }
 

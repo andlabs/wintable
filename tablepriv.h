@@ -52,8 +52,8 @@ struct table {
 	intmax_t selectedRow;
 	intmax_t selectedColumn;
 	HTHEME theme;
-	BOOL checkboxMouseOverLast;
-	LPARAM checkboxMouseOverLastPoint;
+	BOOL checkboxMouseMoved;
+	LPARAM checkboxMouseMoveLPARAM;
 	BOOL checkboxMouseDown;
 	intmax_t checkboxMouseDownRow;
 	intmax_t checkboxMouseDownColumn;

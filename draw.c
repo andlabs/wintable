@@ -90,6 +90,8 @@ static HRESULT drawImageCell(struct table *t, HDC dc, struct drawCellParams *p, 
 static HRESULT drawCheckboxCell(struct table *t, HDC dc, struct drawCellParams *p, RECT *r)
 {
 	int cbState;
+	POINT pt;
+	HRESULT hr;
 
 	toCellContentRect(t, r, p->xoff, p->m->checkboxWidth, p->m->checkboxHeight);
 	cbState = 0;
@@ -98,9 +100,18 @@ static HRESULT drawCheckboxCell(struct table *t, HDC dc, struct drawCellParams *
 	if (t->checkboxMouseDown)
 		if (p->row == t->checkboxMouseDownRowColumn.row && p->column == t->checkboxMouseDownRowColumn.column)
 			cbState |= checkboxStatePushed;
-	if (t->checkboxMouseMoved)
-		if (lParamInRect(r, t->checkboxMouseMoveLPARAM) != 0)
+	if (t->checkboxMouseMoved) {
+		// t->checkboxMouseMoveLPARAM is unadjusted
+		// TODO do it in the WM_MOUSEMOVE handler instead?
+		// TODO just do the cbState logic there instead?
+		pt.x = GET_X_LPARAM(t->checkboxMouseMoveLPARAM);
+		pt.y = GET_Y_LPARAM(t->checkboxMouseMoveLPARAM);
+		hr = adjustPoint(t, p->m, &pt);
+		if (hr != S_OK)
+			return hr;
+		if (PtInRect(r, pt) != 0)
 			cbState |= checkboxStateHot;
+	}
 	return drawCheckbox(t, dc, r, cbState);
 }
 

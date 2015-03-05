@@ -17,7 +17,6 @@ BOOL runEventHandlers(const eventhandlerfunc list[], struct table *t, struct met
 	const eventhandlerfunc *p;
 	BOOL handled = FALSE;
 
-	// TODO make sure lResult is consistent
 	for (p = list; *p != NULL; p++)
 		if ((*(*p))(t, m, uMsg, wParam, lParam))
 			handled = TRUE;

@@ -118,17 +118,18 @@ EVENTHANDLER(checkboxMouseUpHandler)
 
 	// okay, we're good; toggle
 	notify(t, tableNotificationCellCheckboxToggled, rc.row, rc.column, 0);
+
+noToggle:
 	// now redraw the checkbox that we clicked
-	// TODO do we need to do this or will rDownCell == rHoverCell?
+	// do this regardless of whether we toggle; otherwise, the clicked checkbox doesn't get redrawn from its pressed state until later
 	hr = rowColumnToClientRect(t, m, t->checkboxMouseDownRowColumn, &rDownCell);
 	if (hr != S_OK && hr != S_FALSE)
 		;	// TODO
 	if (hr != S_FALSE)
 		if (InvalidateRect(t->hwnd, &rDownCell, TRUE) == 0)
 			;	// TODO
-
-noToggle:
-	// redraw the cell being hovered over as well, just in case (see above)
+	// and redraw the cell being hovered over as well, just in case (see above)
+	// TODO could we reliably tell if rHoverCell == rDownCell somehow and avoid the duplicate call (other than comparing the rects)?
 	if (redrawHover)
 		if (InvalidateRect(t->hwnd, &rHoverCell, TRUE) == 0)
 			;	// TODO

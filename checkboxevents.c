@@ -56,6 +56,7 @@ EVENTHANDLER(checkboxMouseMoveHandler)
 	if (hr != S_FALSE)
 		if (InvalidateRect(t->hwnd, &rCell, TRUE) == 0)
 			;	// TODO
+	// TODO return FALSE if hr == S_FALSE for both?
 	return TRUE;
 }
 

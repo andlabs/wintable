@@ -138,9 +138,20 @@ noToggle:
 // TODO what happens if any of these fail?
 EVENTHANDLER(checkboxCaptureChangedHandler)
 {
-$	if we weren't in checkbox clicking mode
+	RECT r;
+	HRESULT hr;
+
+	if (!t->checkboxMosueDown)
 		return FALSE;
-$	leave checkbox clicking mode
-$	TODO redraw the checkbox in question
+	t->checkboxMouseDown = FALSE;
+	// capture was taken before the mouse was released
+	// don't release capture or toggle the checkbox (even if every other toggling condition was met)
+	// do redraw the checkbox that used to be clicked on
+	hr = rowColumnToClientRect(t, m, t->checkboxMouseDownRowColumn, &r);
+	if (hr != S_OK && hr != S_FALSE)
+		;	// TODO
+	if (hr != S_FALSE)
+		if (InvalidateRect(t->hwnd, &r, TRUE) == 0)
+			;	// TODO
 	return TRUE;
 }

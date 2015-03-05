@@ -55,8 +55,7 @@ struct table {
 	BOOL checkboxMouseMoved;
 	LPARAM checkboxMouseMoveLPARAM;
 	BOOL checkboxMouseDown;
-	intmax_t checkboxMouseDownRow;
-	intmax_t checkboxMouseDownColumn;
+	struct rowcol checkboxMouseDownRowColumn;
 	struct tableAcc *firstAcc;
 };
 

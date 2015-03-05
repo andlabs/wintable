@@ -63,10 +63,25 @@ EVENTHANDLER(checkboxMouseMoveHandler)
 // TODO what happens if any of these fail?
 EVENTHANDLER(checkboxMouseDownHandler)
 {
-$	determine if the mouse landed on a checkbox
-$	if so
-$		SetCapture()
-$		mark that we are clicking a checkbox
+	struct rowcol rc;
+	RECT rCell, rCheckbox;
+	POINT pt;
+	HRESULT hr;
+
+	hr = lParamToCheckbox(t, m, lParam, &rc, &rCell, &rCheckbox);
+	if (hr != S_OK && hr != S_FALSE)
+		;	// TODO
+	if (hr == S_FALLSE)			// not in a checkbox cell
+		return FALSE;
+	pt.x = GET_X_LPARAM(lParam);
+	pt.y = GET_Y_LPARAM(lParam);
+	if (PtInRect(&rCheckbox, pt) == 0)
+		return FALSE;
+	SetCapture(t->hwnd);
+	t->checkboxMouseDown = TRUE;
+	t->checkboxMouseDownRowColumn = rc;
+	if (InvalidateRect(t->hwnd, &rCell, TRUE) == 0)
+		;	// TODO
 	return TRUE;
 }
 

@@ -6,7 +6,7 @@
 
 #include "table.h"
 
-#define panic(...) abort()
+#define panic(s) { fprintf(stderr, "%s: %I32d\n", s, GetLastError()); abort(); }
 
 HWND tablehwnd = NULL;
 BOOL msgfont = FALSE;

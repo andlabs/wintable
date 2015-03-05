@@ -1,8 +1,6 @@
 // 4 december 2014
 #include "tablepriv.h"
 
-// TODO change all of these to take struct metrics?
-
 static HRESULT doAdjustRect(struct table *t, struct metrics *m, RECT *r, intmax_t *yOffsetOut, BOOL unadjust)
 {
 	intmax_t xOffset;

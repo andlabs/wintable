@@ -89,7 +89,6 @@ static HRESULT drawImageCell(struct table *t, HDC dc, struct drawCellParams *p, 
 
 static HRESULT drawCheckboxCell(struct table *t, HDC dc, struct drawCellParams *p, RECT *r)
 {
-	POINT pt;
 	int cbState;
 
 	toCellContentRect(t, r, p->xoff, p->m->checkboxWidth, p->m->checkboxHeight);
@@ -97,14 +96,11 @@ static HRESULT drawCheckboxCell(struct table *t, HDC dc, struct drawCellParams *
 	if (isCheckboxChecked(t, p->row, p->column))
 		cbState |= checkboxStateChecked;
 	if (t->checkboxMouseDown)
-		if (p->row == t->checkboxMouseDownRow && p->column == t->checkboxMouseDownColumn)
+		if (p->row == t->checkboxMouseDownRowColumn.row && p->column == t->checkboxMouseDownRowColumn.column)
 			cbState |= checkboxStatePushed;
-	if (t->checkboxMouseOverLast) {
-		pt.x = GET_X_LPARAM(t->checkboxMouseOverLastPoint);
-		pt.y = GET_Y_LPARAM(t->checkboxMouseOverLastPoint);
-		if (PtInRect(r, pt) != 0)
+	if (t->checkboxMouseMoved)
+		if (lParamInRect(r, t->checkboxMouseMoveLPARAM) != 0)
 			cbState |= checkboxStateHot;
-	}
 	return drawCheckbox(t, dc, r, cbState);
 }
 

@@ -11,7 +11,6 @@ HRESULT columnWidth(struct table *t, intmax_t n, LONG *width)
 	return S_OK;
 }
 
-// TODO add firstVisible?
 // TODO really return an error in the freeing process?
 HRESULT getMetrics(struct table *t, HDC dc, BOOL select, struct metrics *m)
 {

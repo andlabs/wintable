@@ -34,6 +34,12 @@
 // forward declaration
 struct tableAcc;
 
+// TODO make this unnecessary here
+struct rowcol {
+	intmax_t row;
+	intmax_t column;
+};
+
 struct table {
 	HWND hwnd;
 	HWND header;
@@ -102,10 +108,7 @@ extern HRESULT getMetrics(struct table *, HDC, BOOL, struct metrics *);
 extern HRESULT adjustRect(struct table *, struct metrics *, RECT *, intmax_t *);
 extern HRESULT unadjustRect(struct table *, struct metrics *, RECT *);
 extern HRESULT adjustPoint(struct table *, struct metrics *, POINT *);
-struct rowcol {
-	intmax_t row;
-	intmax_t column;
-};
+// TODO struct rowcol should go here
 extern HRESULT clientCoordToRowColumn(struct table *, struct metrics *, POINT, struct rowcol *);
 extern HRESULT lParamToRowColumn(struct table *, struct metrics *, LPARAM, struct rowcol *);
 extern HRESULT rowColumnToClientRect(struct table *, struct metrics *, struct rowcol, RECT *);

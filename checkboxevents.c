@@ -40,7 +40,7 @@ EVENTHANDLER(checkboxMouseMoveHandler)
 	// the drawing code will figure that out
 	// we simply need to mark the old and new cells for redraw
 	if (t->checkboxMouseMoved) {		// mark the previous cell in case we've changed cells
-		hr = lParamToCheckbox(t, m, t->checkboxMouseMoveLPARAM, &rc, &rCell, &rCheck);
+		hr = lParamToCheckbox(t, m, t->checkboxMouseMoveLPARAM, &rc, &rCell, &rCheckbox);
 		if (hr != S_OK && hr != S_FALSE)
 			;	// TODO
 		if (hr != S_FALSE)
@@ -50,7 +50,7 @@ EVENTHANDLER(checkboxMouseMoveHandler)
 	t->checkboxMouseMoved = TRUE;
 	t->checkboxMouseMoveLPARAM = lParam;
 	// TODO see if we need to get rid of code duplication here
-	hr = lParamToCheckbox(t, m, t->checkboxMouseMoveLPARAM, &rc, &rCell, &rCheck);
+	hr = lParamToCheckbox(t, m, t->checkboxMouseMoveLPARAM, &rc, &rCell, &rCheckbox);
 	if (hr != S_OK && hr != S_FALSE)
 		;	// TODO
 	if (hr != S_FALSE)
@@ -70,7 +70,7 @@ EVENTHANDLER(checkboxMouseDownHandler)
 	hr = lParamToCheckbox(t, m, lParam, &rc, &rCell, &rCheckbox);
 	if (hr != S_OK && hr != S_FALSE)
 		;	// TODO
-	if (hr == S_FALLSE)			// not in a checkbox cell
+	if (hr == S_FALSE)			// not in a checkbox cell
 		return FALSE;
 	if (lParamInRect(&rCheckbox, lParam) == 0)
 		return FALSE;
@@ -110,7 +110,7 @@ EVENTHANDLER(checkboxMouseUpHandler)
 	if (hr == S_FALSE)		// not in checkbox cell
 		goto noToggle;
 	redrawHover = TRUE;
-	if (rc != t->checkboxMouseDownRowColumn)
+	if (rc.row != t->checkboxMouseDownRowColumn.row || rc.column != t->checkboxMouseDownRowColumn.column)
 		goto noToggle;
 	if (lParamInRect(&rHoverCheckbox, lParam) == 0)
 		goto noToggle;
@@ -141,7 +141,7 @@ EVENTHANDLER(checkboxCaptureChangedHandler)
 	RECT r;
 	HRESULT hr;
 
-	if (!t->checkboxMosueDown)
+	if (!t->checkboxMouseDown)
 		return FALSE;
 	t->checkboxMouseDown = FALSE;
 	// capture was taken before the mouse was released

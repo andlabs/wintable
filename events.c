@@ -17,7 +17,7 @@ static const eventhandlerfunc charHandlers[] = {
 };
 
 static const eventhandlerfunc mouseMoveHandlers[] = {
-//TODO	checkboxMouseMoveHandler,
+	checkboxMouseMoveHandler,
 	NULL,
 };
 
@@ -35,17 +35,17 @@ EVENTHANDLER(mouseDownFocusHandler)
 static const eventhandlerfunc lbuttonDownHandlers[] = {
 	mouseDownFocusHandler,
 	mouseDownSelectHandler,
-//TODO	checkboxMouseDownHandler,
+	checkboxMouseDownHandler,
 	NULL,
 };
 
 static const eventhandlerfunc lbuttonUpHandlers[] = {
-//TODO	checkboxMouseUpHandler,
+	checkboxMouseUpHandler,
 	NULL,
 };
 
 static const eventhandlerfunc captureChangedHandlers[] = {
-//TODO	checkboxCaptureChangedHandler,
+	checkboxCaptureChangedHandler,
 	NULL,
 };
 

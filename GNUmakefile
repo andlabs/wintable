@@ -41,14 +41,21 @@ HFILES = \
 	table.h \
 	tablepriv.h
 
+TESTCFILES = \
+	test.c
+
 OFILES = $(CFILES:%.c=$(OBJDIR)/%.o)
+TESTOFILES = $(TESTCFILES:%.c=$(OBJDIR)/%.o)
 
 neededCFLAGS = --std=c99 -Wall -Wextra -Wno-unused-parameter
 
-neededLDFLAGS = -luser32 -lkernel32 -lgdi32 -lcomctl32 -luxtheme -lole32 -loleaut32 -loleacc -luuid -lmsimg32
+neededLDFLAGS = -static-libgcc -luser32 -lkernel32 -lgdi32 -lcomctl32 -luxtheme -lole32 -loleaut32 -loleacc -luuid -lmsimg32
 
 all: clean $(OFILES)
 	$(CC) -g -o $(OUTDIR)/wintable.dll -shared -Wl,--out-implib,$(OUTDIR)/wintable.lib $(OFILES) $(LDFLAGS) $(neededLDFLAGS) $(mflag)
+
+test: all $(TESTOFILES)
+	$(CC) -g -o $(OUTDIR)/wintable.exe $(TESTOFILES) $(LDFLAGS) $(neededLDFLAGS) $(OUTDIR)/wintable.lib $(mflag)
 
 $(OBJDIR)/%.o: %.c $(HFILES) dirs
 	$(CC) -g -o $@ -c $< $(CFLAGS) $(neededCFLAGS) $(mflag)

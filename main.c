@@ -102,11 +102,3 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 		hInstance = hinstDLL;
 	return TRUE;
 }
-
-// this is solely for the test program's use and will be removed (TODO) when we're ready to split
-EXTERN_C IMAGE_DOS_HEADER __ImageBase;
-HINSTANCE tableTestProgramInit(void)
-{
-	hInstance = (HINSTANCE) (&__ImageBase);
-	return hInstance;
-}

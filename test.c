@@ -120,8 +120,6 @@ LRESULT CALLBACK mainwndproc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 }
 
-extern void tableTestProgramInit(void);
-
 int main(int argc, char *argv[])
 {
 	HWND mainwin;
@@ -139,7 +137,6 @@ int main(int argc, char *argv[])
 	icc.dwICC = ICC_LISTVIEW_CLASSES;
 	if (InitCommonControlsEx(&icc) == 0)
 		panic("(test program) error initializing comctl32.dll");
-	tableTestProgramInit();
 	if (tableInit() == 0)
 		panic("(test program) error initializing Table");
 	ZeroMemory(&wc, sizeof (WNDCLASSW));

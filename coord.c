@@ -5,16 +5,21 @@
 
 static HRESULT doAdjustRect(struct table *t, struct metrics *m, RECT *r, intmax_t *yOffsetOut, BOOL unadjust)
 {
+	intmax_t xOffset;
 	intmax_t yOffset;
 
+	// TODO adjust this comment for xOffset
 	// see http://blogs.msdn.com/b/oldnewthing/archive/2003/07/31/54601.aspx
 	// we need to get cliprect to be in a position where (0, header height) is row 0
 	// we can get row 0 at (0, 0) by moving cliprect down the number of pixels in all the rows above the current Y origin value
 	// TODO explain why we subtract t->headerHeight
+	xOffset = t->xOrigin;
 	yOffset = t->yOrigin * m->rowHeight - t->headerHeight;
-	if (unadjust)
+	if (unadjust) {
+		xOffset = -xOffset;
 		yOffset = -yOffset;
-	if (OffsetRect(r, t->xOrigin, yOffset) == 0)
+	}
+	if (OffsetRect(r, xOffset, yOffset) == 0)
 		return logLastError("error adjusting cliprect to Table scroll origin in doAdjustRect()");
 	if (yOffsetOut != NULL)
 		*yOffsetOut = yOffset;

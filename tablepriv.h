@@ -82,6 +82,7 @@ extern BOOL runHandlers(const handlerfunc[], struct table *, UINT, WPARAM, LPARA
 extern BOOL runEventHandlers(const eventhandlerfunc[], struct table *, struct metrics *, UINT, WPARAM, LPARAM, LRESULT *, LRESULT);
 extern HRESULT selectFont(struct table *, HDC, HFONT *, HFONT *);
 extern HRESULT deselectFont(HDC, HFONT, HFONT);
+extern BOOL lParamInRect(const RECT *, LPARAM);
 
 // metrics.c
 struct metrics {

@@ -52,3 +52,13 @@ HRESULT deselectFont(HDC dc, HFONT prevfont, HFONT newfont)
 	// doin't delete newfont here, even if it is the system font (see http://msdn.microsoft.com/en-us/library/windows/desktop/dd144925%28v=vs.85%29.aspx)
 	return S_OK;
 }
+
+// weird types here are to be parallel to the declaration of PtInRect() in Microsoft's headers
+BOOL lParamInRect(const RECT *r, LPARAM lParam)
+{
+	POINT pt;
+
+	pt.x = GET_X_LPARAM(lParam);
+	pt.y = GET_Y_LPARAM(lParam);
+	return PtInRect(r, pt);
+}

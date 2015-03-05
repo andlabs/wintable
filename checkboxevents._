@@ -65,7 +65,6 @@ EVENTHANDLER(checkboxMouseDownHandler)
 {
 	struct rowcol rc;
 	RECT rCell, rCheckbox;
-	POINT pt;
 	HRESULT hr;
 
 	hr = lParamToCheckbox(t, m, lParam, &rc, &rCell, &rCheckbox);
@@ -73,9 +72,7 @@ EVENTHANDLER(checkboxMouseDownHandler)
 		;	// TODO
 	if (hr == S_FALLSE)			// not in a checkbox cell
 		return FALSE;
-	pt.x = GET_X_LPARAM(lParam);
-	pt.y = GET_Y_LPARAM(lParam);
-	if (PtInRect(&rCheckbox, pt) == 0)
+	if (lParamInRect(&rCheckbox, lParam) == 0)
 		return FALSE;
 	SetCapture(t->hwnd);
 	t->checkboxMouseDown = TRUE;
@@ -88,14 +85,54 @@ EVENTHANDLER(checkboxMouseDownHandler)
 // TODO what happens if any of these fail?
 EVENTHANDLER(checkboxMouseUpHandler)
 {
-$	if we weren't clicking a checkbox
+	struct rowcol rc;
+	RECT rHoverCell, rHoverCheckbox;
+	BOOL redrawHover;
+	RECT rDownCell;
+	HRESULT hr;
+
+	if (!t->checkboxMouseDown)
 		return FALSE;
-$	leave checkbox clicking mode
-$	ReleaseCapture()
-$	if the mouse was released in the same checkbox
-$		toggle it
-$	TODO else return FALSE?
-$	TODO redraw the checkbox in question
+
+	// first get out of mouse down mode and release the mouse capture
+	// we do things in that order because we want to ignore the WM_CAPTURECHANGED that ReleaseCapture() generates
+	t->checkboxMouseDown = FALSE;
+	if (ReleaseCapture() == 0)
+		;	// TODO
+
+	// now we need to figure out if we released the mouse button in the same checkbox that was initially clicked
+	// so we have to figure out which checkbox is being hovered over right now
+	// if it is a different checkbox, we need to redraw that one as well, as it will now need to be shown hot
+	redrawHover = FALSE;
+	hr = lParamToCheckbox(t, m, lParam, &rc, &rHoverCell, &rHoverCheckbox);
+	if (hr != S_OK && hr != S_FALSE)
+		;	// TODO
+	if (hr == S_FALSE)		// not in checkbox cell
+		goto noToggle;
+	redrawHover = TRUE;
+	if (rc != t->checkboxMouseDownRowColumn)
+		goto noToggle;
+	if (lParamInRect(&rHoverCheckbox, lParam) == 0)
+		goto noToggle;
+
+	// okay, we're good; toggle
+	notify(t, tableNotificationCellCheckboxToggled, rc.row, rc.column, 0);
+	// now redraw the checkbox that we clicked
+	// TODO do we need to do this or will rDownCell == rHoverCell?
+	hr = rowColumnToClientRect(t, m, t->checkboxMouseDownRowColumn, &rDownCell);
+	if (hr != S_OK && hr != S_FALSE)
+		;	// TODO
+	if (hr != S_FALSE)
+		if (InvalidateRect(t->hwnd, &rDownCell, TRUE) == 0)
+			;	// TODO
+
+noToggle:
+	// redraw the cell being hovered over as well, just in case (see above)
+	if (redrawHover)
+		if (InvalidateRect(t->hwnd, &rHoverCell, TRUE) == 0)
+			;	// TODO
+	// TODO return FALSE if we jumped over the toggling?
+	return TRUE;
 }
 
 // TODO what happens if any of these fail?

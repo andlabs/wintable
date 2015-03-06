@@ -2,11 +2,14 @@
 
 import "unknwn.idl";
 
+// UUIDs were generated with uuidgen from util-linux 2.25.1 on Ubuntu GNOME 14.10 on 6 March 2015
+
 // TODO STA?
 // TODO make sure all parameter attributes are correct
 
-// TODO object? local?
-[uuid(TODO)]
+// TODO keep local?
+// TODO the UUID was generated with uuidgen with no arguments; I have /dev/random and /dev/urandom but make sure uuidgen ran with -r anyway
+[object, local, uuid(8f361d46-caab-489f-8d20-aeaaeaa9104f)]
 interface tableModel : IUnknown {
 	// tableSubscribe() adds the Table with the given window handle to a list of Tables to notify of any changes to the tableModel.
 	// It should neither take a reference to the tableModel nor assume that one has been taken beforehand/will be taken afterward; the Table will do that itself.
@@ -62,5 +65,7 @@ interface tableModel : IUnknown {
 }
 
 // TODO tableMutableModel
+// if so uuid(459d0d7e-bd48-41bb-89e2-2782d8d902f2)
+// that one WAS generated with uuidgen -r so we're good
 
 // TODO trees?

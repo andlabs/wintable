@@ -91,6 +91,11 @@ __declspec(dllexport) ATOM __stdcall tableInit(void)
 	return a;		// pass last error up if a == 0
 }
 
+__declspec(dllexport) HINSTANCE __stdcall tableHINSTANCE(void)
+{
+	return hInstance;
+}
+
 // TODO consider DisableThreadLibraryCalls() (will require removing ALL C runtime calls)
 // TODO make sure this is the correct name for C runtime initialization (CHECK MSDN OR THE HEADERS)
 // TODO can hinstDLL ever change? (see above about hInstance)

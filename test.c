@@ -24,7 +24,7 @@ BOOL mainwinCreate(HWND hwnd, LPCREATESTRUCT lpcs)
 		WS_CHILD | WS_VISIBLE | WS_HSCROLL | WS_VSCROLL,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		400, 400,
-		hwnd, NULL, lpcs->hInstance, NULL);
+		hwnd, NULL, tableHINSTANCE(), NULL);
 	if (tablehwnd == NULL)
 		panic("(test program) error creating Table");
 	SendMessageW(tablehwnd, tableAddColumn, tableColumnText, (LPARAM) L"Column");

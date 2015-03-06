@@ -68,5 +68,6 @@ struct tableNM {
 };
 
 extern __declspec(dllexport) ATOM __stdcall tableInit(void);
+extern __declspec(dllexport) HINSTANCE __stdcall tableHINSTANCE(void);
 
 #endif

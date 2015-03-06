@@ -1,6 +1,7 @@
 # TODOs so I don't forget:
 # - make debugging an option
-# - split making a test binary into a separate target
+# - clean up compiler flag construction
+# - __declspec(dllimport)
 
 ifeq ($(MAKECMDGOALS),64)
 	CC = x86_64-w64-mingw32-gcc

@@ -14,6 +14,8 @@ static UINT dfcState(int cbstate)
 		ret |= DFCS_HOT;
 	if ((cbstate & checkboxStatePushed) != 0)
 		ret |= DFCS_PUSHED;
+	if ((cbstate & checkboxStateDisabled) != 0)
+		ret |= DFCS_INACTIVE;
 	return ret;
 }
 
@@ -42,6 +44,14 @@ static int themestates[checkboxnStates] = {
 	CBS_CHECKEDPRESSED,				// checked | pushed
 	CBS_UNCHECKEDPRESSED,			// hot | pushed
 	CBS_CHECKEDPRESSED,				// checked | hot | pushed
+	CBS_UNCHECKEDDISABLED,			// disabled
+	CBS_CHECKEDDISABLED,				// checked | disabled
+	CBS_UNCHECKEDDISABLED,			// hot | disabled
+	CBS_CHECKEDDISABLED,				// checked | hot | disabled
+	CBS_UNCHECKEDDISABLED,			// pushed | disabled
+	CBS_CHECKEDDISABLED,				// checked | pushed | disabled
+	CBS_UNCHECKEDDISABLED,			// hot | pushed | disabled
+	CBS_CHECKEDDISABLED,				// checked | hot | pushed | disabled
 };
 
 static HRESULT getStateSize(HDC dc, int cbState, HTHEME theme, SIZE *s)

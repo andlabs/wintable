@@ -165,7 +165,8 @@ enum {
 	checkboxStateChecked = 1 << 0,
 	checkboxStateHot = 1 << 1,
 	checkboxStatePushed = 1 << 2,
-	checkboxnStates = 1 << 3,
+	checkboxStateDisabled = 1 << 3,
+	checkboxnStates = 1 << 4,
 };
 extern HRESULT drawCheckbox(struct table *, HDC, RECT *, int);
 extern HRESULT getCheckboxSize(struct table *, HDC, int *, int *);

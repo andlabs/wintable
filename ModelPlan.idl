@@ -1,12 +1,14 @@
 // 27 february 2015
 
 import "unknwn.idl";
+import "stdint.h";
 
 // UUIDs were generated with uuidgen from util-linux 2.25.1 on Ubuntu GNOME 14.10 on 6 March 2015
 
-// TODO STA?
 // TODO make sure all parameter attributes are correct
 
+// tableModel is the interface that any COM object that wishes to provide data to a Table must implement.
+// Table itself assumes the model is an in-process, STA object.
 // TODO keep local?
 // TODO the UUID was generated with uuidgen with no arguments; I have /dev/random and /dev/urandom but make sure uuidgen ran with -r anyway
 [object, local, uuid(8f361d46-caab-489f-8d20-aeaaeaa9104f)]
@@ -32,12 +34,13 @@ interface tableModel : IUnknown {
 
 	// TODO document
 	// TODO return an error?
+	// TODO enumeration
 	TODOTYPE tableNotify(TODO arguments);
 
 	// tableColumnCount() returns the number of columns in the tableModel.
 	// This value should be a constant; it should never change after object creation.
 	// (TODO would this go against CoCreateInstance()? maybe "after the first subscription" instead?)
-	intmax_t tableColumnCount(TODO no arguments);
+	intmax_t tableColumnCount(void);
 
 	// tableColumnType() returns the data type for a given column.
 	// This should be one of the tableColumnXxxx constants.
@@ -54,7 +57,7 @@ interface tableModel : IUnknown {
 	);
 
 	// tableRowCount() returns the number of rows in the tableModel.
-	intmax_t tableRowCount(TODO no arguments);
+	intmax_t tableRowCount(void);
 
 	// TODO document
 	HRESULT tableCellValue(
@@ -64,8 +67,45 @@ interface tableModel : IUnknown {
 	);
 }
 
-// TODO tableMutableModel
-// if so uuid(459d0d7e-bd48-41bb-89e2-2782d8d902f2)
-// that one WAS generated with uuidgen -r so we're good
+// tableMutableModel is the interface that any COM object that wishes to provide data to a Table that can be changed by the Table itself must implement.
+// TODO keep local?
+[object, local, uuid(459d0d7e-bd48-41bb-89e2-2782d8d902f2)]
+interface tableMutableModel : tableModel {
+	// tableIsColumnMutable returns S_OK if the given column is mutable, S_FALSE if not, and E_INVALIDARG if an invalid column number is specified.
+	// The value returned should be a constant; it should never change after object creation.
+	// TODO really not just a simple bool?
+	HRESULT tableIsColumnMutable(
+		[in] intptr_t column
+	);
+
+	// TODO document
+	HRESULT tableSetCellValue(
+		[in] intmax_t row,
+		[in] intmax_t column,
+		[in] VARIANT *data		// TODO pointer?
+	);
+
+	// TODO document
+	// TODO really not just a simple bool?
+	HRESULT tableCanManipulateRows(void);
+
+	// TODO document
+	HRESULT tableAppendRow(
+		[out, retval] intmax_t *rowNumber
+	);
+
+	// TODO insert row
+
+	// TODO document
+	HRESULT tableDeleteRow(
+		[in] intmax_t rowNumber,
+	);
+}
+
+// TODO see if there's a standard COM error for:
+// - wrong variant type
+// TODO tableMutableModel errors:
+// - tableMutableModelErrorColumnNotMutable
+// - tableMutableModelErrorCannotManipulateRows
 
 // TODO trees?

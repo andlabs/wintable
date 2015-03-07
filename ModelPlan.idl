@@ -28,20 +28,45 @@ enum {
 // TODO the UUID was generated with uuidgen with no arguments; I have /dev/random and /dev/urandom but make sure uuidgen ran with -r anyway
 [object, local, uuid(8f361d46-caab-489f-8d20-aeaaeaa9104f)]
 interface tableModel : IUnknown {
-	// tableSubscribe() adds the Table with the given window handle to a list of Tables to notify of any changes to the tableModel.
-	// It should neither take a reference to the tableModel nor assume that one has been taken beforehand/will be taken afterward; the Table will do that itself.
-	// It should return S_OK on success or a COM error code on failure; in particular, it should return:
-	// - E_INVALIDARG if hwnd is NULL
-	// TODO E_OUTOFMEMORY?
+	// tableSubscribe() adds the Table with the given window
+	// handle to a list of Tables to notify of any changes to the
+	// tableModel. It is called by the Table itself when you issue
+	// a tableSetModel message; you do not need to invoke
+	// this method directly yourself.
+	// 
+	// It should neither take a reference to the tableModel nor
+	// assume that one has been taken beforehand/will be taken
+	// afterward; the Table will do that itself.
+	// 
+	// It should return S_OK on success or a COM error code
+	// on failure; in particular, it should return:
+	// - E_INVALIDARG if hwnd is NULL or HWND_BROADCAST
+	// - E_OUTOFMEMORY if a memory allocation failed
+	// 
+	// You may use the tableSubscribtions system provided by
+	// this DLL to implement this method for you.
 	// TODO should this check if hwnd is actually a Table?
 	HRESULT tableSubscribe(
 		[in] HWND hwnd
 	);
 
-	// tableUnsubscribe() removes the Table with the given window handle from a list of Tables to notify of any changes to the tableModel.
-	// It should neither release a reference to the tableModel nor assume that one has been released beforehand/will be released afterward; the Table will do that itself.
-	// It should return S_OK on success or a COM error code on failure; in particular, it should return:
-	// - E_INVALIDARG if hwnd is NULL
+	// tableUnsubscribe() removes the Table with the given
+	// window handle from a list of Tables to notify of any
+	// changes to the tableModel. It is called by the Table itself
+	// when you issue a tableSetModel message or when the
+	// Table is destroyed; you do not need to invoke this method
+	// directly yourself.
+	// 
+	// It should neither release a reference to the tableModel nor
+	// assume that one has been released beforehand/will be
+	// released afterward; the Table will do that itself.
+	// 
+	// It should return S_OK on success or a COM error code
+	// on failure; in particular, it should return:
+	// - E_INVALIDARG if hwnd is NULL or HWND_BROADCAST
+	// 
+	// You may use the tableSubscribtions system provided by
+	// this DLL to implement this method for you.
 	// TODO what error for not already subscribed
 	HRESULT tableUnsubscribe(
 		[in] HWND hwnd
@@ -55,8 +80,9 @@ interface tableModel : IUnknown {
 		[in] intmax_t column
 	);
 
-	// tableColumnCount() returns the number of columns in the tableModel.
-	// This value should be a constant; it should never change after object creation.
+	// tableColumnCount() returns the number of columns in
+	// the tableModel. This value should be a constant; it should
+	// never change after object creation.
 	// (TODO would this go against CoCreateInstance()? maybe "after the first subscription" instead?)
 	intmax_t tableColumnCount(void);
 

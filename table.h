@@ -56,9 +56,8 @@ struct tableNM {
 extern __declspec(dllexport) ATOM __stdcall tableInit(void);
 extern __declspec(dllexport) HINSTANCE __stdcall tableHINSTANCE(void);
 
-// table model stuff
+// table model helpers
 
-// subscribers.c
 typedef struct tableSubscriptions tableSubscriptions;
 // TODO make these __stdcall
 extern __declspec(dllexport) tableSubscriptions *tableNewSubscriptions(void)

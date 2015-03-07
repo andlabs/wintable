@@ -5,7 +5,7 @@
 // TODO alert on not a table
 // TODO invalid window handles (NULL, HWND_BROADCAST)
 
-// This file provides functions that you can use to implement tableModel::Subscribe(), tableModel::Unsubscribe(), and tableModel::Notify().
+// tableSubscriptions is a type and some functions that you can use to implement tableModel::Subscribe(), tableModel::Unsubscribe(), and tableModel::Notify().
 
 struct tableSubscriptions {
 	HWND *hwnds;

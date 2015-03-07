@@ -1,6 +1,7 @@
 # TODOs so I don't forget:
 # - make debugging an option
-# - clean up compiler flag construction
+# - make 64 below an actual option
+# - figure out why make test seems to rebuild the DLL
 # - __declspec(dllimport)
 
 ifeq ($(MAKECMDGOALS),64)
@@ -15,6 +16,11 @@ endif
 
 OBJDIR = .objs
 OUTDIR = out
+
+BASENAME = wintable
+DLLFILE = $(OUTDIR)/$(BASENAME).dll
+LIBFILE = $(OUTDIR)/$(BASENAME).lib
+TESTEXEFILE = $(OUTDIR)/$(BASENAME).exe
 
 CFILES = \
 	alloc.c \
@@ -48,18 +54,37 @@ TESTCFILES = \
 OFILES = $(CFILES:%.c=$(OBJDIR)/%.o)
 TESTOFILES = $(TESTCFILES:%.c=$(OBJDIR)/%.o)
 
-neededCFLAGS = --std=c99 -Wall -Wextra -Wno-unused-parameter
+xCFLAGS = \
+	--std=c99 \
+	-Wall \
+	-Wextra \
+	-Wno-unused-parameter \
+	$(mflag) \
+	$(CFLAGS)
 
-neededLDFLAGS = -static-libgcc -luser32 -lkernel32 -lgdi32 -lcomctl32 -luxtheme -lole32 -loleaut32 -loleacc -luuid -lmsimg32
+xLDFLAGS = \
+	-static-libgcc \
+	-luser32 -lkernel32 -lgdi32 -lcomctl32 -luxtheme -lole32 -loleaut32 -loleacc -luuid -lmsimg32 \
+	$(mflag) \
+	$(LDFLAGS)
 
-all: clean $(OFILES)
-	$(CC) -g -o $(OUTDIR)/wintable.dll -shared -Wl,--out-implib,$(OUTDIR)/wintable.lib $(OFILES) $(LDFLAGS) $(neededLDFLAGS) $(mflag)
+default:
+	$(MAKE) clean
+	$(MAKE) it
+	$(MAKE) test
 
-test: all $(TESTOFILES)
-	$(CC) -g -o $(OUTDIR)/wintable.exe $(TESTOFILES) $(LDFLAGS) $(neededLDFLAGS) $(OUTDIR)/wintable.lib $(mflag)
+it: $(DLLFILE)
+
+$(DLLFILE): $(OFILES)
+	$(CC) -g -o $(DLLFILE) -shared -Wl,--out-implib,$(LIBFILE) $(OFILES) $(xLDFLAGS)
+
+test: $(TESTEXEFILE)
+
+$(TESTEXEFILE): $(DLLFILE) $(TESTOFILES)
+	$(CC) -g -o $(TESTEXEFILE) $(TESTOFILES) $(LIBFILE) $(xLDFLAGS)
 
 $(OBJDIR)/%.o: %.c $(HFILES) dirs
-	$(CC) -g -o $@ -c $< $(CFLAGS) $(neededCFLAGS) $(mflag)
+	$(CC) -g -o $@ -c $< $(xCFLAGS)
 
 dirs:
 	mkdir -p $(OBJDIR) $(OUTDIR)

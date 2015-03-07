@@ -2,10 +2,25 @@
 
 import "unknwn.idl";
 import "stdint.h";
+import "oaidl.idl";
 
 // UUIDs were generated with uuidgen from util-linux 2.25.1 on Ubuntu GNOME 14.10 on 6 March 2015
 
 // TODO make sure all parameter attributes are correct
+
+// tableModel::tableNotify() notifications
+enum {
+	// row - index of added row
+	// column - ignored
+	tableModelNotifyRowAdded,
+	// row - index of deleted row
+	// column - ignored
+	tableModelNotifyRowDeleted,
+	// row - index of changed row
+	// column - index of changed column
+	tableModelNotifyCellChanged,
+	// TODO others?
+}
 
 // tableModel is the interface that any COM object that wishes to provide data to a Table must implement.
 // Table itself assumes the model is an in-process, STA object.
@@ -34,8 +49,11 @@ interface tableModel : IUnknown {
 
 	// TODO document
 	// TODO return an error?
-	// TODO enumeration
-	TODOTYPE tableNotify(TODO arguments);
+	void tableNotify(
+		[in] int notification,			// TODO int?
+		[in] intmax_t row,
+		[in] intmax_t column
+	);
 
 	// tableColumnCount() returns the number of columns in the tableModel.
 	// This value should be a constant; it should never change after object creation.
@@ -69,6 +87,7 @@ interface tableModel : IUnknown {
 
 // tableMutableModel is the interface that any COM object that wishes to provide data to a Table that can be changed by the Table itself must implement.
 // TODO keep local?
+// TODO document that all methods call tableNotify()
 [object, local, uuid(459d0d7e-bd48-41bb-89e2-2782d8d902f2)]
 interface tableMutableModel : tableModel {
 	// tableIsColumnMutable returns S_OK if the given column is mutable, S_FALSE if not, and E_INVALIDARG if an invalid column number is specified.

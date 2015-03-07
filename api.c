@@ -25,23 +25,8 @@ static void addColumn(struct table *t, WPARAM wParam, LPARAM lParam)
 	// (TODO when — if — adding autoresize, figure this one out)
 }
 
-// TODO what happens if the currently selected row is lost?
-static void setRowCount(struct table *t, intmax_t rc)
-{
-	intmax_t old, i;
-
-	old = t->count;
-	t->count = rc;
-	// we DO redraw everything because we don't want any rows that should no longer be there to remain on screen!
-	updateAll(t);			// DONE
-	// TODO reset checkbox and selection logic if the current row for both no longer exists
-}
-
 HANDLER(apiHandlers)
 {
-	intmax_t *rcp;
-	intmax_t row;
-
 	switch (uMsg) {
 	case WM_SETFONT:
 		// don't free the old font; see http://blogs.msdn.com/b/oldnewthing/archive/2008/09/12/8945692.aspx
@@ -61,35 +46,7 @@ HANDLER(apiHandlers)
 		addColumn(t, wParam, lParam);
 		*lResult = 0;
 		return TRUE;
-	case tableSetRowCount:
-		rcp = (intmax_t *) lParam;
-		setRowCount(t, *rcp);
-		*lResult = 0;
-		return TRUE;
-	case tableGetSelection:
-		rcp = (intmax_t *) wParam;
-		if (rcp != NULL)
-			*rcp = t->selectedRow;
-		rcp = (intmax_t *) lParam;
-		if (rcp != NULL)
-			*rcp = t->selectedColumn;
-		*lResult = 0;
-		return TRUE;
-/*TODO	case tableSetSelection:
-		// TODO does doselect() do validation?
-		rcp = (intmax_t *) wParam;
-		row = *rcp;
-		rcp = (intmax_t *) lParam;
-		if (rcp == NULL)
-			if (row == -1)
-				doselect(t, -1, -1);
-			else		// select column 0, just like keyboard selections; TODO what if there aren't any columns?
-				doselect(t, row, 0);
-		else
-			doselect(t, row, *rcp);
-		*lResult = 0;
-		return TRUE;
-*/	}
+	}
 	return FALSE;
 }
 

@@ -129,6 +129,32 @@ interface tableModel : IUnknown {
 		[in] intmax_t column,
 		[out, retval] VARIANT *value
 	);
+
+	// tableDrawImageCell() draws the image belonging to the
+	// given cell into the given HDC. The image shall be resized
+	// to fit the given rectangle.
+	// 
+	// It should return S_OK on success or a COM error code
+	// on failure; in particular, it should return:
+	// - E_INVALIDARG if row or column is out of range
+	//     or if the given HDC is NULL
+	// - E_POINTER if the given destination rectangle is NULL
+	// - TODO E_POINTER for the HDC as well?
+	// - TODO wrong type
+	// - HRESULT_FROM_WIN32(GetLastError()) if a Windows
+	//     API function that returns a last error code fails
+	// 
+	// You may use the tableDrawImageCell() function provided by
+	// this DLL to implement this method for you. Be aware that
+	// this function expects images to be 32-bit alpha-premultiplied
+	// ARGB bitmaps (TODO DIB setions?) as expected by the
+	// Windows API AlphaBlend() function.
+	HRESULT tableDrawImageCell(
+		[in] intmax_t row,
+		[in] intmax_t column,
+		[in] HDC hdc,
+		[in] RECT *rDest
+	);
 }
 
 // tableMutableModel is the interface that any COM object that wishes to provide data to a Table that can be changed by the Table itself must implement.

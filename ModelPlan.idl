@@ -177,28 +177,12 @@ interface tableMutableModel : tableModel {
 		[in] intmax_t column,
 		[in] VARIANT *data		// TODO pointer?
 	);
-
-	// TODO document
-	// TODO really not just a simple bool?
-	HRESULT tableCanManipulateRows(void);
-
-	// TODO document
-	HRESULT tableAppendRow(
-		[out, retval] intmax_t *rowNumber
-	);
-
-	// TODO insert row
-
-	// TODO document
-	HRESULT tableDeleteRow(
-		[in] intmax_t rowNumber,
-	);
 }
 
 // TODO see if there's a standard COM error for:
-// - wrong variant type
+// - wrong column type
 // TODO tableMutableModel errors:
 // - tableMutableModelErrorColumnNotMutable
-// - tableMutableModelErrorCannotManipulateRows
 
 // TODO trees?
+// TODO E_HANDLE for NULL HWNDs and HDCs instead of E_POINTER or E_INVALIDARG?

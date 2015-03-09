@@ -8,6 +8,7 @@ import "oaidl.idl";
 
 // TODO make sure all parameter attributes are correct
 
+/*
 // tableModel::tableNotify() notifications
 enum {
 	// row - index of added row
@@ -21,6 +22,7 @@ enum {
 	tableModelNotifyCellChanged,
 	// TODO others?
 }
+*/
 
 // tableModel is the interface that any COM object that wishes to provide data to a Table must implement.
 // Table itself assumes the model is an in-process, STA object.
@@ -109,6 +111,7 @@ interface tableModel : IUnknown {
 	);
 
 	// tableRowCount() returns the number of rows in the tableModel.
+	// TODO HRESULT?
 	intmax_t tableRowCount(void);
 
 	// tableCellValue() returns the value of a given tableModel cell.

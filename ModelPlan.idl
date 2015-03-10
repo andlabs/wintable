@@ -8,7 +8,6 @@ import "oaidl.idl";
 
 // TODO make sure all parameter attributes are correct
 
-/*
 // tableModel::tableNotify() notifications
 enum {
 	// row - index of added row
@@ -21,8 +20,12 @@ enum {
 	// column - index of changed column
 	tableModelNotifyCellChanged,
 	// TODO others?
-}
-*/
+};
+
+typedef union {
+	BSTR *stringVal;
+	BOOL boolVal;
+} tableCellValue;
 
 // TODO
 // I need to drive the point home that tableModel is intended for Table
@@ -123,18 +126,14 @@ interface tableModel : IUnknown {
 	// on failure; in particular, it should return:
 	// - E_POINTER if value is NULL
 	// - E_INVALIDARG if row or column is out of range
-	// value will be set to
-	// - VT_EMPTY on failure
-	// - VT_BSTR if the cell is in a tableColumnText column, with
-	//     value->bstrVal set to the text
-	// - TODO oif the cell is in a tableColumnImage column
-	// - VT_BOOL if the cell is in a tableColumnCheckbox column,
-	//     with value->boolVal set to VARIANT_TRUE if checked
-	//     or VARIANT_FALSE if unchecked.
+	// TODO what value for value on failure?
+	// On success, value->stringVal or value->boolVal shall
+	// be set accordingly. In the case the cell contains a string,
+	// be sure to free the BSTR of value->stringVal when done.
 	HRESULT tableCellValue(
 		[in] intmax_t row,
 		[in] intmax_t column,
-		[out, retval] VARIANT *value
+		[out, retval] tableCellValue *value
 	);
 
 	// tableDrawImageCell() draws the image belonging to the
@@ -176,7 +175,7 @@ interface tableModel : IUnknown {
 	HRESULT tableSetCellValue(
 		[in] intmax_t row,
 		[in] intmax_t column,
-		[in] VARIANT *data		// TODO pointer?
+		[in] tableCellValue data
 	);
 }
 

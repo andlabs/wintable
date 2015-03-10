@@ -24,6 +24,10 @@ enum {
 }
 */
 
+// TODO
+// I need to drive the point home that tableModel is intended for Table
+// my mistake was trying to make it general purpose
+
 // tableModel is the interface that any COM object that wishes to provide data to a Table must implement.
 // Table itself assumes the model is an in-process, STA object.
 // TODO keep local?
@@ -158,13 +162,7 @@ interface tableModel : IUnknown {
 		[in] HDC hdc,
 		[in] RECT *rDest
 	);
-}
 
-// tableMutableModel is the interface that any COM object that wishes to provide data to a Table that can be changed by the Table itself must implement.
-// TODO keep local?
-// TODO document that all methods call tableNotify()
-[object, local, uuid(459d0d7e-bd48-41bb-89e2-2782d8d902f2)]
-interface tableMutableModel : tableModel {
 	// tableIsColumnMutable returns S_OK if the given column
 	// is mutable, S_FALSE if not, and E_INVALIDARG if an invalid
 	// column number is specified. The value returned should be a
@@ -184,8 +182,8 @@ interface tableMutableModel : tableModel {
 
 // TODO see if there's a standard COM error for:
 // - wrong column type
-// TODO tableMutableModel errors:
-// - tableMutableModelErrorColumnNotMutable
+// TODO
+// - tableModelErrorColumnNotMutable
 
 // TODO trees?
 // TODO E_HANDLE for NULL HWNDs and HDCs instead of E_POINTER or E_INVALIDARG?

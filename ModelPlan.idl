@@ -184,6 +184,7 @@ interface tableModel : IUnknown {
 // - wrong column type
 // TODO
 // - tableModelErrorColumnNotMutable
+// - tableModelErrorModelNotMutable? or tableModelErrorTableNotMutable?
 
 // TODO trees?
 // TODO E_HANDLE for NULL HWNDs and HDCs instead of E_POINTER or E_INVALIDARG?

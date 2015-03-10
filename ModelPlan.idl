@@ -8,6 +8,26 @@ import "oaidl.idl";
 
 // TODO make sure all parameter attributes are correct
 
+// table model column types
+// TODO should we just merge these with table column types?
+enum {
+	tableModelColumnInvalid,
+	tableModelColumnString,
+	tableModelColumnImage,
+	tableModelColumnBool,
+	tableModelColumnARGBColor,
+};
+
+// tableARGBColor is an explicit type name for an ARGB color.
+// Each color component is 8 bits wide, with A in the most significant bits, then R, then G, and then B in the least significant bits.
+// Colors are assumed to be alpha-premultiplied.
+// tableARGB() and tableRGBA() produce tableARGBColors from the given component values, specified in the order in the macros.
+typedef uint32_t tableARGBColor;
+// TODO
+// TODO have a ; at the end?
+cpp_quote("#define tableARGB(a, r, g, b) ((tableARGBColor) (a) << 24) | ((tableARGBColor) (r) << 16) | ((tableARGBColor) (b) << 8) | (tableARGBColor) (b))")
+cpp_quote("#define tableRGBA(r, g, b, a) tableARGB((a), (r), (g), (b))")
+
 // tableModel::tableNotify() notifications
 enum {
 	// row - index of added row
@@ -22,9 +42,21 @@ enum {
 	// TODO others?
 };
 
-typedef union {
+typedef struct {
+	int code;
+	intmax_t row;
+	intmax_t column;
+} tableModelNotificationParams;
+
+typedef union switch (int type) {
+case tableModelColumnInvalid:
+case tableModelColumnString:
 	BSTR *stringVal;
+case tableModelColumnImage:
+case tableModelColumnBool:
 	BOOL boolVal;
+case tableModelColumnARGBColor:
+	tableARGBColor color;
 } tableCellValue;
 
 // TODO

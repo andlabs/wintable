@@ -50,20 +50,28 @@ typedef struct {
 
 typedef union switch (int type) {
 case tableModelColumnInvalid:
+	;			// userSTGMEDIUM in Microsoft's objidl.idl says to do this for empty values
 case tableModelColumnString:
 	BSTR *stringVal;
 case tableModelColumnImage:
+	;
 case tableModelColumnBool:
 	BOOL boolVal;
 case tableModelColumnARGBColor:
 	tableARGBColor color;
 } tableCellValue;
 
-// TODO
-// I need to drive the point home that tableModel is intended for Table
-// my mistake was trying to make it general purpose
+// tableModel errors
+cpp_quote("#define tableModelErrorTableAlreadySubscribed MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 0x200)")
+cpp_quote("#define tableModelErrorTableNotSubscribed MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 0x201)")
+cpp_quote("#define tableModelErrorWrongColumnType MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 0x202)")
 
-// tableModel is the interface that any COM object that wishes to provide data to a Table must implement.
+// tableModel is the interface that any COM object that wishes
+// to provide data to a Table must implement. The methods of
+// tableModel are specifically intended to drive a Table; they are
+// not intended to be (and indeed, cannot be used to) provide
+// data to the model in any other context.
+// 
 // Table itself assumes the model is an in-process, STA object.
 // TODO keep local?
 // TODO the UUID was generated with uuidgen with no arguments; I have /dev/random and /dev/urandom but make sure uuidgen ran with -r anyway
@@ -83,9 +91,12 @@ interface tableModel : IUnknown {
 	// on failure; in particular, it should return:
 	// - E_INVALIDARG if hwnd is NULL or HWND_BROADCAST
 	// - E_OUTOFMEMORY if a memory allocation failed
+	// - tableModelErrorTableAlreadySubscribed if the given
+	//     Table is already subscribed
 	// 
 	// You may use the tableSubscribtions system provided by
-	// this DLL to implement this method for you.
+	// this DLL to implement this method for you. These functions
+	// perform all necessary error checking
 	// TODO should this check if hwnd is actually a Table?
 	HRESULT tableSubscribe(
 		[in] HWND hwnd
@@ -105,9 +116,12 @@ interface tableModel : IUnknown {
 	// It should return S_OK on success or a COM error code
 	// on failure; in particular, it should return:
 	// - E_INVALIDARG if hwnd is NULL or HWND_BROADCAST
+	// - tableModelErrorTableNotSubscribed if the given Table is
+	//     not subscribed
 	// 
 	// You may use the tableSubscribtions system provided by
-	// this DLL to implement this method for you.
+	// this DLL to implement this method for you. These functions
+	// perform all necessary error checking;.
 	// TODO what error for not already subscribed
 	HRESULT tableUnsubscribe(
 		[in] HWND hwnd
@@ -158,10 +172,11 @@ interface tableModel : IUnknown {
 	// on failure; in particular, it should return:
 	// - E_POINTER if value is NULL
 	// - E_INVALIDARG if row or column is out of range
-	// TODO what value for value on failure?
-	// On success, value->stringVal or value->boolVal shall
-	// be set accordingly. In the case the cell contains a string,
-	// be sure to free the BSTR of value->stringVal when done.
+	// On failure, value->type will be set to tableModelColumnInvalid.
+	// On success, value->type will be set to the column
+	// type and the appropriate field for that type will be
+	// set to the actual value.
+	// TODO image cells
 	HRESULT tableCellValue(
 		[in] intmax_t row,
 		[in] intmax_t column,
@@ -177,8 +192,8 @@ interface tableModel : IUnknown {
 	// - E_INVALIDARG if row or column is out of range
 	//     or if the given HDC is NULL
 	// - E_POINTER if the given destination rectangle is NULL
-	// - TODO E_POINTER for the HDC as well?
-	// - TODO wrong type
+	// - tableModelErrorWrongColumnType if the given column
+	//     is not of type tableModelColumnImage
 	// - HRESULT_FROM_WIN32(GetLastError()) if a Windows
 	//     API function that returns a last error code fails
 	// 
@@ -211,11 +226,8 @@ interface tableModel : IUnknown {
 	);
 }
 
-// TODO see if there's a standard COM error for:
-// - wrong column type
 // TODO
 // - tableModelErrorColumnNotMutable
-// - tableModelErrorModelNotMutable? or tableModelErrorTableNotMutable?
 
 // TODO trees?
 // TODO E_HANDLE for NULL HWNDs and HDCs instead of E_POINTER or E_INVALIDARG?

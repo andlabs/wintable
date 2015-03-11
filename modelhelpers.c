@@ -43,7 +43,13 @@ __declspec(dllexport) HRESULT tableSubscriptionsSubscribe(tableSubscriptions *s,
 {
 	HWND *hwnds;
 	size_t cap;
+	size_t i;
 
+	if (hwnd == NULL || hwnd == HWND_BROADCAST)
+		return E_INVALIDARG;
+	for (i = 0; i < s->len; i++)
+		if (hwnd == s->hwnds[i])
+			return tableModelErrorTableAlreadySubscribed;
 	if (s->len >= s->cap) {
 		// grow linearly to conserve memory
 		// there shouldn't be /too/ many subscribers anyway
@@ -64,14 +70,15 @@ __declspec(dllexport) HRESULT tableSubscriptionsUnsubscribe(tableSubscriptions *
 {
 	size_t i;
 
+	if (hwnd == NULL || hwnd == HWND_BROADCAST)
+		return E_INVALIDARG;
 	for (i = 0; i < s->len; i++)
 		if (s->hwnds[i] == hwnd) {
 			s->len--;
 			// TODO move higher hwnds back
 			return S_OK;
 		}
-	// TODO what to return if not found?
-	return S_OK;
+	return tableModelErrorTableNotSubscribed;
 }
 
 __declspec(dllexport) void tableSubscriptionsNotify(tableSubscriptions *s, int notification, intmax_t row, intmax_t column)

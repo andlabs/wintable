@@ -201,7 +201,7 @@ interface tableModel : IUnknown {
 	// this DLL to implement this method for you. Be aware that
 	// this function expects images to be 32-bit alpha-premultiplied
 	// ARGB bitmaps (TODO DIB setions?) as expected by the
-	// Windows API AlphaBlend() function.
+	// Windows API AlphaBlend() function. (TODO what errors are already provided?)
 	HRESULT tableDrawImageCell(
 		[in] intmax_t row,
 		[in] intmax_t column,

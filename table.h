@@ -32,24 +32,8 @@ enum {
 // note that these are positive; see http://blogs.msdn.com/b/oldnewthing/archive/2009/08/21/9877791.aspx
 // each of these is of type tableNM
 // all fields except data will always be set
-enum {
-	// data parameter is always 0
-	// for tableColumnText return should be WCHAR *
-	// for tableColumnImage return should be HBITMAP
-	// for tableColumnCheckbox return is nonzero for checked, zero for unchecked
-	tableNotificationGetCellData,
-	// data parameter is pointer, same as tableNotificationGetCellData
-	// not sent for checkboxes
-	// no return
-	tableNotificationFinishedWithCellData,
-	// data is zero
-	// no return
-	tableNotificationCellCheckboxToggled,
-	// sent even on deselection (in that case, row == -1 and column == -1)
-	// data is zero
-	// no return
-	tableNotificationSelectionChanged,
-};
+// enum {
+// };
 
 typedef struct tableNM tableNM;
 

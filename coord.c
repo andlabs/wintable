@@ -72,7 +72,7 @@ HRESULT clientCoordToRowColumn(struct table *t, struct metrics *m, POINT pt, str
 
 	// the row is easy
 	rc->row = pt.y / m->rowHeight;
-	if (rc->row >= t->count)
+	if (rc->row >= tableModel_tableRowCount(t->model))
 		goto outside;
 
 	// the column... still easy, just tedious

@@ -103,8 +103,10 @@ EVENTHANDLER(keyDownSelectHandler)
 {
 	intmax_t row;
 	intmax_t column;
+	intmax_t rowCount;
 
-	if (t->count == 0 || t->nColumns == 0)		// no items to select
+	rowCount = tableModel_tableRowCount(t->model);
+	if (rowCount == 0 || t->nColumns == 0)		// no items to select
 		return FALSE;
 	row = t->selectedRow;
 	column = t->selectedColumn;
@@ -122,8 +124,8 @@ EVENTHANDLER(keyDownSelectHandler)
 			column = 0;
 		} else {
 			row++;
-			if (row >= t->count)
-				row = t->count - 1;
+			if (row >= rowCount)
+				row = rowCount - 1;
 		}
 		break;
 	case VK_LEFT:
@@ -149,7 +151,7 @@ EVENTHANDLER(keyDownSelectHandler)
 			column = 0;
 		break;
 	case VK_END:
-		row = t->count - 1;
+		row = rowCount - 1;
 		if (column == -1)
 			column = 0;
 		break;
@@ -171,15 +173,15 @@ EVENTHANDLER(keyDownSelectHandler)
 		if (row == -1) {
 			row = firstVisible(t) + t->vpagesize - 1;
 			// TODO ensusre this is the case with the real list view
-			if (row >= t->count)
-				row = t->count - 1;
+			if (row >= rowCount)
+				row = rowCount - 1;
 			column = 0;
 		} else {
 			row = firstVisible(t) + t->vpagesize - 1;
 			if (row == t->selectedRow)
 				row += t->vpagesize - 1;
-			if (row >= t->count)
-				row = t->count - 1;
+			if (row >= rowCount)
+				row = rowCount - 1;
 		}
 		break;
 	default:

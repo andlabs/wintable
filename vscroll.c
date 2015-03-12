@@ -9,7 +9,7 @@ static HRESULT vscrollParams(struct table *t, struct scrollParams *p)
 	ZeroMemory(p, sizeof (struct scrollParams));
 	p->pos = &(t->yOrigin);
 	p->pagesize = t->vpagesize;
-	p->length = t->count;
+	p->length = tableModel_taleRowCount(t->model);
 	hr = metrics(t, &m);
 	if (hr != S_OK)
 		return hr;

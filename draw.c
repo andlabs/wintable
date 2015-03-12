@@ -185,6 +185,7 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect)
 	intmax_t startRow, endRow;
 	POINT prevOrigin;
 	intmax_t yOffset;
+	intmax_t count;
 
 	hr = selectFont(t, dc, &newfont, &prevfont);
 	if (hr != S_OK)
@@ -217,8 +218,9 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect)
 	if (startRow < 0)
 		startRow = 0;
 	endRow = (cliprect.bottom + p.height - 1) / p.height;
-	if (endRow > t->count)		// exclusive
-		endRow = t->count;
+	count = tableModel_tableRowCount(t->model);
+	if (endRow > count)		// exclusive
+		endRow = count;
 
 	for (i = startRow; i < endRow; i++) {
 		p.row = i;

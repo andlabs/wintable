@@ -51,9 +51,9 @@ BOOL mainwinCreate(HWND hwnd, LPCREATESTRUCT lpcs)
 		m = mkmodel();
 		if (m == NULL)
 			panic("no model");
-		// TODO error check?
-		// TODO make a flag
-//TODO		SendMessageW(tablehwnd, tableSetModel, 0, (LPARAM) m);
+		// TODO error check
+		// TODO make a flag to run this conditionally (for tests)
+		SendMessageW(tablehwnd, tableSetModel, 0, (LPARAM) m);
 	}
 	row = 2;
 	col = 1;

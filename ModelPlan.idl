@@ -236,3 +236,4 @@ interface tableModel : IUnknown {
 // TODO trees?
 // TODO E_HANDLE for NULL HWNDs and HDCs instead of E_POINTER or E_INVALIDARG?
 // TODO invalid windows other than NULL?
+// TODO allow methods to return any other errors where appropriate

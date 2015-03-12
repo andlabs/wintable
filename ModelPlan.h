@@ -1,8 +1,6 @@
 // 27 february 2015
 
-import "unknwn.idl";
-import "stdint.h";
-import "oaidl.idl";
+// TODO merge
 
 // UUIDs were generated with uuidgen from util-linux 2.25.1 on Ubuntu GNOME 14.10 on 6 March 2015
 
@@ -23,9 +21,8 @@ enum {
 // tableARGB() and tableRGBA() produce tableARGBColors from the given component values, specified in the order in the macros.
 typedef uint32_t tableARGBColor;
 // TODO
-// TODO have a ; at the end?
-cpp_quote("#define tableARGB(a, r, g, b) ((tableARGBColor) (a) << 24) | ((tableARGBColor) (r) << 16) | ((tableARGBColor) (b) << 8) | (tableARGBColor) (b))")
-cpp_quote("#define tableRGBA(r, g, b, a) tableARGB((a), (r), (g), (b))")
+#define tableARGB(a, r, g, b) ((tableARGBColor) (a) << 24) | ((tableARGBColor) (r) << 16) | ((tableARGBColor) (b) << 8) | (tableARGBColor) (b))
+#define tableRGBA(r, g, b, a) tableARGB((a), (r), (g), (b))
 
 // tableModel::tableNotify() notifications
 enum {
@@ -40,29 +37,28 @@ enum {
 	tableModelNotifyCellChanged,
 };
 
-typedef struct {
+typedef struct tableModelNotificationParams tableModelNotificationParams;
+typedef struct tableCellValue tableCellValue;
+
+struct tableModelNotificationParams {
 	int code;
 	intmax_t row;
 	intmax_t column;
-} tableModelNotificationParams;
+};
 
-typedef union switch (int type) {
-case tableModelColumnInvalid:
-	;			// userSTGMEDIUM in Microsoft's objidl.idl says to do this for empty values
-case tableModelColumnString:
-	BSTR *stringVal;
-case tableModelColumnImage:
-	;
-case tableModelColumnBool:
-	BOOL boolVal;
-case tableModelColumnARGBColor:
-	tableARGBColor color;
-} tableCellValue;
+struct tableCellValue {
+	int type;
+	union {
+		BSTR *stringVal;
+		BOOL boolVal;
+		tableARGBColor color;
+	};
+};
 
 // tableModel errors
-cpp_quote("#define tableModelErrorTableAlreadySubscribed MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 0x200)")
-cpp_quote("#define tableModelErrorTableNotSubscribed MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 0x201)")
-cpp_quote("#define tableModelErrorWrongColumnType MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 0x202)")
+#define tableModelErrorTableAlreadySubscribed MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 0x200)
+#define tableModelErrorTableNotSubscribed MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 0x201)
+#define tableModelErrorWrongColumnType MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 0x202)
 
 // tableModel is the interface that any COM object that wishes
 // to provide data to a Table must implement. The methods of
@@ -71,9 +67,16 @@ cpp_quote("#define tableModelErrorWrongColumnType MAKE_HRESULT(SEVERITY_ERROR, F
 // data to the model in any other context.
 // 
 // Table itself assumes the model is an in-process, STA object.
-// TODO keep local?
-[object, local, uuid(8f361d46-caab-489f-8d20-aeaaeaa9104f)]
-interface tableModel : IUnknown {
+#undef INTERFACE
+#define INTERFACE tableModel
+DECLARE_INTERFACE_IID_(tableModel, IUnknown, 8f361d46-caab-489f-8d20-aeaaeaa9104f) {
+	BEGIN_INTERFACE
+
+	// IUnknown methods
+	STDMETHOD(QueryInterface)(THIS_ REFIID riid, void **ppv) PURE;
+	STDMETHOD_(ULONG, AddRef)(THIS) PURE;
+	STDMETHOD_(ULONG, Release)(THIS) PURE;
+
 	// tableSubscribe() adds the Table with the given window
 	// handle to a list of Tables to notify of any changes to the
 	// tableModel. It is called by the Table itself when you issue
@@ -96,9 +99,9 @@ interface tableModel : IUnknown {
 	// perform all necessary error checking; you can implement
 	// your tableSubscribe() by merely calling this function.
 	// TODO should this check if hwnd is actually a Table?
-	HRESULT tableSubscribe(
-		[in] HWND hwnd
-	);
+	STDMETHOD(tableSubscribe)(THIS_
+		HWND hwnd
+	) PURE;
 
 	// tableUnsubscribe() removes the Table with the given
 	// window handle from a list of Tables to notify of any
@@ -121,9 +124,9 @@ interface tableModel : IUnknown {
 	// this DLL to implement this method for you. These functions
 	// perform all necessary error checking; you can implement
 	// your tableUnsubscribe() by merely calling this function.
-	HRESULT tableUnsubscribe(
-		[in] HWND hwnd
-	);
+	STDMETHOD(tableUnsubscribe)(THIS_
+		HWND hwnd
+	) PURE;
 
 	// tableNotify() notifies all the Tables currently subscribed
 	// to the tableModel that something about the tableModel
@@ -135,15 +138,15 @@ interface tableModel : IUnknown {
 	// You may use the tableSubscribtions system provided by
 	// this DLL to implement this method for you.
 	// TODO return an error?
-	void tableNotify(
+	STDMETHOD_(void, tableNotify)(THIS_
 		[in] tableModelNotificationParams *p
-	);
+	) PURE;
 
 	// tableColumnCount() returns the number of columns in
 	// the tableModel. This value should be a constant; it should
 	// never change after object creation.
 	// (TODO would this go against CoCreateInstance()? maybe "after the first subscription" instead?)
-	intmax_t tableColumnCount(void);
+	STDMETHOD_(intmax_t, tableColumnCount)(THIS) PURE;
 
 	// tableColumnType() returns the data type for a given column.
 	// This should be one of the tableColumnXxxx constants.
@@ -156,14 +159,14 @@ interface tableModel : IUnknown {
 	// The value of *colType on success should be a constant;
 	// it should never change after object creation.
 	// (TODO would this go against CoCreateInstance()? maybe "after the first subscription" instead?)
-	HRESULT tableColumnType(
-		[in] intmax_t column,
-		[out, retval] int *colType
-	);
+	STDMETHOD(tableColumnType)(THIS_
+		intmax_t column,
+		int *colType
+	) PURE;
 
 	// tableRowCount() returns the number of rows in the tableModel.
 	// TODO HRESULT?
-	intmax_t tableRowCount(void);
+	STDMETHOD_(intmax_t, tableRowCount)(THIS) PURE;
 
 	// tableCellValue() returns the value of a given tableModel cell.
 	// It should return S_OK on success or a COM error code
@@ -175,11 +178,11 @@ interface tableModel : IUnknown {
 	// type and the appropriate field for that type will be
 	// set to the actual value.
 	// TODO image cells
-	HRESULT tableCellValue(
-		[in] intmax_t row,
-		[in] intmax_t column,
-		[out, retval] tableCellValue *value
-	);
+	STDMETHOD(tableCellValue)(THIS_
+		intmax_t row,
+		intmax_t column,
+		tableCellValue *value
+	) PURE;
 
 	// tableDrawImageCell() draws the image belonging to the
 	// given cell into the given HDC. The image shall be resized
@@ -200,12 +203,12 @@ interface tableModel : IUnknown {
 	// this function expects images to be 32-bit alpha-premultiplied
 	// ARGB bitmaps (TODO DIB setions?) as expected by the
 	// Windows API AlphaBlend() function. (TODO what errors are already provided?)
-	HRESULT tableDrawImageCell(
-		[in] intmax_t row,
-		[in] intmax_t column,
-		[in] HDC hdc,
-		[in] RECT *rDest
-	);
+	STDMETHOD(tableDrawImageCell)(THIS_
+		intmax_t row,
+		intmax_t column,
+		HDC hdc,
+		RECT *rDest
+	) PURE;
 
 	// tableIsColumnMutable returns S_OK if the given column
 	// is mutable, S_FALSE if not, and E_INVALIDARG if an invalid
@@ -213,23 +216,25 @@ interface tableModel : IUnknown {
 	// should be a constant; it should never change after object
 	// creation.
 	// TODO really not just a simple bool?
-	HRESULT tableIsColumnMutable(
-		[in] intptr_t column
-	);
+	STDMETHOD(tableIsColumnMutable)(THIS_
+		intptr_t column
+	) PURE;
 
 	// TODO document
-	HRESULT tableSetCellValue(
-		[in] intmax_t row,
-		[in] intmax_t column,
-		[in] tableCellValue data
-	);
+	STDMETHOD(tableSetCellValue)(THIS_
+		intmax_t row,
+		intmax_t column,
+		tableCellValue data
+	) PURE;
 
 	// TODO document
-	HRESULT tableCellToggleBool(
-		[in] intmax_t row,
-		[in] intmax_t column
-	);
-}
+	STDMETHOD(tableCellToggleBool)(THIS_
+		intmax_t row,
+		intmax_t column
+	) PURE;
+
+	END_INTERFACE
+};
 
 // TODO
 // - tableModelErrorColumnNotMutable

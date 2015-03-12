@@ -112,3 +112,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 		hInstance = hinstDLL;
 	return TRUE;
 }
+
+// TODO don't duplicate the GUIDs
+__declspec(dllexport) const IID IID_tableModel = { 0x8f361d46, 0xcaab, 0x489f, { 0x8d, 0x20, 0xae, 0xaa, 0xea, 0xa9, 0x10, 0x4f } };

@@ -239,3 +239,4 @@ interface tableModel : IUnknown {
 // TODO invalid windows other than NULL?
 // TODO allow methods to return any other errors where appropriate
 // TODO forbid E_NOTIMPL?
+// TODO dc or hdc?

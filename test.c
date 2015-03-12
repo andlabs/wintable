@@ -10,9 +10,11 @@
 
 HWND tablehwnd = NULL;
 BOOL msgfont = FALSE;
-BOOL sixrows = FALSE;
+intmax_t rowcount;
+HBITMAP bitmap;
 
 HBITMAP mkbitmap(void);
+tableModel *mkmodel(void);
 
 BOOL mainwinCreate(HWND hwnd, LPCREATESTRUCT lpcs)
 {
@@ -43,13 +45,18 @@ BOOL mainwinCreate(HWND hwnd, LPCREATESTRUCT lpcs)
 			panic("(test program) error creating lfMessageFont HFONT");
 		SendMessageW(tablehwnd, WM_SETFONT, (WPARAM) font, TRUE);
 	}
-	c = 100;
-	if (sixrows)
-		c = 6;
-	SendMessageW(tablehwnd, tableSetRowCount, 0, (LPARAM) (&c));
+	{
+		tableModel *m;
+
+		m = mkmodel();
+		if (m == NULL)
+			panic("no model");
+		// TODO error check?
+		SendMessageW(tablehwnd, tableSetModel, 0, (LPARAM) m);
+	}
 	row = 2;
 	col = 1;
-	SendMessageW(tablehwnd, tableSetSelection, (WPARAM) (&row), (LPARAM) (&col));
+//TODO	SendMessageW(tablehwnd, tableSetSelection, (WPARAM) (&row), (LPARAM) (&col));
 	SetFocus(tablehwnd);
 	return TRUE;
 }
@@ -70,52 +77,12 @@ BOOL checkboxstates[100];
 
 LRESULT CALLBACK mainwndproc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	NMHDR *nmhdr = (NMHDR *) lParam;
-	tableNM *nm = (tableNM *) lParam;
-	WCHAR *text;
-	int n;
-
 	if (uMsg == WM_CREATE)
 		ZeroMemory(checkboxstates, 100 * sizeof (BOOL));
 	switch (uMsg) {
 	HANDLE_MSG(hwnd, WM_CREATE, mainwinCreate);
 	HANDLE_MSG(hwnd, WM_SIZE, mainwinResize);
 	HANDLE_MSG(hwnd, WM_DESTROY, mainwinDestroy);
-	case WM_NOTIFY:
-		if (nmhdr->hwndFrom != tablehwnd)
-			break;
-		switch (nmhdr->code) {
-		case tableNotificationGetCellData:
-			switch (nm->columnType) {
-			case tableColumnText:
-				n = _scwprintf(L"mainwin (%d,%d)", nm->row, nm->column);
-				text = (WCHAR *) malloc((n + 1) * sizeof (WCHAR));
-				if (text == NULL)
-					panic("(table program) error allocating string");
-				_swprintf(text, L"mainwin (%d,%d)", nm->row, nm->column);
-				return (LRESULT) text;
-			case tableColumnImage:
-				return (LRESULT) mkbitmap();
-			case tableColumnCheckbox:
-				return (LRESULT) (checkboxstates[nm->row]);
-			}
-			panic("(test program) unreachable");
-		case tableNotificationFinishedWithCellData:
-			switch (nm->columnType) {
-			case tableColumnText:
-				free((void *) (nm->data));
-				break;
-			case tableColumnImage:
-				if (DeleteObject((HBITMAP) (nm->data)) == 0)
-					panic("(test program) error deleting cell image");
-				break;
-			}
-			return 0;
-		case tableNotificationCellCheckboxToggled:
-			checkboxstates[nm->row] = !checkboxstates[nm->row];
-			return 0;
-		}
-		break;
 	}
 	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 }
@@ -127,11 +94,13 @@ int main(int argc, char *argv[])
 	INITCOMMONCONTROLSEX icc;
 	WNDCLASSW wc;
 
+	rowcount = 100;
 	if (argc != 1)
 		if (strcmp(argv[1], "6") == 0)
-			sixrows = TRUE;
+			rowcount = 6;
 		else
 			msgfont = TRUE;
+	bitmap = mkbitmap();
 	ZeroMemory(&icc, sizeof (INITCOMMONCONTROLSEX));
 	icc.dwSize = sizeof (INITCOMMONCONTROLSEX);
 	icc.dwICC = ICC_LISTVIEW_CLASSES;
@@ -205,4 +174,204 @@ HBITMAP mkbitmap(void)
 		panic("test bitmap creation failed");
 	memcpy(ppvBits, iconpix, bi.bmiHeader.biSizeImage);
 	return b;
+}
+
+typedef struct testmodel testmodel;
+
+struct testmodel {
+	const tableModelVtbl *vtbl;
+	ULONG refcount;
+	tableSubscriptions *subs;
+};
+
+HRESULT STDMETHODCALLTYPE testmodelQueryInterface(tableModel *this, REFIID riid, void **ppvObject)
+{
+	if (ppvObject == NULL)
+		return E_POINTER;
+	*ppvObject = NULL;
+	if (IsEqualUUID(riid, &IID_IUnknown) ||
+		IsEqualUUID(riid, &IID_tableModel)) {
+		*ppvObject = this;
+		tableModel_AddRef(this);
+		return S_OK;
+	}
+	return E_NOINTERFACE;
+}
+
+#define THIS ((testmodel *) this)
+
+ULONG STDMETHODCALLTYPE testmodelAddRef(tableModel *this)
+{
+	THIS->refcount++;
+	return THIS->refcount;
+}
+
+ULONG STDMETHODCALLTYPE testmodelRelease(tableModel *this)
+{
+	THIS->refcount--;
+	if (THIS->refcount == 0) {
+		tableDeleteSubscriptions(THIS->subs);
+		free(this);
+		return 0;
+	}
+	return THIS->refcount;
+}
+
+HRESULT STDMETHODCALLTYPE testmodeltableSubscribe(tableModel *this, HWND hwnd)
+{
+	return tableSubscribe(THIS->subs, hwnd);
+}
+
+HRESULT STDMETHODCALLTYPE testmodeltableUnsubscribe(tableModel *this, HWND hwnd)
+{
+	return tableUnsubscribe(THIS->subs, hwnd);
+}
+
+void STDMETHODCALLTYPE testmodeltableNotify(tableModel *this, tableModelNotificationParams *p)
+{
+	tableNotify(THIS->subs, p);
+}
+
+intmax_t STDMETHODCALLTYPE testmodeltableColumnCount(tableModel *this)
+{
+	return 3;
+}
+
+HRESULT STDMETHODCALLTYPE testmodeltableColumnType(tableModel *this, intmax_t column, int *colType)
+{
+	if (colType == NULL)
+		return E_POINTER;
+	switch (column) {
+	case 0:
+		*colType = tableModelColumnString;
+		return S_OK;
+	case 1:
+		*colType = tableModelColumnImage;
+		return S_OK;
+	case 2:
+		*colType = tableModelColumnBool;
+		return S_OK;
+	}
+	*colType = tableModelColumnInvalid;
+	return E_INVALIDARG;
+}
+
+intmax_t STDMETHODCALLTYPE testmodeltableRowCount(tableModel *this)
+{
+	return rowcount;
+}
+
+HRESULT STDMETHODCALLTYPE testmodeltableCellValue(tableModel *this, intmax_t row, intmax_t column, tableCellValue *value)
+{
+	WCHAR str[100];
+
+	if (value == NULL)
+		return E_POINTER;
+	value->type = tableModelColumnInvalid;
+	if (row < 0 || row >= rowcount)
+		return E_INVALIDARG;
+	if (column < 0 || column >= 3)
+		return E_INVALIDARG;
+	switch (column) {
+	case 0:
+		_snwprintf(str, 100, L"mainwin (%d,%d)", (int) row, (int) column);
+		value->stringVal = SysAllocString(str);
+		if (value->stringVal == NULL)
+			return E_OUTOFMEMORY;
+		value->type = tableModelColumnString;
+		return S_OK;
+	case 1:
+		// TODO
+	case 2:
+		value->type = tableModelColumnBool;
+		value->boolVal = checkboxstates[row];
+		return S_OK;
+	}
+	panic("unreachable");
+	return E_FAIL;
+}
+
+HRESULT STDMETHODCALLTYPE testmodeltableDrawImageCell(tableModel *this, intmax_t row, intmax_t column, HDC hdc, RECT *rDest)
+{
+	if (row < 0 || row >= rowcount)
+		return E_INVALIDARG;
+	if (column < 0 || column >= 3)
+		return E_INVALIDARG;
+	if (column != 1)
+		return tableModelColumnWrongColumnType;
+return S_OK;//TODO
+//	return tableDrawImageCell(TODO);
+}
+
+HRESULT STDMETHODCALLTYPE testmodeltableIsColumnMutable(tableModel *this, intptr_t column)
+{
+	if (column < 0 || column >= 3)
+		return E_INVALIDARG;
+	if (column == 2)
+		return S_OK;
+	return S_FALSE;
+}
+
+HRESULT STDMETHODCALLTYPE testmodeltableSetCellValue(tableModel *this, intmax_t row, intmax_t column, tableCellValue data)
+{
+	if (row < 0 || row >= rowcount)
+		return E_INVALIDARG;
+	if (column < 0 || column >= 3)
+		return E_INVALIDARG;
+	if (column != 2)
+//TODO		return tableModelErrorColumnNotMutable;
+		return E_INVALIDARG;
+	if (data->type != tableModelColumnBool)
+		// TODO really?
+		return tableModelErrorWrongColumnType;
+	// TODO really this?
+	checkboxstates[row] = data->boolVal;
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE testmodeltableCellToggleBool(tableModel *this, intmax_t row, intmax_t column)
+{
+	if (row < 0 || row >= rowcount)
+		return E_INVALIDARG;
+	if (column < 0 || column >= 3)
+		return E_INVALIDARG;
+	if (column != 2)
+		return tableModelErrorWrongColumnType;
+	checkboxstates[row] = !checkboxstates[row];
+	return S_OK;
+}
+
+const tableModelVtbl testmodelVtbl = {
+	.QueryInterface. = testmodelQueryInterface,
+	.AddRef = testmodelAddRef,
+	.Release = testmodelRelease,
+	.tableSubscribe = testmodeltableSubscribe,
+	.tableUnsubscribe = testmodeltableUnsubscribe,
+	.tableNotify = testmodeltableNotify,
+	.tableColumnCount = testmodeltableColumnCount,
+	.tableColumnType = testmodeltableColumnType,
+	.tableRowCount = testmodeltableRowCount,
+	.tableCellValue = testmodeltableCellValue,
+	.tableDrawImageCell = testmodeltableDrawImageCell,
+	.tableIsColumnMutable = testmodeltableIsColumnMutable,
+	.tableSetCellValue = testmodeltableSetCellValue,
+	.tableCellToggleBool = testmodeltableCellToggleBool,
+};
+
+tableModel *mkmodel(void)
+{
+	testmodel *m;
+
+	m = (testmodel *) malloc(sizeof (testmodel));
+	if (m == NULL)
+		return NULL;
+	ZeroMemory(m, sizeof (testmodel));
+	m->vtbl = &testmodelVtbl;
+	m->refcount = 1;
+	m->subs = tableNewSubscriptions();
+	if (m->subs == NULL) {
+		free(m);
+		return NULL;
+	}
+	return (tableModel *) m;
 }

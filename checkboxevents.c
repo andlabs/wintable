@@ -117,7 +117,9 @@ EVENTHANDLER(checkboxMouseUpHandler)
 		goto noToggle;
 
 	// okay, we're good; toggle
-	notify(t, tableNotificationCellCheckboxToggled, rc.row, rc.column, 0);
+	hr = tableModel_tableCellToggleBool(t->model, rc.row, rc.column);
+	if (hr != S_OK)
+		;	// TODO
 
 noToggle:
 	// now redraw the checkbox that we clicked

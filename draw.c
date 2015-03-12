@@ -1,21 +1,6 @@
 // 8 december 2014
 #include "tablepriv.h"
 
-// TODO move to api.h? definitely move somewhere
-// TODO migrate
-static WCHAR *getCellText(struct table *t, intmax_t row, intmax_t column)
-{
-	return (WCHAR *) notify(t, tableNotificationGetCellData, row, column, 0);
-}
-static void returnCellData(struct table *t, intmax_t row, intmax_t column, void *what)
-{
-	notify(t, tableNotificationFinishedWithCellData, row, column, (uintptr_t) what);
-}
-static int isCheckboxChecked(struct table *t, intmax_t row, intmax_t column)
-{
-	return notify(t, tableNotificationGetCellData, row, column, 0) != 0;
-}
-
 struct drawCellParams {
 	intmax_t row;
 	intmax_t column;
@@ -30,16 +15,21 @@ struct drawCellParams {
 static HRESULT drawTextCell(struct table *t, HDC dc, struct drawCellParams *p, RECT *r, int textColor)
 {
 	WCHAR *text;
+	tableCellValue value;
+	HRESULT hr;
 
 	toCellContentRect(t, r, p->xoff, 0, p->m->textHeight);
 	if (SetTextColor(dc, GetSysColor(textColor)) == CLR_INVALID)
 		return logLastError("error setting Table cell text color");
 	if (SetBkMode(dc, TRANSPARENT) == 0)
 		return logLastError("error setting transparent text drawing mode for Table cell");
-	text = getCellText(t, p->row, p->column);
-	if (DrawTextExW(dc, text, -1, r, DT_END_ELLIPSIS | DT_LEFT | DT_NOPREFIX | DT_SINGLELINE, NULL) == 0)
+	hr = tableModel_tableCellValue(t->model, p->row, p->column, &value);
+	if (hr != S_OK)
+		return logHRESULT("error getting Table cell text in drawTextCell()", hr);
+	// TODO verify cell type
+	if (DrawTextExW(dc, value.stringVal, -1, r, DT_END_ELLIPSIS | DT_LEFT | DT_NOPREFIX | DT_SINGLELINE, NULL) == 0)
 		return logLastError("error drawing Table cell text");
-	returnCellData(t, p->row, p->column, text);
+	SysFreeString(value.stringVal);
 	return S_OK;
 }
 
@@ -91,11 +81,16 @@ static HRESULT drawCheckboxCell(struct table *t, HDC dc, struct drawCellParams *
 {
 	int cbState;
 	POINT pt;
+	tableCellValue value;
 	HRESULT hr;
 
 	toCellContentRect(t, r, p->xoff, p->m->checkboxWidth, p->m->checkboxHeight);
 	cbState = 0;
-	if (isCheckboxChecked(t, p->row, p->column))
+	hr = tableModel_tableCellValue(t->model, p->row, p->column, &value);
+	if (hr != S_OK)
+		return logHRESULT("error getting Table cell text in drawCheckboxCell()", hr);
+	// TODO verify value type
+	if (value.boolVal != FALSE)
 		cbState |= checkboxStateChecked;
 	if (t->checkboxMouseDown)
 		if (p->row == t->checkboxMouseDownRowColumn.row && p->column == t->checkboxMouseDownRowColumn.column)

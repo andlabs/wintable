@@ -36,44 +36,14 @@ static HRESULT drawTextCell(struct table *t, HDC dc, struct drawCellParams *p, R
 // TODO really panic on cleanup failure?
 static HRESULT drawImageCell(struct table *t, HDC dc, struct drawCellParams *p, RECT *r)
 {
-	HBITMAP bitmap;
-	BITMAP bi;
-	HDC idc;
-	HBITMAP previbitmap;
-	BLENDFUNCTION bf;
+	HRESULT hr;
 
 	// only call tableImageWidth() and tableImageHeight() here in case it changes partway through
 	// we can get the values back out with basic subtraction (r->right - r->left/r->bottom - r->top)
 	toCellContentRect(t, r, p->xoff, p->m->imageWidth, p->m->imageHeight);
-
-	bitmap = (HBITMAP) notify(t, tableNotificationGetCellData, p->row, p->column, 0);
-	ZeroMemory(&bi, sizeof (BITMAP));
-	if (GetObject(bitmap, sizeof (BITMAP), &bi) == 0)
-		return logLastError("error getting Table cell image dimensions for drawing");
-	// is it even possible to enforce the type of bitmap we need here based on the contents of the BITMAP (or even the DIBSECTION) structs?
-
-	idc = CreateCompatibleDC(dc);
-	if (idc == NULL)
-		return logLastError("error creating compatible DC for Table image cell drawing");
-	previbitmap = SelectObject(idc, bitmap);
-	if (previbitmap == NULL)
-		return logLastError("error selecting Table cell image into compatible DC for image drawing");
-
-	ZeroMemory(&bf, sizeof (BLENDFUNCTION));
-	bf.BlendOp = AC_SRC_OVER;
-	bf.BlendFlags = 0;
-	bf.SourceConstantAlpha = 255;			// per-pixel alpha values
-	bf.AlphaFormat = AC_SRC_ALPHA;
-	if (AlphaBlend(dc, r->left, r->top, r->right - r->left, r->bottom - r->top,
-		idc, 0, 0, bi.bmWidth, bi.bmHeight, bf) == FALSE)
-		return logLastError("error drawing image into Table cell");
-
-	if (SelectObject(idc, previbitmap) != bitmap)
-		return logLastError("error deselecting Table cell image for drawing image");
-	if (DeleteDC(idc) == 0)
-		return logLastError("error deleting Table compatible DC for image cell drawing");
-
-	returnCellData(t, p->row, p->column, bitmap);
+	hr = tableModel_tableDrawImageCell(t->model, p->row, p->column, dc, r);
+	if (hr != S_OK)
+		return logHRESULT("error drawing Table image cell in drawImageCell()", hr);
 	return S_OK;
 }
 

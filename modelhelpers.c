@@ -91,3 +91,43 @@ __declspec(dllexport) void tableSubscriptionsNotify(tableSubscriptions *s, int n
 	for (i = 0; i < s->len; i++)
 		SendMessageW(s->hwnds[i], tableModelNotify, 0, (LPARAM) (&mn));
 }
+
+// this is an implementation of tableModel::tableDrawImageCell()
+// TODO formally document
+// TODO which argument first?
+// TODO really panic on cleanup failure?
+__declspec(dllexport) HRESULT __stdcall tableDrawImageCell(HDC dc, HBITMAP bitmap, RECT *r)
+{
+	BITMAP bi;
+	HDC idc;
+	HBITMAP previbitmap;
+	BLENDFUNCTION bf;
+
+	ZeroMemory(&bi, sizeof (BITMAP));
+	if (GetObject(bitmap, sizeof (BITMAP), &bi) == 0)
+		return logLastError("error getting Table cell image dimensions for drawing");
+	// is it even possible to enforce the type of bitmap we need here based on the contents of the BITMAP (or even the DIBSECTION) structs?
+
+	idc = CreateCompatibleDC(dc);
+	if (idc == NULL)
+		return logLastError("error creating compatible DC for Table image cell drawing");
+	previbitmap = SelectObject(idc, bitmap);
+	if (previbitmap == NULL)
+		return logLastError("error selecting Table cell image into compatible DC for image drawing");
+
+	ZeroMemory(&bf, sizeof (BLENDFUNCTION));
+	bf.BlendOp = AC_SRC_OVER;
+	bf.BlendFlags = 0;
+	bf.SourceConstantAlpha = 255;			// per-pixel alpha values
+	bf.AlphaFormat = AC_SRC_ALPHA;
+	if (AlphaBlend(dc, r->left, r->top, r->right - r->left, r->bottom - r->top,
+		idc, 0, 0, bi.bmWidth, bi.bmHeight, bf) == FALSE)
+		return logLastError("error drawing image into Table cell");
+
+	if (SelectObject(idc, previbitmap) != bitmap)
+		return logLastError("error deselecting Table cell image for drawing image");
+	if (DeleteDC(idc) == 0)
+		return logLastError("error deleting Table compatible DC for image cell drawing");
+
+	return S_OK;
+}

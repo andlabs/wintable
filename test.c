@@ -300,8 +300,7 @@ HRESULT STDMETHODCALLTYPE testmodeltableDrawImageCell(tableModel *this, intmax_t
 		return E_INVALIDARG;
 	if (column != 1)
 		return tableModelColumnWrongColumnType;
-return S_OK;//TODO
-//	return tableDrawImageCell(TODO);
+	return tableDrawImageCell(dc, bitmap, r);
 }
 
 HRESULT STDMETHODCALLTYPE testmodeltableIsColumnMutable(tableModel *this, intptr_t column)

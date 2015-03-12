@@ -58,4 +58,6 @@ extern __declspec(dllexport) HRESULT tableSubscriptionsSubscribe(tableSubscripti
 extern __declspec(dllexport) HRESULT tableSubscriptionsUnsubscribe(tableSubscriptions *, HWND);
 extern __declspec(dllexport) void tableSubscriptionsNotify(tableSubscriptions *, int, intmax_t, intmax_t);
 
+extern __declspec(dllexport) HRESULT __stdcall tableDrawImageCell(HDC, HBITMAP, RECT *);
+
 #endif

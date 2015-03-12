@@ -47,6 +47,7 @@ struct rowcol {
 struct table {
 	HWND hwnd;
 	HWND header;
+	tableModel *model;		// TODO move to the end of the structure?
 	HFONT font;
 	intmax_t nColumns;
 	int *columnTypes;
@@ -54,7 +55,6 @@ struct table {
 	intmax_t headerHeight;
 	intmax_t xOrigin;		// in logical units
 	intmax_t hpagesize;		// in logical units
-	intmax_t count;
 	intmax_t yOrigin;		// in rows
 	intmax_t vpagesize;		// in rows
 	int hwheelCarry;

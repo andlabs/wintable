@@ -14,6 +14,10 @@ enum {
 	// wParam - one of the type constants
 	// lParam - column name as a Unicode string
 	tableAddColumn = WM_USER + 20,
+	// wParam - 0
+	// lParam - pointer to tableModel to set model
+	// return - HRESULT error code cast to LRESULT; S_OK on success
+	tableSetModel,
 };
 
 enum {

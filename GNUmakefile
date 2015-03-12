@@ -81,6 +81,8 @@ $(DLLFILE): $(OFILES)
 	$(CC) -g -o $(DLLFILE) -shared -Wl,--out-implib,$(LIBFILE) $(OFILES) $(xLDFLAGS)
 
 test: $(TESTEXEFILE)
+# see http://stackoverflow.com/a/29021641/3408572
+.PHONY: test
 
 $(TESTEXEFILE): $(DLLFILE) $(TESTOFILES)
 	$(CC) -g -o $(TESTEXEFILE) $(TESTOFILES) $(LIBFILE) $(xLDFLAGS)

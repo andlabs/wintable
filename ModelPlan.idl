@@ -9,7 +9,6 @@ import "oaidl.idl";
 // TODO make sure all parameter attributes are correct
 
 // table model column types
-// TODO should we just merge these with table column types?
 enum {
 	tableModelColumnInvalid,
 	tableModelColumnString,
@@ -39,7 +38,6 @@ enum {
 	// row - index of changed row
 	// column - index of changed column
 	tableModelNotifyCellChanged,
-	// TODO others?
 };
 
 typedef struct {
@@ -153,11 +151,11 @@ interface tableModel : IUnknown {
 	// on failure; in particular, it should return:
 	// - E_POINTER if colType is NULL
 	// - E_INVALIDARG if column is out of range
-	// The value of *colType on return should be a constant;
+	// On failure, *colType is set to tableModelColumnInvalid;
+	// on success, *colType is set to anything else.
+	// The value of *colType on success should be a constant;
 	// it should never change after object creation.
 	// (TODO would this go against CoCreateInstance()? maybe "after the first subscription" instead?)
-	// TODO annotation for colType?
-	// TODO value of *colType on error?
 	HRESULT tableColumnType(
 		[in] intmax_t column,
 		[out, retval] int *colType
@@ -211,8 +209,9 @@ interface tableModel : IUnknown {
 
 	// tableIsColumnMutable returns S_OK if the given column
 	// is mutable, S_FALSE if not, and E_INVALIDARG if an invalid
-	// column number is specified. The value returned should be a
-	// constant; it should never change after object creation.
+	// column number is specified. The value returned on success
+	// should be a constant; it should never change after object
+	// creation.
 	// TODO really not just a simple bool?
 	HRESULT tableIsColumnMutable(
 		[in] intptr_t column
@@ -223,6 +222,12 @@ interface tableModel : IUnknown {
 		[in] intmax_t row,
 		[in] intmax_t column,
 		[in] tableCellValue data
+	);
+
+	// TODO document
+	HRESULT tableCellToggleBool(
+		[in] intmax_t row,
+		[in] intmax_t column
 	);
 }
 

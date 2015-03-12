@@ -50,8 +50,8 @@ extern __declspec(dllexport) ATOM __stdcall tableInit(void);
 extern __declspec(dllexport) HINSTANCE __stdcall tableHINSTANCE(void);
 
 // TODO
-#include "TableModel.h"
-extern __declspec(dllexport) IID IID_tableModel;
+#include "ModelPlan.h"
+extern __declspec(dllexport) const IID IID_tableModel;
 
 // table model helpers
 

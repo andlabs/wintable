@@ -139,7 +139,7 @@ DECLARE_INTERFACE_IID_(tableModel, IUnknown, 8f361d46-caab-489f-8d20-aeaaeaa9104
 	// this DLL to implement this method for you.
 	// TODO return an error?
 	STDMETHOD_(void, tableNotify)(THIS_
-		[in] tableModelNotificationParams *p
+		tableModelNotificationParams *p
 	) PURE;
 
 	// tableColumnCount() returns the number of columns in

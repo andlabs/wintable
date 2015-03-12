@@ -93,7 +93,8 @@ interface tableModel : IUnknown {
 	// 
 	// You may use the tableSubscribtions system provided by
 	// this DLL to implement this method for you. These functions
-	// perform all necessary error checking
+	// perform all necessary error checking; you can implement
+	// your tableSubscribe() by merely calling this function.
 	// TODO should this check if hwnd is actually a Table?
 	HRESULT tableSubscribe(
 		[in] HWND hwnd
@@ -118,8 +119,8 @@ interface tableModel : IUnknown {
 	// 
 	// You may use the tableSubscribtions system provided by
 	// this DLL to implement this method for you. These functions
-	// perform all necessary error checking;.
-	// TODO what error for not already subscribed
+	// perform all necessary error checking; you can implement
+	// your tableUnsubscribe() by merely calling this function.
 	HRESULT tableUnsubscribe(
 		[in] HWND hwnd
 	);

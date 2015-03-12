@@ -10,7 +10,7 @@
 #define CINTERFACE
 #define COBJMACROS
 // see https://github.com/golang/go/issues/9916#issuecomment-74812211
-#define INITGUID
+//TODO#define INITGUID
 // get Windows version right; right now Windows XP
 #define WINVER 0x0501
 #define _WIN32_WINNT 0x0501

@@ -236,6 +236,55 @@ DECLARE_INTERFACE_IID_(tableModel, IUnknown, 8f361d46-caab-489f-8d20-aeaaeaa9104
 	END_INTERFACE
 };
 
+// TODO this is straight from the MIDL output; do a proper migration
+#ifdef COBJMACROS
+
+
+#define tableModel_QueryInterface(This,riid,ppvObject)	\
+    ( (This)->lpVtbl -> QueryInterface(This,riid,ppvObject) ) 
+
+#define tableModel_AddRef(This)	\
+    ( (This)->lpVtbl -> AddRef(This) ) 
+
+#define tableModel_Release(This)	\
+    ( (This)->lpVtbl -> Release(This) ) 
+
+
+#define tableModel_tableSubscribe(This,hwnd)	\
+    ( (This)->lpVtbl -> tableSubscribe(This,hwnd) ) 
+
+#define tableModel_tableUnsubscribe(This,hwnd)	\
+    ( (This)->lpVtbl -> tableUnsubscribe(This,hwnd) ) 
+
+#define tableModel_tableNotify(This,p)	\
+    ( (This)->lpVtbl -> tableNotify(This,p) ) 
+
+#define tableModel_tableColumnCount(This)	\
+    ( (This)->lpVtbl -> tableColumnCount(This) ) 
+
+#define tableModel_tableColumnType(This,column,colType)	\
+    ( (This)->lpVtbl -> tableColumnType(This,column,colType) ) 
+
+#define tableModel_tableRowCount(This)	\
+    ( (This)->lpVtbl -> tableRowCount(This) ) 
+
+#define tableModel_tableCellValue(This,row,column,value)	\
+    ( (This)->lpVtbl -> tableCellValue(This,row,column,value) ) 
+
+#define tableModel_tableDrawImageCell(This,row,column,hdc,rDest)	\
+    ( (This)->lpVtbl -> tableDrawImageCell(This,row,column,hdc,rDest) ) 
+
+#define tableModel_tableIsColumnMutable(This,column)	\
+    ( (This)->lpVtbl -> tableIsColumnMutable(This,column) ) 
+
+#define tableModel_tableSetCellValue(This,row,column,data)	\
+    ( (This)->lpVtbl -> tableSetCellValue(This,row,column,data) ) 
+
+#define tableModel_tableCellToggleBool(This,row,column)	\
+    ( (This)->lpVtbl -> tableCellToggleBool(This,row,column) ) 
+
+#endif /* COBJMACROS */
+
 // TODO
 // - tableModelErrorColumnNotMutable
 

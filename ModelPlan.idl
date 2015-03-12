@@ -72,7 +72,6 @@ cpp_quote("#define tableModelErrorWrongColumnType MAKE_HRESULT(SEVERITY_ERROR, F
 // 
 // Table itself assumes the model is an in-process, STA object.
 // TODO keep local?
-// TODO the UUID was generated with uuidgen with no arguments; I have /dev/random and /dev/urandom but make sure uuidgen ran with -r anyway
 [object, local, uuid(8f361d46-caab-489f-8d20-aeaaeaa9104f)]
 interface tableModel : IUnknown {
 	// tableSubscribe() adds the Table with the given window

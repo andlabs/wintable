@@ -201,3 +201,6 @@ extern HANDLER(drawHandlers);
 extern intmax_t firstVisible(struct table *);
 extern HRESULT ensureVisible(struct table *, struct metrics *, struct rowcol);
 extern HRESULT queueRedrawRow(struct table *, struct metrics *, intmax_t);
+
+// nullmodel.c
+extern const tableModel nullModel;

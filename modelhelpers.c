@@ -45,7 +45,7 @@ __declspec(dllexport) HRESULT tableSubscriptionsSubscribe(tableSubscriptions *s,
 	size_t cap;
 	size_t i;
 
-	if (hwnd == NULL || hwnd == HWND_BROADCAST)
+	if (hwnd == NULL)
 		return E_INVALIDARG;
 	for (i = 0; i < s->len; i++)
 		if (hwnd == s->hwnds[i])
@@ -70,7 +70,7 @@ __declspec(dllexport) HRESULT tableSubscriptionsUnsubscribe(tableSubscriptions *
 {
 	size_t i;
 
-	if (hwnd == NULL || hwnd == HWND_BROADCAST)
+	if (hwnd == NULL)
 		return E_INVALIDARG;
 	for (i = 0; i < s->len; i++)
 		if (s->hwnds[i] == hwnd) {

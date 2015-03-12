@@ -86,7 +86,7 @@ interface tableModel : IUnknown {
 	// 
 	// It should return S_OK on success or a COM error code
 	// on failure; in particular, it should return:
-	// - E_INVALIDARG if hwnd is NULL or HWND_BROADCAST
+	// - E_INVALIDARG if hwnd is NULL
 	// - E_OUTOFMEMORY if a memory allocation failed
 	// - tableModelErrorTableAlreadySubscribed if the given
 	//     Table is already subscribed
@@ -112,7 +112,7 @@ interface tableModel : IUnknown {
 	// 
 	// It should return S_OK on success or a COM error code
 	// on failure; in particular, it should return:
-	// - E_INVALIDARG if hwnd is NULL or HWND_BROADCAST
+	// - E_INVALIDARG if hwnd is NULL
 	// - tableModelErrorTableNotSubscribed if the given Table is
 	//     not subscribed
 	// 
@@ -235,3 +235,4 @@ interface tableModel : IUnknown {
 
 // TODO trees?
 // TODO E_HANDLE for NULL HWNDs and HDCs instead of E_POINTER or E_INVALIDARG?
+// TODO invalid windows other than NULL?

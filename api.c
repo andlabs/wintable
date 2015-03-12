@@ -8,6 +8,7 @@
 // TODO
 #define panic(...) abort()
 
+// TODO make return an HRESULT
 static void addColumn(struct table *t, WPARAM wParam, LPARAM lParam)
 {
 	t->nColumns++;
@@ -25,6 +26,29 @@ static void addColumn(struct table *t, WPARAM wParam, LPARAM lParam)
 	// (TODO when — if — adding autoresize, figure this one out)
 }
 
+// TODO what if m is NULL?
+// TODO what happens if unsubscribing fails?
+// TODO should we QueryInterface() or just assume this is a tableModel?
+// TODO (related to unsubscribing fails, but not entirely covered by it) what should the model be set to on failure?
+static HRESULT setModel(struct table *t, tableModel *m)
+{
+	if (t->model != &nullTable) {
+		hr = tableModel_Unsubscribe(t->model, t->hwnd);
+		if (hr != S_OK)
+			return logHRESULT("error unsubscribing old Table model in setModel()", hr);
+		tableModel_Release(t->model);
+	}
+	t->model = m;
+	tableModel_AddRef(t->model);
+	hr = tableModel_Subscribe(t->model, t->hwnd);
+	if (hr != S_OK) {
+		tableModel_Release(t->model);
+		return logHRESULT("error subscribing to new Table model in setModel()", hr);
+	}
+	return S_OK;
+}
+
+// TODO what happens if any of these fail?
 HANDLER(apiHandlers)
 {
 	switch (uMsg) {
@@ -45,6 +69,9 @@ HANDLER(apiHandlers)
 	case tableAddColumn:
 		addColumn(t, wParam, lParam);
 		*lResult = 0;
+		return TRUE;
+	case tableSetModel:
+		*lResult = (LRESULT) setModel(t, (tableModel *) lParam);
 		return TRUE;
 	}
 	return FALSE;

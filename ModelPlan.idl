@@ -238,3 +238,4 @@ interface tableModel : IUnknown {
 // TODO E_HANDLE for NULL HWNDs and HDCs instead of E_POINTER or E_INVALIDARG?
 // TODO invalid windows other than NULL?
 // TODO allow methods to return any other errors where appropriate
+// TODO forbid E_NOTIMPL?

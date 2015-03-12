@@ -13,6 +13,7 @@
 enum {
 	// wParam - one of the type constants
 	// lParam - column name as a Unicode string
+	// TODO make return an HRESULT?
 	tableAddColumn = WM_USER + 20,
 	// wParam - 0
 	// lParam - pointer to tableModel to set model

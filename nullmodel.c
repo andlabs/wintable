@@ -2,6 +2,7 @@
 #include "tablepriv.h"
 
 // the null Table model simplifies the implementation of Table itself by providing a default model implementation that represents a blank Table
+// this is the model that the Table uses before the programmer sets one themselves
 // it is DELIBERATELY NOT a valid COM object!
 // - AddRef() and Release() return 1 without doing any refcounting or memory management (the null model must always be live)
 // - QueryInterface() returns E_NOTIMPL

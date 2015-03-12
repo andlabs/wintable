@@ -52,7 +52,7 @@ TESTCFILES = \
 	test.c
 
 # TODO get rid of IDL baggage
-OFILES = $(CFILES:%.c=$(OBJDIR)/%.o) $(OBJDIR)/ModelPlan_i.o $(OBJDIR)/ModelPlan_p.o $(OBJDIR)/dlldata.o
+OFILES = $(CFILES:%.c=$(OBJDIR)/%.o) $(OBJDIR)/ModelPlan_i.o $(OBJDIR)/dlldata.o
 TESTOFILES = $(TESTCFILES:%.c=$(OBJDIR)/%.o)
 
 xCFLAGS = \
@@ -90,8 +90,8 @@ $(OBJDIR)/%.o: %.c $(HFILES) dirs
 # TODO
 $(OBJDIR)/ModelPlan_i.o: idlout/ModelPlan_i.c $(HFILES) dirs
 	$(CC) -g -o $@ -c $< $(xCFLAGS)
-$(OBJDIR)/ModelPlan_p.o: idlout/ModelPlan_p.c $(HFILES) dirs
-	$(CC) -g -o $@ -c $< $(xCFLAGS)
+#$(OBJDIR)/ModelPlan_p.o: idlout/ModelPlan_p.c $(HFILES) dirs
+#	$(CC) -g -o $@ -c $< $(xCFLAGS)
 $(OBJDIR)/dlldata.o: idlout/dlldata.c $(HFILES) dirs
 	$(CC) -g -o $@ -c $< $(xCFLAGS)
 

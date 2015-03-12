@@ -221,17 +221,17 @@ ULONG STDMETHODCALLTYPE testmodelRelease(tableModel *this)
 
 HRESULT STDMETHODCALLTYPE testmodeltableSubscribe(tableModel *this, HWND hwnd)
 {
-	return tableSubscribe(THIS->subs, hwnd);
+	return tableSubscriptionsSubscribe(THIS->subs, hwnd);
 }
 
 HRESULT STDMETHODCALLTYPE testmodeltableUnsubscribe(tableModel *this, HWND hwnd)
 {
-	return tableUnsubscribe(THIS->subs, hwnd);
+	return tableSubscriptionsUnsubscribe(THIS->subs, hwnd);
 }
 
 void STDMETHODCALLTYPE testmodeltableNotify(tableModel *this, tableModelNotificationParams *p)
 {
-	tableNotify(THIS->subs, p);
+	tableSubscriptionsNotify(THIS->subs, p);
 }
 
 intmax_t STDMETHODCALLTYPE testmodeltableColumnCount(tableModel *this)

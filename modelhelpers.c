@@ -81,15 +81,12 @@ __declspec(dllexport) HRESULT tableSubscriptionsUnsubscribe(tableSubscriptions *
 	return tableModelErrorTableNotSubscribed;
 }
 
-__declspec(dllexport) void tableSubscriptionsNotify(tableSubscriptions *s, int notification, intmax_t row, intmax_t column)
+__declspec(dllexport) void tableSubscriptionsNotify(tableSubscriptions *s, tableModelNotificationParams *p)
 {
-	struct modelNotification mn;
+	size_t i;
 
-	mn.code = notification;
-	mn.row = row;
-	mn.column = column;
 	for (i = 0; i < s->len; i++)
-		SendMessageW(s->hwnds[i], tableModelNotify, 0, (LPARAM) (&mn));
+		SendMessageW(s->hwnds[i], tableModelNotify, 0, (LPARAM) p);
 }
 
 // this is an implementation of tableModel::tableDrawImageCell()

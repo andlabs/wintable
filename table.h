@@ -19,6 +19,10 @@ enum {
 	// lParam - pointer to tableModel to set model
 	// return - HRESULT error code cast to LRESULT; S_OK on success
 	tableSetModel,
+	// wParam - 0
+	// lParam - pointer to tableModelNotificationParams struct
+	// no return (TODO?)
+	tableModelNotify,
 };
 
 enum {
@@ -56,7 +60,7 @@ extern __declspec(dllexport) tableSubscriptions *tableNewSubscriptions(void);
 extern __declspec(dllexport) void tableDeleteSubscriptions(tableSubscriptions *);
 extern __declspec(dllexport) HRESULT tableSubscriptionsSubscribe(tableSubscriptions *, HWND);
 extern __declspec(dllexport) HRESULT tableSubscriptionsUnsubscribe(tableSubscriptions *, HWND);
-extern __declspec(dllexport) void tableSubscriptionsNotify(tableSubscriptions *, int, intmax_t, intmax_t);
+extern __declspec(dllexport) void tableSubscriptionsNotify(tableSubscriptions *, tableModelNotificationParams *);
 
 extern __declspec(dllexport) HRESULT __stdcall tableDrawImageCell(HDC, HBITMAP, RECT *);
 

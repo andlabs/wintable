@@ -240,3 +240,4 @@ interface tableModel : IUnknown {
 // TODO allow methods to return any other errors where appropriate
 // TODO forbid E_NOTIMPL?
 // TODO dc or hdc?
+// TODO tableModelNotification or tableModelNotify?

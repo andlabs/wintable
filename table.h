@@ -5,6 +5,9 @@
 
 #define tableWindowClass L"andlabs_wintable"
 
+// TODO
+#include "idlout/ModelPlan.h"
+
 // start at WM_USER + 20 just in case for whatever reason we ever get the various dialog manager messages (see also http://blogs.msdn.com/b/oldnewthing/archive/2003/10/21/55384.aspx)
 // each of these returns nothing unless otherwise indicated
 enum {
@@ -60,7 +63,7 @@ extern __declspec(dllexport) HINSTANCE __stdcall tableHINSTANCE(void);
 
 typedef struct tableSubscriptions tableSubscriptions;
 // TODO make these __stdcall
-extern __declspec(dllexport) tableSubscriptions *tableNewSubscriptions(void)
+extern __declspec(dllexport) tableSubscriptions *tableNewSubscriptions(void);
 extern __declspec(dllexport) void tableDeleteSubscriptions(tableSubscriptions *);
 extern __declspec(dllexport) HRESULT tableSubscriptionsSubscribe(tableSubscriptions *, HWND);
 extern __declspec(dllexport) HRESULT tableSubscriptionsUnsubscribe(tableSubscriptions *, HWND);

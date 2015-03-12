@@ -29,6 +29,10 @@
 #include <stdarg.h>
 #include <oleacc.h>
 
+// oh you're FUCKING kidding me
+// was this macro introduced with the Windows 8 or 8.1 SDK? because it's not in the Visual Studido 2013 Express for Windows Desktop (I think) headers nor in the headers in the Windows 7 DDK
+#define _COM_Outptr_
+
 #include "table.h"
 
 // forward declaration

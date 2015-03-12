@@ -190,8 +190,8 @@ HRESULT STDMETHODCALLTYPE testmodelQueryInterface(tableModel *this, REFIID riid,
 	if (ppvObject == NULL)
 		return E_POINTER;
 	*ppvObject = NULL;
-	if (IsEqualUUID(riid, &IID_IUnknown) ||
-		IsEqualUUID(riid, &IID_tableModel)) {
+	if (IsEqualIID(riid, &IID_IUnknown) ||
+		IsEqualIID(riid, &IID_tableModel)) {
 		*ppvObject = this;
 		tableModel_AddRef(this);
 		return S_OK;
@@ -199,6 +199,7 @@ HRESULT STDMETHODCALLTYPE testmodelQueryInterface(tableModel *this, REFIID riid,
 	return E_NOINTERFACE;
 }
 
+#undef THIS
 #define THIS ((testmodel *) this)
 
 ULONG STDMETHODCALLTYPE testmodelAddRef(tableModel *this)
@@ -299,8 +300,8 @@ HRESULT STDMETHODCALLTYPE testmodeltableDrawImageCell(tableModel *this, intmax_t
 	if (column < 0 || column >= 3)
 		return E_INVALIDARG;
 	if (column != 1)
-		return tableModelColumnWrongColumnType;
-	return tableDrawImageCell(dc, bitmap, r);
+		return tableModelErrorWrongColumnType;
+	return tableDrawImageCell(hdc, bitmap, rDest);
 }
 
 HRESULT STDMETHODCALLTYPE testmodeltableIsColumnMutable(tableModel *this, intptr_t column)
@@ -321,11 +322,11 @@ HRESULT STDMETHODCALLTYPE testmodeltableSetCellValue(tableModel *this, intmax_t 
 	if (column != 2)
 //TODO		return tableModelErrorColumnNotMutable;
 		return E_INVALIDARG;
-	if (data->type != tableModelColumnBool)
+	if (data.type != tableModelColumnBool)
 		// TODO really?
 		return tableModelErrorWrongColumnType;
 	// TODO really this?
-	checkboxstates[row] = data->boolVal;
+	checkboxstates[row] = data.boolVal;
 	return S_OK;
 }
 
@@ -342,7 +343,7 @@ HRESULT STDMETHODCALLTYPE testmodeltableCellToggleBool(tableModel *this, intmax_
 }
 
 const tableModelVtbl testmodelVtbl = {
-	.QueryInterface. = testmodelQueryInterface,
+	.QueryInterface = testmodelQueryInterface,
 	.AddRef = testmodelAddRef,
 	.Release = testmodelRelease,
 	.tableSubscribe = testmodeltableSubscribe,

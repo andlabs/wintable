@@ -32,15 +32,17 @@ static void addColumn(struct table *t, WPARAM wParam, LPARAM lParam)
 // TODO (related to unsubscribing fails, but not entirely covered by it) what should the model be set to on failure?
 static HRESULT setModel(struct table *t, tableModel *m)
 {
-	if (t->model != &nullTable) {
-		hr = tableModel_Unsubscribe(t->model, t->hwnd);
+	HRESULT hr;
+
+	if (t->model != &nullModel) {
+		hr = tableModel_tableUnsubscribe(t->model, t->hwnd);
 		if (hr != S_OK)
 			return logHRESULT("error unsubscribing old Table model in setModel()", hr);
 		tableModel_Release(t->model);
 	}
 	t->model = m;
 	tableModel_AddRef(t->model);
-	hr = tableModel_Subscribe(t->model, t->hwnd);
+	hr = tableModel_tableSubscribe(t->model, t->hwnd);
 	if (hr != S_OK) {
 		tableModel_Release(t->model);
 		return logHRESULT("error subscribing to new Table model in setModel()", hr);

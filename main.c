@@ -52,7 +52,7 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 //TODO		invalidateTableAccs(t);
 		// TODO what if any of this fails?
 		if (t->model != &nullModel)
-			tableModel_tableUnsubscribe(t->model);
+			tableModel_tableUnsubscribe(t->model, t->hwnd);
 		tableModel_Release(t->model);
 		freeCheckboxThemeData(t);
 		destroyHeader(t);

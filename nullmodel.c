@@ -83,7 +83,7 @@ static HRESULT STDMETHODCALLTYPE nullModeltableCellToggleBool(tableModel *this, 
 }
 
 static const tableModelVtbl nullModelVtbl = {
-	.QueryInterface. = nullModelQueryInterface,
+	.QueryInterface = nullModelQueryInterface,
 	.AddRef = nullModelAddRef,
 	.Release = nullModelRelease,
 	.tableSubscribe = nullModeltableSubscribe,
@@ -100,5 +100,5 @@ static const tableModelVtbl nullModelVtbl = {
 };
 
 const tableModel nullModel = {
-	.lpVtbl = nullModelVtbl,
+	.lpVtbl = &nullModelVtbl,
 };

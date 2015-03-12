@@ -36,6 +36,7 @@ CFILES = \
 	hscroll.c \
 	main.c \
 	metrics.c \
+	modelhelpers.c \
 	nullmodel.c \
 	resize.c \
 	scroll.c \

@@ -52,7 +52,8 @@ BOOL mainwinCreate(HWND hwnd, LPCREATESTRUCT lpcs)
 		if (m == NULL)
 			panic("no model");
 		// TODO error check?
-		SendMessageW(tablehwnd, tableSetModel, 0, (LPARAM) m);
+		// TODO make a flag
+//TODO		SendMessageW(tablehwnd, tableSetModel, 0, (LPARAM) m);
 	}
 	row = 2;
 	col = 1;

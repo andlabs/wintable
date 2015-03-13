@@ -8,19 +8,22 @@
 // TODO
 #define panic(...) abort()
 
-// TODO make return an HRESULT
-static void addColumn(struct table *t, WPARAM wParam, LPARAM lParam)
+static HRESULT addColumn(struct table *t, tableColumn *tc)
 {
+	HRESULT hr;
+
 	t->nColumns++;
-	t->columnTypes = (int *) tableRealloc(t->columnTypes, t->nColumns * sizeof (int));
+	t->columns = (tableColumn *) tableRealloc(t->columns, t->nColumns * sizeof (tableColumn));
 	// TODO return failure
 	if (t->columnTypes == NULL)
 		logMemoryExhausted("adding the new column type to the current Table's list of column types");
-	t->columnTypes[t->nColumns - 1] = (int) wParam;
-	// TODO make a panicNoErrCode() or panicArg() for this
-	if (t->columnTypes[t->nColumns - 1] >= nTableColumnTypes)
-		panic("invalid column type passed to tableAddColumn");
-	headerAddColumn(t, (WCHAR *) lParam);
+	// copy fields
+	t->columns[t->nColumns - 1] = *tc;
+	// TODO get name out and set copy of name to NULL
+	// (TODO say why)
+	hr = headerAddColumn(t, xxxxx);
+	if (hr != S_OK)
+		return hr;
 	update(t, TRUE);
 	// TODO only redraw the part of the client area where the new client went, if any
 	// (TODO when — if — adding autoresize, figure this one out)
@@ -48,6 +51,7 @@ static HRESULT setModel(struct table *t, tableModel *m)
 		tableModel_Release(t->model);
 		return logHRESULT("error subscribing to new Table model in setModel()", hr);
 	}
+	// TODO updateAll()
 	return S_OK;
 }
 
@@ -70,8 +74,7 @@ HANDLER(apiHandlers)
 		*lResult = (LRESULT) (t->font);
 		return TRUE;
 	case tableAddColumn:
-		addColumn(t, wParam, lParam);
-		*lResult = 0;
+		*lResult = (LRESULT) addColumn(t, (tableColumn *) lParam);
 		return TRUE;
 	case tableSetModel:
 		*lResult = (LRESULT) setModel(t, (tableModel *) lParam);

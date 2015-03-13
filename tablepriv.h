@@ -46,7 +46,7 @@ struct table {
 	tableModel *model;		// TODO move to the end of the structure?
 	HFONT font;
 	intmax_t nColumns;
-	int *columnTypes;
+	tableColumn *columns;
 	intmax_t width;
 	intmax_t headerHeight;
 	intmax_t xOrigin;		// in logical units

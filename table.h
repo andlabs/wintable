@@ -50,11 +50,11 @@ struct tableNM {
 typedef struct tableColumn tableColumn;
 
 struct tableColumn {
+	// TODO remove? (get type from model column instead)
 	int type;
 	WCHAR *headerText;
-	intmax_t modelColumn;
-	// -1 for none
-	intmax_t backgroundColorModelColumn;
+	intmax_t modelColumn;				// required
+	intmax_t bgcolorModelColumn;		// -1 for none
 };
 
 extern __declspec(dllexport) ATOM __stdcall tableInit(void);

@@ -8,9 +8,10 @@
 // start at WM_USER + 20 just in case for whatever reason we ever get the various dialog manager messages (see also http://blogs.msdn.com/b/oldnewthing/archive/2003/10/21/55384.aspx)
 // each of these returns nothing unless otherwise indicated
 enum {
-	// wParam - one of the type constants
-	// lParam - column name as a Unicode string
-	// TODO make return an HRESULT?
+	// wParam - 0
+	// lParam - pointer to a tableColumn structure describing column
+	// return - HRESULT error code cast to LRESULT; S_OK on success
+	// (E_INVALIDARG if column type is invalid)
 	tableAddColumn = WM_USER + 20,
 	// wParam - 0
 	// lParam - pointer to tableModel to set model
@@ -44,6 +45,16 @@ struct tableNM {
 	intmax_t column;
 	int columnType;
 	uintptr_t data;
+};
+
+typedef struct tableColumn tableColumn;
+
+struct tableColumn {
+	int type;
+	WCHAR *headerText;
+	intmax_t modelColumn;
+	// -1 for none
+	intmax_t backgroundColorModelColumn;
 };
 
 extern __declspec(dllexport) ATOM __stdcall tableInit(void);

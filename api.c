@@ -30,6 +30,7 @@ static void addColumn(struct table *t, WPARAM wParam, LPARAM lParam)
 // TODO what happens if unsubscribing fails?
 // TODO should we QueryInterface() or just assume this is a tableModel?
 // TODO (related to unsubscribing fails, but not entirely covered by it) what should the model be set to on failure?
+// TODO update selection
 static HRESULT setModel(struct table *t, tableModel *m)
 {
 	HRESULT hr;

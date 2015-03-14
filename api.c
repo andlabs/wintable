@@ -5,26 +5,35 @@
 // TODO and adjust all the below functions to boot
 // TODO migrate in general
 
-// TODO
-#define panic(...) abort()
-
 static HRESULT addColumn(struct table *t, tableColumn *tc)
 {
+	tableColumn *newc;
+	intmax_t count;
+	WCHAR *name;
 	HRESULT hr;
 
-	t->nColumns++;
-	t->columns = (tableColumn *) tableRealloc(t->columns, t->nColumns * sizeof (tableColumn));
-	// TODO return failure
-	if (t->columnTypes == NULL)
-		logMemoryExhausted("adding the new column type to the current Table's list of column types");
+	// store in a separate place to make an allocation failure nonlethal to the table itself
+	count = t->nColumns + 1;
+	newc = (tableColumn *) tableRealloc(t->columns, count * sizeof (tableColumn));
+	if (newc == NULL)
+		return logMemoryExhausted("adding the new column type to the current Table's list of column types");
+	t->columns = newc;
+	t->nColumns = count;
+
 	// copy fields
 	t->columns[t->nColumns - 1] = *tc;
-	// TODO get name out and set copy of name to NULL
-	// (TODO say why)
-	hr = headerAddColumn(t, xxxxx);
+	// don't keep a pointer to the name around, just to be safe
+	// (especially if we will support deletion later)
+	// TODO work this out more nicely, especially if we allow changing details (or even changing the name) later
+	// we still need it for the headerAddColumn() call though
+	name = t->columns[t->nColumns - 1].name;
+	t->columns[t->nColumns - 1].name = NULL;
+
+	hr = headerAddColumn(t, name);
 	if (hr != S_OK)
 		return hr;
-	update(t, TRUE);
+
+	return update(t, TRUE);
 	// TODO only redraw the part of the client area where the new client went, if any
 	// (TODO when — if — adding autoresize, figure this one out)
 }

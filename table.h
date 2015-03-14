@@ -50,7 +50,8 @@ struct tableNM {
 typedef struct tableColumn tableColumn;
 
 struct tableColumn {
-	WCHAR *headerText;
+	// TODO change to headerText to avoid confusion? since the column isn't going to have a name to look up by (and we don't even save this copy of the name in our internal data structures; we'll need to change instances of name in api.c and header.c as well...
+	WCHAR *name;
 	intmax_t modelColumn;				// required; determines column type
 	intmax_t bgcolorModelColumn;		// -1 for none
 };

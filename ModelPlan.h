@@ -7,12 +7,13 @@
 // TODO make sure all parameter attributes are correct
 
 // table model column types
+// TODO define behavior on a table if invalid types are used for column data
 enum {
-	tableModelColumnInvalid,
-	tableModelColumnString,
-	tableModelColumnImage,
-	tableModelColumnBool,
-	tableModelColumnARGBColor,
+	tableModelColumnInvalid,		// for errors; should not be used in a Table
+	tableModelColumnString,			// shown as text in a Table
+	tableModelColumnImage,		// shown as an image in a Table
+	tableModelColumnBool,			// shown as a checkbox in a Table
+	tableModelColumnARGBColor,		// not shown in a Table; can be used for cell background colors
 };
 
 // tableARGBColor is an explicit type name for an ARGB color.

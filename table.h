@@ -11,7 +11,7 @@ enum {
 	// wParam - 0
 	// lParam - pointer to a tableColumn structure describing column
 	// return - HRESULT error code cast to LRESULT; S_OK on success
-	// (E_INVALIDARG if column type is invalid)
+	// (TODO later error on out of range columns...)
 	tableAddColumn = WM_USER + 20,
 	// wParam - 0
 	// lParam - pointer to tableModel to set model
@@ -50,10 +50,8 @@ struct tableNM {
 typedef struct tableColumn tableColumn;
 
 struct tableColumn {
-	// TODO remove? (get type from model column instead)
-	int type;
 	WCHAR *headerText;
-	intmax_t modelColumn;				// required
+	intmax_t modelColumn;				// required; determines column type
 	intmax_t bgcolorModelColumn;		// -1 for none
 };
 

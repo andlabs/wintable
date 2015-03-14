@@ -33,7 +33,7 @@ HRESULT logLastError(const char *context)
 #endif
 	SetLastError(le);
 	// a function does not have to set a last error
-	// what happens if a future version of some header file changes HRESULT_FROM_WIN32(0) to explicitly return S_OK?
+	// if the last error we get is actually 0, then HRESULT_FROM_WIN32(0) will return S_OK (0 cast to an HRESULT, since 0 <= 0), which we don't want
 	// prevent this by returning E_FAIL, so the rest of the Table code doesn't barge onward
 	if (le == 0)
 		return E_FAIL;

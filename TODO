@@ -19,3 +19,5 @@ TODO
 - see if there are any places metrics are computed more than once and fix them
 - document exported methods; tableHINSTANCE() cannot fail.
 - what happens if there is a tableSetModel message or or the table is destroyed while we have the mouse capture?
+- add prefast annotations
+	- enable prefast in the msvc makefile

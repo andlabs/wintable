@@ -76,7 +76,7 @@ typedef BOOL (*eventhandlerfunc)(struct table *, struct metrics *, UINT, WPARAM,
 // debug.c
 extern HRESULT logLastError(const char *);
 extern HRESULT logHRESULT(const char *, HRESULT);
-extern void logMemoryExhausted(const char *);
+extern HRESULT logMemoryExhausted(const char *);
 
 // alloc.c
 extern void *tableAlloc(size_t);

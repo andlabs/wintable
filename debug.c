@@ -63,12 +63,13 @@ HRESULT logHRESULT(const char *context, HRESULT hr)
 	return hr;
 }
 
-void logMemoryExhausted(const char *reason)
+HRESULT logMemoryExhausted(const char *reason)
 {
 	fprintf(stderr, "memory exhausted %s\n", reason);
 #ifdef tableDebugStop
 	DebugBreak();
 #endif
+	return E_OUTOFMEMORY;
 }
 
 #else
@@ -90,8 +91,9 @@ HRESULT logHRESULT(const char *reason, HRESULT hr)
 	return hr;
 }
 
-void logMemoryExhausted(const char *reason)
+HRESULT logMemoryExhausted(const char *reason)
 {
+	return E_OUTOFMEMORY;
 }
 
 #endif

@@ -20,6 +20,7 @@ BOOL mainwinCreate(HWND hwnd, LPCREATESTRUCT lpcs)
 {
 	intmax_t c;
 	intmax_t row, col;
+	tableColumn tc;
 
 	tablehwnd = CreateWindowExW(0,
 		tableWindowClass, L"Main Window",
@@ -29,9 +30,19 @@ BOOL mainwinCreate(HWND hwnd, LPCREATESTRUCT lpcs)
 		hwnd, NULL, tableHINSTANCE(), NULL);
 	if (tablehwnd == NULL)
 		panic("(test program) error creating Table");
-	SendMessageW(tablehwnd, tableAddColumn, tableColumnText, (LPARAM) L"Column");
-	SendMessageW(tablehwnd, tableAddColumn, tableColumnImage, (LPARAM) L"Column 2");
-	SendMessageW(tablehwnd, tableAddColumn, tableColumnCheckbox, (LPARAM) L"Column 3");
+	// TODO error checking
+	// TODO reset all fields?
+	ZeroMemory(&tc, sizeof (tableColumn));
+	tc.name = L"Column";
+	tc.modelColumn = 0;
+	tc.bgcolorModelColumn = -1;
+	SendMessageW(tablehwnd, tableAddColumn, 0, (LPARAM) (&tc));
+	tc.name = L"Column 2";
+	tc.modelColumn = 1;
+	SendMessageW(tablehwnd, tableAddColumn, 0, (LPARAM) (&tc));
+	tc.name = L"Column 3";
+	tc.modelColumn = 2;
+	SendMessageW(tablehwnd, tableAddColumn, 0, (LPARAM) (&tc));
 	if (msgfont) {
 		NONCLIENTMETRICSW ncm;
 		HFONT font;

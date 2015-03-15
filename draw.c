@@ -60,7 +60,10 @@ static HRESULT drawCheckboxCell(struct table *t, HDC dc, struct drawCellParams *
 	if (hr != S_OK)
 		return logHRESULT("error getting Table cell text in drawCheckboxCell()", hr);
 	// TODO verify value type
-	if (p->row % 2 == 0)
+	hr = tableModel_tableIsColumnMutable(t->model, p->column);
+	if (hr != S_OK && hr != S_FALSE)
+		return logHRESULT("error determining whether Table model column is mutable in drawCheckboxCell()", hr);
+	else if (hr == S_FALSE)
 		cbState |= checkboxStateDisabled;
 	if (value.boolVal != FALSE)
 		cbState |= checkboxStateChecked;

@@ -6,7 +6,7 @@
 // TODO http://stackoverflow.com/a/22695333/3408572
 
 // returns S_FALSE if we're outside the client rect or not in a checkbox
-static HRESULT lParamToCheckbox(struct table *t, struct metrics *m, LPARAM lParam, struct rowcol *rc, RECT *rCell, RECT *rCheckbox)
+static HRESULT lParamToCheckbox(struct table *t, struct metrics *m, LPARAM lParam, struct rowcol *rc, RECT *rCell, RECT *rCheckbox, BOOL mutableOnly)
 {
 	int coltype;
 	HRESULT hr;
@@ -22,6 +22,13 @@ static HRESULT lParamToCheckbox(struct table *t, struct metrics *m, LPARAM lPara
 		return logHRESULT("error getting Table moel column type in lParamToCheckbox()", hr);
 	if (coltype != tableModelColumnBool)
 		return S_FALSE;
+	if (mutableOnly) {
+		hr = tableModel_tableIsColumnMutable(t->model, rc->column);
+		if (hr != S_OK && hr != S_FALSE)
+			return logHRESULT("error determining if Table model column is mutable in lParamToCheckbox()", hr);
+		if (hr == S_FALSE)		// we only want mutable columns
+			return S_FALSE;
+	}
 	hr = rowColumnToClientRect(t, m, *rc, rCell);
 	if (hr != S_OK)			// handles the S_FALSE case
 		return hr;
@@ -44,7 +51,8 @@ EVENTHANDLER(checkboxMouseMoveHandler)
 	// the drawing code will figure that out
 	// we simply need to mark the old and new cells for redraw
 	if (t->checkboxMouseMoved) {		// mark the previous cell in case we've changed cells
-		hr = lParamToCheckbox(t, m, t->checkboxMouseMoveLPARAM, &rc, &rCell, &rCheckbox);
+		// TODO mutable only?
+		hr = lParamToCheckbox(t, m, t->checkboxMouseMoveLPARAM, &rc, &rCell, &rCheckbox, FALSE);
 		if (hr != S_OK && hr != S_FALSE)
 			;	// TODO
 		if (hr != S_FALSE)
@@ -54,7 +62,8 @@ EVENTHANDLER(checkboxMouseMoveHandler)
 	t->checkboxMouseMoved = TRUE;
 	t->checkboxMouseMoveLPARAM = lParam;
 	// TODO see if we need to get rid of code duplication here
-	hr = lParamToCheckbox(t, m, t->checkboxMouseMoveLPARAM, &rc, &rCell, &rCheckbox);
+	// TODO mutable only?
+	hr = lParamToCheckbox(t, m, t->checkboxMouseMoveLPARAM, &rc, &rCell, &rCheckbox, FALSE);
 	if (hr != S_OK && hr != S_FALSE)
 		;	// TODO
 	if (hr != S_FALSE)
@@ -72,7 +81,8 @@ EVENTHANDLER(checkboxMouseDownHandler)
 	RECT rCell, rCheckbox;
 	HRESULT hr;
 
-	hr = lParamToCheckbox(t, m, lParam, &rc, &rCell, &rCheckbox);
+	// definitely mutable only; we can't toggle immutable checkboxes
+	hr = lParamToCheckbox(t, m, lParam, &rc, &rCell, &rCheckbox, TRUE);
 	if (hr != S_OK && hr != S_FALSE)
 		;	// TODO
 	if (hr == S_FALSE)			// not in a checkbox cell
@@ -109,7 +119,8 @@ EVENTHANDLER(checkboxMouseUpHandler)
 	// so we have to figure out which checkbox is being hovered over right now
 	// if it is a different checkbox, we need to redraw that one as well, as it will now need to be shown hot
 	redrawHover = FALSE;
-	hr = lParamToCheckbox(t, m, lParam, &rc, &rHoverCell, &rHoverCheckbox);
+	// definitely mutable only; we can't toggle immutable checkboxes
+	hr = lParamToCheckbox(t, m, lParam, &rc, &rHoverCell, &rHoverCheckbox, TRUE);
 	if (hr != S_OK && hr != S_FALSE)
 		;	// TODO
 	if (hr == S_FALSE)		// not in checkbox cell

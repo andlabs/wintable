@@ -103,7 +103,7 @@ LRESULT notify(struct table *t, UINT code, intmax_t row, intmax_t column, uintpt
 	nm.nmhdr.code = code;
 	nm.row = row;
 	nm.column = column;
-	nm.columnType = t->columnTypes[nm.column];
+//TODO	nm.columnType = t->columnTypes[nm.column];
 	nm.data = data;
 	// TODO check for error from GetParent()?
 	return SendMessageW(GetParent(t->hwnd), WM_NOTIFY, (WPARAM) (nm.nmhdr.idFrom), (LPARAM) (&nm));

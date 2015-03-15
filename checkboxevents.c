@@ -8,6 +8,7 @@
 // returns S_FALSE if we're outside the client rect or not in a checkbox
 static HRESULT lParamToCheckbox(struct table *t, struct metrics *m, LPARAM lParam, struct rowcol *rc, RECT *rCell, RECT *rCheckbox)
 {
+	int coltype;
 	HRESULT hr;
 
 	// TODO does this make sure we're not in the client rect?
@@ -16,7 +17,10 @@ static HRESULT lParamToCheckbox(struct table *t, struct metrics *m, LPARAM lPara
 		return hr;
 	if (rc->row == -1 || rc->column == -1)
 		return S_FALSE;
-	if (t->columnTypes[rc->column] != tableColumnCheckbox)
+	hr = tableModel_tableColumnType(t->model, t->columns[rc->column].modelColumn, &coltype);
+	if (hr != S_OK)
+		return hr;
+	if (coltype != tableModelColumnBool)
 		return S_FALSE;
 	hr = rowColumnToClientRect(t, m, *rc, rCell);
 	if (hr != S_OK)			// handles the S_FALSE case

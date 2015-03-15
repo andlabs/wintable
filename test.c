@@ -341,8 +341,7 @@ HRESULT STDMETHODCALLTYPE testmodeltableSetCellValue(tableModel *this, intmax_t 
 	if (column < 0 || column >= nColumns)
 		return E_INVALIDARG;
 	if (column != 2)
-//TODO		return tableModelErrorColumnNotMutable;
-		return E_INVALIDARG;
+		return tableModelErrorColumnNotMutable;
 	if (data.type != tableModelColumnBool)
 		// TODO really?
 		return tableModelErrorWrongColumnType;
@@ -360,7 +359,7 @@ HRESULT STDMETHODCALLTYPE testmodeltableCellToggleBool(tableModel *this, intmax_
 	if (column != 2 && column != 3)
 		return tableModelErrorWrongColumnType;
 	if (column == 3)
-return E_INVALIDARG;//TODO		return tableModelErrorColumnNotMutable;
+		return tableModelErrorColumnNotMutable;
 	checkboxstates[row] = !checkboxstates[row];
 	return S_OK;
 }

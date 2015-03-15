@@ -60,6 +60,7 @@ struct tableCellValue {
 #define tableModelErrorTableAlreadySubscribed MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 0x200)
 #define tableModelErrorTableNotSubscribed MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 0x201)
 #define tableModelErrorWrongColumnType MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 0x202)
+#define tableModelErrorColumnNotMutable MAKE_HRESULT(SEVERITY_ERROR, FACILITY_ITF, 0x203)
 
 // tableModel is the interface that any COM object that wishes
 // to provide data to a Table must implement. The methods of
@@ -285,9 +286,6 @@ DECLARE_INTERFACE_IID_(tableModel, IUnknown, 8f361d46-caab-489f-8d20-aeaaeaa9104
     ( (This)->lpVtbl -> tableCellToggleBool(This,row,column) ) 
 
 #endif /* COBJMACROS */
-
-// TODO
-// - tableModelErrorColumnNotMutable
 
 // TODO trees?
 // TODO E_HANDLE for NULL HWNDs and HDCs instead of E_POINTER or E_INVALIDARG?

@@ -19,7 +19,7 @@ static HRESULT lParamToCheckbox(struct table *t, struct metrics *m, LPARAM lPara
 		return S_FALSE;
 	hr = tableModel_tableColumnType(t->model, t->columns[rc->column].modelColumn, &coltype);
 	if (hr != S_OK)
-		return hr;
+		return logHRESULT("error getting Table moel column type in lParamToCheckbox()", hr);
 	if (coltype != tableModelColumnBool)
 		return S_FALSE;
 	hr = rowColumnToClientRect(t, m, *rc, rCell);

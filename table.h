@@ -23,13 +23,6 @@ enum {
 	tableModelNotify,
 };
 
-enum {
-	tableColumnText,
-	tableColumnImage,
-	tableColumnCheckbox,
-	nTableColumnTypes,
-};
-
 // notification codes
 // note that these are positive; see http://blogs.msdn.com/b/oldnewthing/archive/2009/08/21/9877791.aspx
 // each of these is of type tableNM

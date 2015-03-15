@@ -360,7 +360,7 @@ HRESULT STDMETHODCALLTYPE testmodeltableCellToggleBool(tableModel *this, intmax_
 	if (column != 2 && column != 3)
 		return tableModelErrorWrongColumnType;
 	if (column == 3)
-;//TODO		return tableModelErrorColumnNotMutable;
+return E_INVALIDARG;//TODO		return tableModelErrorColumnNotMutable;
 	checkboxstates[row] = !checkboxstates[row];
 	return S_OK;
 }

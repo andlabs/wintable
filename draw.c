@@ -89,6 +89,7 @@ static HRESULT drawCell(struct table *t, HDC dc, struct drawCellParams *p)
 	HBRUSH background;
 	int textColor;
 	RECT cellrect;
+	int coltype;
 	HRESULT hr;
 
 	// TODO verify these two
@@ -114,22 +115,28 @@ static HRESULT drawCell(struct table *t, HDC dc, struct drawCellParams *p)
 		return logLastError("error filling Table cell background");
 	cellrect = r;		// save for drawing the focus rect
 
-	switch (t->columnTypes[p->column]) {
-	case tableColumnText:
+	hr = tableModel_tableColumnType(t->model, p->column, &coltype);
+	if (hr != S_OK)
+		return logHRESULT("error getting Table model column type in drawCell()", hr);
+	switch (coltype) {
+	case tableModelColumnString:
 		hr = drawTextCell(t, dc, p, &r, textColor);
 		if (hr != S_OK)
 			return hr;
 		break;
-	case tableColumnImage:
+	case tableModelColumnImage:
 		hr = drawImageCell(t, dc, p, &r);
 		if (hr != S_OK)
 			return hr;
 		break;
-	case tableColumnCheckbox:
+	case tableModelColumnBool:
 		hr = drawCheckboxCell(t, dc, p, &r);
 		if (hr != S_OK)
 			return hr;
 		break;
+	default:
+		// TODO
+		return logHRESULT("invalid Table model column type in drawCell()", E_INVALIDARG);
 	}
 
 	// TODO in front of or behind the cell contents?

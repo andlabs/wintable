@@ -43,6 +43,9 @@ BOOL mainwinCreate(HWND hwnd, LPCREATESTRUCT lpcs)
 	tc.name = L"Column 3";
 	tc.modelColumn = 2;
 	SendMessageW(tablehwnd, tableAddColumn, 0, (LPARAM) (&tc));
+	tc.name = L"Noneditable Checkboxes";
+	tc.modelColumn = 3;
+	SendMessageW(tablehwnd, tableAddColumn, 0, (LPARAM) (&tc));
 	if (msgfont) {
 		NONCLIENTMETRICSW ncm;
 		HFONT font;
@@ -245,9 +248,11 @@ void STDMETHODCALLTYPE testmodeltableNotify(tableModel *this, tableModelNotifica
 	tableSubscriptionsNotify(THIS->subs, p);
 }
 
+#define nColumns 4
+
 intmax_t STDMETHODCALLTYPE testmodeltableColumnCount(tableModel *this)
 {
-	return 3;
+	return nColumns;
 }
 
 HRESULT STDMETHODCALLTYPE testmodeltableColumnType(tableModel *this, intmax_t column, int *colType)
@@ -262,6 +267,7 @@ HRESULT STDMETHODCALLTYPE testmodeltableColumnType(tableModel *this, intmax_t co
 		*colType = tableModelColumnImage;
 		return S_OK;
 	case 2:
+	case 3:
 		*colType = tableModelColumnBool;
 		return S_OK;
 	}
@@ -283,7 +289,7 @@ HRESULT STDMETHODCALLTYPE testmodeltableCellValue(tableModel *this, intmax_t row
 	value->type = tableModelColumnInvalid;
 	if (row < 0 || row >= rowcount)
 		return E_INVALIDARG;
-	if (column < 0 || column >= 3)
+	if (column < 0 || column >= nColumns)
 		return E_INVALIDARG;
 	switch (column) {
 	case 0:
@@ -299,6 +305,10 @@ HRESULT STDMETHODCALLTYPE testmodeltableCellValue(tableModel *this, intmax_t row
 		value->type = tableModelColumnBool;
 		value->boolVal = checkboxstates[row];
 		return S_OK;
+	case 3:
+		value->type = tableModelColumnBool;
+		value->boolVal = ((row / 3) % 2) == 1;
+		return S_OK;
 	}
 	panic("unreachable");
 	return E_FAIL;
@@ -308,7 +318,7 @@ HRESULT STDMETHODCALLTYPE testmodeltableDrawImageCell(tableModel *this, intmax_t
 {
 	if (row < 0 || row >= rowcount)
 		return E_INVALIDARG;
-	if (column < 0 || column >= 3)
+	if (column < 0 || column >= nColumns)
 		return E_INVALIDARG;
 	if (column != 1)
 		return tableModelErrorWrongColumnType;
@@ -317,9 +327,9 @@ HRESULT STDMETHODCALLTYPE testmodeltableDrawImageCell(tableModel *this, intmax_t
 
 HRESULT STDMETHODCALLTYPE testmodeltableIsColumnMutable(tableModel *this, intptr_t column)
 {
-	if (column < 0 || column >= 3)
+	if (column < 0 || column >= nColumns)
 		return E_INVALIDARG;
-	if (column == 2)
+	if (column == 2)		// column 3 is also uneditable
 		return S_OK;
 	return S_FALSE;
 }
@@ -328,7 +338,7 @@ HRESULT STDMETHODCALLTYPE testmodeltableSetCellValue(tableModel *this, intmax_t 
 {
 	if (row < 0 || row >= rowcount)
 		return E_INVALIDARG;
-	if (column < 0 || column >= 3)
+	if (column < 0 || column >= nColumns)
 		return E_INVALIDARG;
 	if (column != 2)
 //TODO		return tableModelErrorColumnNotMutable;
@@ -345,10 +355,12 @@ HRESULT STDMETHODCALLTYPE testmodeltableCellToggleBool(tableModel *this, intmax_
 {
 	if (row < 0 || row >= rowcount)
 		return E_INVALIDARG;
-	if (column < 0 || column >= 3)
+	if (column < 0 || column >= nColumns)
 		return E_INVALIDARG;
-	if (column != 2)
+	if (column != 2 && column != 3)
 		return tableModelErrorWrongColumnType;
+	if (column == 3)
+;//TODO		return tableModelErrorColumnNotMutable;
 	checkboxstates[row] = !checkboxstates[row];
 	return S_OK;
 }

@@ -12,6 +12,7 @@ enum {
 	// lParam - pointer to a tableColumn structure describing column
 	// return - HRESULT error code cast to LRESULT; S_OK on success
 	// (TODO later error on out of range columns...)
+	// TODO indicate whether tableColumn is modified
 	tableAddColumn = WM_USER + 20,
 	// wParam - 0
 	// lParam - pointer to tableModel to set model

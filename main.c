@@ -10,6 +10,7 @@ static const handlerfunc handlers[] = {
 	hscrollHandler,
 	vscrollHandler,
 //TODO	accessibilityHandler,
+	modelNotificationHandler,
 	NULL,
 };
 

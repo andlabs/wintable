@@ -200,3 +200,6 @@ extern HRESULT queueRedrawRow(struct table *, struct metrics *, intmax_t);
 
 // nullmodel.c
 extern const tableModel nullModel;
+
+// modelnotify.c
+HANDLER(modelNotificationHandler);

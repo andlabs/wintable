@@ -37,6 +37,7 @@ CFILES = \
 	main.c \
 	metrics.c \
 	modelhelpers.c \
+	modelnotify.c \
 	nullmodel.c \
 	resize.c \
 	scroll.c \

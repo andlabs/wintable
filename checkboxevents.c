@@ -154,6 +154,7 @@ noToggle:
 	return TRUE;
 }
 
+// TODO WM_CANCELMODE?
 // TODO what happens if any of these fail?
 EVENTHANDLER(checkboxCaptureChangedHandler)
 {

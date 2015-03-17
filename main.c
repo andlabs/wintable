@@ -11,6 +11,7 @@ static const handlerfunc handlers[] = {
 	vscrollHandler,
 //TODO	accessibilityHandler,
 	modelNotificationHandler,
+	enableFocusHandlers,
 	NULL,
 };
 

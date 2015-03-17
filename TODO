@@ -9,7 +9,6 @@ TODO
 	- reproduce
 - checkbox columns don't clip to the column width
 - send standard notification codes
-- redraw on focus change
 - draw themed WS_EX_CLIENTEDGE (and WS_EX_WINDOWEDGE?)
 - in-place tooltips for text columns
 - see if we can get tableRealloc() to not be destructive on failure and change every use of tableRealloc() to boot

@@ -31,6 +31,7 @@ CFILES = \
 	coord.c \
 	debug.c \
 	draw.c \
+	enablefocus.c \
 	events.c \
 	header.c \
 	hscroll.c \

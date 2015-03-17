@@ -203,3 +203,6 @@ extern const tableModel nullModel;
 
 // modelnotify.c
 HANDLER(modelNotificationHandler);
+
+// enablefocus.c
+HANDLER(enableFocusHandlers);

@@ -20,3 +20,5 @@ TODO
 - what happens if there is a tableSetModel message or or the table is destroyed while we have the mouse capture?
 - add prefast annotations
 	- enable prefast in the msvc makefile
+- WM_THEMECHANGED etc.
+	- what message was fo setting GWL_STYLE/GWL_EXSTYLE?

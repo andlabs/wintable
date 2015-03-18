@@ -7,6 +7,7 @@ static const handlerfunc commandHandlers[] = {
 
 static const handlerfunc notifyHandlers[] = {
 	headerNotifyHandler,
+	tooltipNotifyHandler,
 	NULL,
 };
 

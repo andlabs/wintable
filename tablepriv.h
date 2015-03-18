@@ -211,3 +211,4 @@ extern HANDLER(enableFocusHandlers);
 // tooltips.c
 extern HRESULT makeTooltip(struct table *, HINSTANCE);
 extern HRESULT destroyTooltip(struct table *);
+extern HANDLER(tooltipNotifyHandler);

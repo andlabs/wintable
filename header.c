@@ -3,6 +3,7 @@
 
 // TODO verify header events (double-clicking on a divider, for example)
 
+// TODO set font
 HRESULT makeHeader(struct table *t, HINSTANCE hInstance)
 {
 	t->header = CreateWindowExW(0,

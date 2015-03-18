@@ -43,6 +43,7 @@ struct rowcol {
 struct table {
 	HWND hwnd;
 	HWND header;
+	HWND tooltip;			// TODO move to the end of the structure?
 	tableModel *model;		// TODO move to the end of the structure?
 	HFONT font;
 	intmax_t nColumns;
@@ -202,7 +203,11 @@ extern HRESULT queueRedrawRow(struct table *, struct metrics *, intmax_t);
 extern const tableModel nullModel;
 
 // modelnotify.c
-HANDLER(modelNotificationHandler);
+extern HANDLER(modelNotificationHandler);
 
 // enablefocus.c
-HANDLER(enableFocusHandlers);
+extern HANDLER(enableFocusHandlers);
+
+// tooltips.c
+extern HRESULT makeTooltip(struct table *, HINSTANCE);
+extern HRESULT destroyTooltip(struct table *);

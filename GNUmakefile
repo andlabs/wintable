@@ -43,6 +43,7 @@ CFILES = \
 	resize.c \
 	scroll.c \
 	select.c \
+	tooltips.c \
 	update.c \
 	util.c \
 	visibility.c \

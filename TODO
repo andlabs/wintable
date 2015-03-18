@@ -24,3 +24,4 @@ TODO
 	- what message was fo setting GWL_STYLE/GWL_EXSTYLE?
 - http://blogs.msdn.com/b/oldnewthing/archive/2006/06/28/649680.aspx making sure mouse scrolling is consistent and that mouse event handlers are done in the right order
 	- especially again after we add tooltips
+- https://msdn.microsoft.com/en-us/library/dd162593%28v=vs.85%29.aspx?

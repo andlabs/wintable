@@ -72,6 +72,7 @@ HANDLER(apiHandlers)
 		// don't free the old font; see http://blogs.msdn.com/b/oldnewthing/archive/2008/09/12/8945692.aspx
 		t->font = (HFONT) wParam;
 		SendMessageW(t->header, WM_SETFONT, wParam, lParam);
+		SendMessageW(t->tooltip, WM_SETFONT, wParam, lParam);
 		// if we redraw, we have to redraw ALL of it; after all, the font changed!
 		if (LOWORD(lParam) != FALSE)
 			updateAll(t);			// DONE

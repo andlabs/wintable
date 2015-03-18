@@ -102,6 +102,9 @@ LRESULT CALLBACK mainwndproc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 }
 
+// TODO
+#define tooltipClasses ICC_TAB_CLASSES
+
 int main(int argc, char *argv[])
 {
 	HWND mainwin;
@@ -118,7 +121,7 @@ int main(int argc, char *argv[])
 	bitmap = mkbitmap();
 	ZeroMemory(&icc, sizeof (INITCOMMONCONTROLSEX));
 	icc.dwSize = sizeof (INITCOMMONCONTROLSEX);
-	icc.dwICC = ICC_LISTVIEW_CLASSES;
+	icc.dwICC = ICC_LISTVIEW_CLASSES | tooltipClasses;
 	if (InitCommonControlsEx(&icc) == 0)
 		panic("(test program) error initializing comctl32.dll");
 	if (tableInit() == 0)

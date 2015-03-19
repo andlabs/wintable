@@ -52,8 +52,8 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 	}
 	if (uMsg == WM_DESTROY) {
 		// TODO free appropriate (after figuring this part out) components of t
-		destroyTooltip(t);
 //TODO		invalidateTableAccs(t);
+		destroyTooltip(t);
 		// TODO what if any of this fails?
 		if (t->model != &nullModel)
 			tableModel_tableUnsubscribe(t->model, t->hwnd);

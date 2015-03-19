@@ -18,6 +18,7 @@ static const eventhandlerfunc charHandlers[] = {
 
 static const eventhandlerfunc mouseMoveHandlers[] = {
 	checkboxMouseMoveHandler,
+	tooltipMouseMoveHandler,
 	NULL,
 };
 

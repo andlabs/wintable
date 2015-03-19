@@ -63,6 +63,7 @@ struct table {
 	LPARAM checkboxMouseMoveLPARAM;
 	BOOL checkboxMouseDown;
 	struct rowcol checkboxMouseDownRowColumn;
+	LPARAM tooltipMouseMoveLPARAM;
 	struct tableAcc *firstAcc;
 };
 
@@ -211,4 +212,5 @@ extern HANDLER(enableFocusHandlers);
 // tooltips.c
 extern HRESULT makeTooltip(struct table *, HINSTANCE);
 extern HRESULT destroyTooltip(struct table *);
+extern EVENTHANDLER(tooltipMouseMoveHandler);
 extern HANDLER(tooltipNotifyHandler);

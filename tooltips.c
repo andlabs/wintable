@@ -22,8 +22,8 @@ HRESULT makeTooltip(struct table *t, HINSTANCE hInstance)
 		return logLastError("error creating Table tooltip");
 	ZeroMemory(&ti, sizeof (TOOLINFOW));
 	ti.cbSize = sizeof (TOOLINFOW);
-	// TODO TTF_TRANSPARENT?
-	ti.uFlags = TTF_IDISHWND | TTF_SUBCLASS;
+	// TODO figure out and explain why TTF_TRANSPARENT is necessary (if it is, anyway; it seems to be)
+	ti.uFlags = TTF_IDISHWND | TTF_SUBCLASS | TTF_TRANSPARENT;
 	ti.hwnd = t->hwnd;
 	ti.uId = (UINT_PTR) (t->hwnd);
 	ti.hinst = hInstance;		// TODO
@@ -42,6 +42,17 @@ HRESULT destroyTooltip(struct table *t)
 	return S_OK;
 }
 
+// TODO this seems rather hackish; is it necessary?
+// TODO if so, how do we handle captures? and mouse leaves?
+EVENTHANDLER(tooltipMouseMoveHandler)
+{
+	t->tooltipMouseMoveLPARAM = lParam;
+	return TRUE;
+}
+
+// TODO can this be fired before a WM_MOUSEMOVE?
+// TODO makek this follow the cursor
+// TODO is it supposed to disappear after a few seconds and then never reappear until the taskbar shows a tooltip?
 HANDLER(tooltipNotifyHandler)
 {
 	NMHDR *nmhdr = (NMHDR *) lParam;
@@ -58,13 +69,13 @@ HANDLER(tooltipNotifyHandler)
 	hr = metrics(t, &m);
 	if (hr != S_OK)
 		;	// TODO
-//TODO	hr = lParamToRowColumn(t, &m, xxxxxx, &rc);
+	hr = lParamToRowColumn(t, &m, t->tooltipMouseMoveLPARAM, &rc);
 	if (hr != S_OK && hr != S_FALSE)
 		;	// TODO
 	if (hr != S_FALSE)	// not in a cell
 		;	// TODO not in a cell
 	hr = tableModel_tableColumnType(t->model, rc.column, &coltype);
-	if (hr != s_OK)
+	if (hr != S_OK)
 		;	// TODO
 	if (coltype != tableModelColumnString)
 		;	// TODO not a text cell
@@ -75,7 +86,7 @@ HANDLER(tooltipNotifyHandler)
 	if (hr != S_OK)
 		;	// TODO
 	// TODO split into its own function
-	toCellContentRect(t, &r, 0, 0, m->textHeight);
+	toCellContentRect(t, &r, 0, 0, m.textHeight);
 	// TODO ClientToScreen() instead?
 	// TODO this error handling is wrong
 	if (MapWindowRect(t->hwnd, NULL, &r) == 0)

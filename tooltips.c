@@ -69,8 +69,8 @@ HANDLER(tooltipNotifyHandler)
 	if (coltype != tableModelColumnString)
 		;	// TODO not a text cell
 	// TODO set text
-	// TODO crop?
 	// TODO S_FALSE?
+	// don't crop to the visible area; we want the tooltip to hang off the edge if we're scrolled to the right (the real listview acts like this)
 	hr = rowColumnToClientRect(t, &m, rc, &r);
 	if (hr != S_OK)
 		;	// TODO

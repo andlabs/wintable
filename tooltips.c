@@ -42,6 +42,13 @@ HRESULT destroyTooltip(struct table *t)
 	return S_OK;
 }
 
+/* comctl32 listview behavior notes
+when the mouse hoves over a cell, the tooltip should show
+when the mouse hovers over another cell, the tooltip should hide [TODO? and the tooltip counter should restart]
+it doesn't matter if the tooltip is wider than the cell; once the mouse leaves the cell, the tooltip hides
+TODO xoff?
+*/
+
 // TODO this seems rather hackish; is it necessary?
 // TODO if so, how do we handle captures? and mouse leaves?
 EVENTHANDLER(tooltipMouseMoveHandler)

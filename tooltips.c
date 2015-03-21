@@ -83,6 +83,7 @@ EVENTHANDLER(tooltipMouseMoveHandler)
 // TODO can this be fired before a WM_MOUSEMOVE?
 // TODO makek this follow the cursor
 // TODO is it supposed to disappear after a few seconds and then never reappear until the taskbar shows a tooltip?
+// TODO reorganize the parts of this function
 HANDLER(tooltipNotifyHandler)
 {
 	NMHDR *nmhdr = (NMHDR *) lParam;
@@ -94,6 +95,7 @@ HANDLER(tooltipNotifyHandler)
 	TOOLINFOW ti;
 	HDC dc;
 	HFONT newfont, prevfont;
+	SIZE extents;
 	HRESULT hr;
 
 	if (nmhdr->hwndFrom != t->tooltip)
@@ -131,7 +133,11 @@ HANDLER(tooltipNotifyHandler)
 		;	// TODO
 	// TODO verify cell type
 
-	// TODO figure out if the text is cropped
+	// get the size of the text now; we'll check it later
+	// TODO find a way to use the same method DrawTextExW() uses (and doesn't require SysStringLen())
+	// TODO really use SysStringLen() and not wcslen()?
+	if (GetTextExtentPoint32W(dc, value.stringVal, SysStringLen(value.stringVal), &extents) == 0)
+		;	// TODO
 	// we're done with the DC now
 	// TODO really error out if cleanup failed?
 	hr = deselectFont(dc, prevfont, newfont);
@@ -154,6 +160,9 @@ HANDLER(tooltipNotifyHandler)
 		;	// TODO
 	// TODO split into its own function
 	toCellContentRect(t, &r, 0, 0, m.textHeight);
+	// now that we have the right rect, we can check if the text fits
+	if (extents.cx < (r.right - r.left))
+		;	// TODO does fit; no tooltip needed
 	// TODO ClientToScreen() instead?
 	// TODO this error handling is wrong
 	if (MapWindowRect(t->hwnd, NULL, &r) == 0)

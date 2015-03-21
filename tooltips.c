@@ -3,6 +3,14 @@
 
 // TODO rename to tooltip.c?
 
+static void initTOOLINFOW(struct table *t, TOOLINFOW *ti)
+{
+	ZeroMemory(ti, sizeof (TOOLINFOW));
+	ti->cbSize = sizeof (TOOLINFOW);
+	ti->hwnd = t->hwnd;
+	ti->uId = (UINT_PTR) (t->hwnd);
+}
+
 // TODO set font
 HRESULT makeTooltip(struct table *t, HINSTANCE hInstance)
 {
@@ -20,12 +28,9 @@ HRESULT makeTooltip(struct table *t, HINSTANCE hInstance)
 		t->hwnd, NULL, hInstance, NULL);
 	if (t->tooltip == NULL)
 		return logLastError("error creating Table tooltip");
-	ZeroMemory(&ti, sizeof (TOOLINFOW));
-	ti.cbSize = sizeof (TOOLINFOW);
+	initTOOLINFOW(t, &ti);
 	// TODO figure out and explain why TTF_TRANSPARENT is necessary (if it is, anyway; it seems to be)
 	ti.uFlags = TTF_IDISHWND | TTF_SUBCLASS | TTF_TRANSPARENT;
-	ti.hwnd = t->hwnd;
-	ti.uId = (UINT_PTR) (t->hwnd);
 	ti.hinst = hInstance;		// TODO
 	// TODO only needed on wine?
 	ti.lpszText = L"initial text that you should not see";
@@ -84,6 +89,8 @@ HANDLER(tooltipNotifyHandler)
 	struct rowcol rc;
 	int coltype;
 	RECT r;
+	tableCellValue value;
+	TOOLINFOW ti;
 	HRESULT hr;
 
 	if (nmhdr->hwndFrom != t->tooltip)
@@ -103,7 +110,17 @@ HANDLER(tooltipNotifyHandler)
 		;	// TODO
 	if (coltype != tableModelColumnString)
 		;	// TODO not a text cell
-	// TODO set text
+
+	hr = tableModel_tableCellValue(t->model, rc.row, rc.column, &value);
+	if (hr != S_OK)
+		;	// TODO
+	// TODO verify cell type
+	initTOOLINFOW(t, &ti);
+	ti.lpszText = value.stringVal;
+	// TODO hInstance
+	SendMessageW(t->tooltip, TTM_UPDATETIPTEXT, 0, (LPARAM) (&ti));
+	SysFreeString(value.stringVal);
+
 	// TODO S_FALSE?
 	// don't crop to the visible area; we want the tooltip to hang off the edge if we're scrolled to the right (the real listview acts like this)
 	hr = rowColumnToClientRect(t, &m, rc, &r);

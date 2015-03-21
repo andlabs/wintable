@@ -50,7 +50,7 @@ struct tableModelNotificationParams {
 struct tableCellValue {
 	int type;
 	union {
-		BSTR *stringVal;
+		BSTR stringVal;
 		BOOL boolVal;
 		tableARGBColor color;
 	};

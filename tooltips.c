@@ -9,6 +9,7 @@ static void initTOOLINFOW(struct table *t, TOOLINFOW *ti)
 	ti->cbSize = sizeof (TOOLINFOW);
 	ti->hwnd = t->hwnd;
 	ti->uId = (UINT_PTR) (t->hwnd);
+	ti->hinst = t->tooltipHINSTANCE;
 }
 
 // TODO set font
@@ -16,6 +17,7 @@ HRESULT makeTooltip(struct table *t, HINSTANCE hInstance)
 {
 	TOOLINFOW ti;
 
+	t->tooltipHINSTANCE = hInstance;
 	// TODO verify extended styles and WS_POPUP
 	// TODO TTS_NOANIMATE and TTS_NOFADE? check list view control after changing transition animation
 	// TODO TTS_ALWAYSTIP? check list view control
@@ -25,13 +27,12 @@ HRESULT makeTooltip(struct table *t, HINSTANCE hInstance)
 		0, 0,
 		0, 0,		// TODO really?
 		// TODO really NULL control ID?
-		t->hwnd, NULL, hInstance, NULL);
+		t->hwnd, NULL, t->tooltipHINSTANCE, NULL);
 	if (t->tooltip == NULL)
 		return logLastError("error creating Table tooltip");
 	initTOOLINFOW(t, &ti);
 	// TODO figure out and explain why TTF_TRANSPARENT is necessary (if it is, anyway; it seems to be)
 	ti.uFlags = TTF_IDISHWND | TTF_SUBCLASS | TTF_TRANSPARENT;
-	ti.hinst = hInstance;		// TODO
 	// TODO only needed on wine?
 	ti.lpszText = L"initial text that you should not see";
 	if (SendMessageW(t->tooltip, TTM_ADDTOOL, 0, (LPARAM) (&ti)) == FALSE)
@@ -117,7 +118,6 @@ HANDLER(tooltipNotifyHandler)
 	// TODO verify cell type
 	initTOOLINFOW(t, &ti);
 	ti.lpszText = value.stringVal;
-	// TODO hInstance
 	SendMessageW(t->tooltip, TTM_UPDATETIPTEXT, 0, (LPARAM) (&ti));
 	SysFreeString(value.stringVal);
 

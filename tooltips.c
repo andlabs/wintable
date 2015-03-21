@@ -92,15 +92,28 @@ HANDLER(tooltipNotifyHandler)
 	RECT r;
 	tableCellValue value;
 	TOOLINFOW ti;
+	HDC dc;
+	HFONT newfont, prevfont;
 	HRESULT hr;
 
 	if (nmhdr->hwndFrom != t->tooltip)
 		return FALSE;
 	if (nmhdr->code != TTN_SHOW)
 		return FALSE;
-	hr = metrics(t, &m);
+
+	// not only do we need the Table's metrics, we also need a DC to determine if the current cell's text doesn't fit
+	dc = GetDC(t->hwnd);
+	if (dc != NULL)
+		;	// TODO
+	hr = selectFont(t, dc, &newfont, &prevfont);
 	if (hr != S_OK)
 		;	// TODO
+	hr = getMetrics(t, dc, FALSE, &m);
+	if (hr != S_OK)
+		;	// TODO
+
+	// figure out which cell we're on and whether it has text
+	// TODO just use t->tooltipMouseMoveRowColumn?
 	hr = lParamToRowColumn(t, &m, t->tooltipMouseMoveLPARAM, &rc);
 	if (hr != S_OK && hr != S_FALSE)
 		;	// TODO
@@ -112,15 +125,28 @@ HANDLER(tooltipNotifyHandler)
 	if (coltype != tableModelColumnString)
 		;	// TODO not a text cell
 
+	// get the cell's text
 	hr = tableModel_tableCellValue(t->model, rc.row, rc.column, &value);
 	if (hr != S_OK)
 		;	// TODO
 	// TODO verify cell type
+
+	// TODO figure out if the text is cropped
+	// we're done with the DC now
+	// TODO really error out if cleanup failed?
+	hr = deselectFont(dc, prevfont, newfont);
+	if (hr != S_OK)
+		;	// TODO
+	if (ReleaseDC(t->hwnd, dc) == 0)
+		;	// TODO
+
+	// set the tooltip's text
 	initTOOLINFOW(t, &ti);
 	ti.lpszText = value.stringVal;
 	SendMessageW(t->tooltip, TTM_UPDATETIPTEXT, 0, (LPARAM) (&ti));
 	SysFreeString(value.stringVal);
 
+	// put the tooltip in the right place
 	// TODO S_FALSE?
 	// don't crop to the visible area; we want the tooltip to hang off the edge if we're scrolled to the right (the real listview acts like this)
 	hr = rowColumnToClientRect(t, &m, rc, &r);
@@ -136,6 +162,8 @@ HANDLER(tooltipNotifyHandler)
 		;	// TODO
 	if (SetWindowPos(t->tooltip, NULL, r.left, r.top, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOZORDER) == 0)
 		;	// TODO
+
+	// and we're done
 	*lResult = (LRESULT) TRUE;
 	return TRUE;
 }

@@ -47,13 +47,30 @@ when the mouse hoves over a cell, the tooltip should show
 when the mouse hovers over another cell, the tooltip should hide [TODO? and the tooltip counter should restart]
 it doesn't matter if the tooltip is wider than the cell; once the mouse leaves the cell, the tooltip hides
 TODO xoff?
+TODO on mouse leave?
 */
 
-// TODO this seems rather hackish; is it necessary?
-// TODO if so, how do we handle captures? and mouse leaves?
+// TODO make sure this matches the above behavior
+// TODO rename t->tooltipMouseMoved to t->tooltipShown? and change its being set accordingly?
+// TODO how do we handle captures? and mouse leaves?
 EVENTHANDLER(tooltipMouseMoveHandler)
 {
+	BOOL lastMouseMoved;
+	struct rowcol rc;
+	HRESULT hr;
+
+	lastMouseMoved = t->tooltipMouseMoved;
+	t->tooltipMouseMoved = TRUE;
 	t->tooltipMouseMoveLPARAM = lParam;
+	hr = lParamToRowColumn(t, m, t->tooltipMouseMoveLPARAM, &rc);
+	if (hr != S_OK)
+		;	// TODO
+	if (lastMouseMoved)
+		// TODO make into a function
+		if (rc.row != t->tooltipMouseMoveRowColumn.row || rc.column != t->tooltipMouseMoveRowColumn.column)
+			// TODO will this reset the tooltip timer, if needed?
+			SendMessageW(t->tooltip, TTM_POP, 0, 0);
+	t->tooltipMouseMoveRowColumn = rc;
 	return TRUE;
 }
 

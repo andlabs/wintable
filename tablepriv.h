@@ -63,7 +63,9 @@ struct table {
 	LPARAM checkboxMouseMoveLPARAM;
 	BOOL checkboxMouseDown;
 	struct rowcol checkboxMouseDownRowColumn;
+	BOOL tooltipMouseMoved;
 	LPARAM tooltipMouseMoveLPARAM;
+	struct rowcol tooltipMouseMoveRowColumn;
 	struct tableAcc *firstAcc;
 };
 

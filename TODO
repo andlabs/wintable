@@ -9,7 +9,7 @@ TODO
 	- reproduce
 - checkbox columns don't clip to the column width
 - send standard notification codes
-- draw themed WS_EX_CLIENTEDGE (and WS_EX_WINDOWEDGE?)
+- draw themed WS_EX_CLIENTEDGE (and WS_EX_STATICEDGE and WS_EX_WINDOWEDGE?)
 - in-place tooltips for text columns
 - see if we can get tableRealloc() to not be destructive on failure and change every use of tableRealloc() to boot
 - make sure all arithmetic operations are strongly typed
@@ -26,3 +26,4 @@ TODO
 	- especially again after we add tooltips
 - https://msdn.microsoft.com/en-us/library/dd162593%28v=vs.85%29.aspx?
 - extern "C" table.h
+- handle WS_EX_LAYOUTRTL, WS_EX_RTLREADING?

@@ -14,7 +14,6 @@ struct drawCellParams {
 
 static HRESULT drawTextCell(struct table *t, HDC dc, struct drawCellParams *p, RECT *r, int textColor)
 {
-	WCHAR *text;
 	tableCellValue value;
 	HRESULT hr;
 

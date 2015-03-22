@@ -39,7 +39,7 @@ static HRESULT STDMETHODCALLTYPE nullModeltableUnsubscribe(tableModel *this, HWN
 
 static void STDMETHODCALLTYPE nullModeltableNotify(tableModel *this, tableModelNotificationParams *p)
 {
-	return E_NOTIMPL;
+	// TODO make some noise here
 }
 
 static intmax_t STDMETHODCALLTYPE nullModeltableColumnCount(tableModel *this)

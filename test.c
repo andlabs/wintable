@@ -2,9 +2,10 @@
 // this is a shortcut for including the windows stuff; TODO remove
 #include "tablepriv.h"
 
-// #qo LIBS: user32 kernel32 gdi32 comctl32 uxtheme ole32 oleaut32 oleacc uuid msimg32
-
+#include <stdio.h>
 #include "table.h"
+
+// #qo LIBS: user32 kernel32 gdi32 comctl32 uxtheme ole32 oleaut32 oleacc uuid msimg32
 
 #define panic(s) { fprintf(stderr, "%s: %I32d\n", s, GetLastError()); abort(); }
 

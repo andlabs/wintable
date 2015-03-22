@@ -9,6 +9,7 @@ intmax_t firstVisible(struct table *t)
 	return t->yOrigin;
 }
 
+// TODO should we do this when clicking the cell that's already focused?
 HRESULT ensureVisible(struct table *t, struct metrics *m, struct rowcol rc)
 {
 	RECT r;

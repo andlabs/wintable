@@ -118,6 +118,7 @@ extern HRESULT clientCoordToRowColumn(struct table *, struct metrics *, POINT, s
 extern HRESULT lParamToRowColumn(struct table *, struct metrics *, LPARAM, struct rowcol *);
 extern HRESULT rowColumnToClientRect(struct table *, struct metrics *, struct rowcol, RECT *);
 extern void toCellContentRect(struct table *, RECT *, LRESULT, intmax_t, intmax_t);
+extern BOOL rowcolEqual(struct rowcol, struct rowcol);
 
 // scroll.c
 struct scrollParams {

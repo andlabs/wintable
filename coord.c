@@ -171,3 +171,8 @@ void toCellContentRect(struct table *t, RECT *r, LRESULT xoff, intmax_t width, i
 		// TODO vertical center
 		r->bottom = r->top + height;
 }
+
+BOOL rowcolEqual(struct rowcol a, struct rowcol b)
+{
+	return (a.row == b.row) && (a.column == b.column);
+}

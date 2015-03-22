@@ -72,8 +72,7 @@ EVENTHANDLER(tooltipMouseMoveHandler)
 	if (hr != S_OK)
 		;	// TODO
 	if (lastMouseMoved)
-		// TODO make into a function
-		if (rc.row != t->tooltipMouseMoveRowColumn.row || rc.column != t->tooltipMouseMoveRowColumn.column)
+		if (!rowcolEqual(rc, t->tooltipMouseMoveRowColumn))
 			// TODO will this reset the tooltip timer, if needed?
 			SendMessageW(t->tooltip, TTM_POP, 0, 0);
 	t->tooltipMouseMoveRowColumn = rc;

@@ -126,7 +126,7 @@ EVENTHANDLER(checkboxMouseUpHandler)
 	if (hr == S_FALSE)		// not in checkbox cell
 		goto noToggle;
 	redrawHover = TRUE;
-	if (rc.row != t->checkboxMouseDownRowColumn.row || rc.column != t->checkboxMouseDownRowColumn.column)
+	if (!rowcolEqual(rc, t->checkboxMouseDownRowColumn))
 		goto noToggle;
 	if (lParamInRect(&rHoverCheckbox, lParam) == 0)
 		goto noToggle;

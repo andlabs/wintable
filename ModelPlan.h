@@ -223,6 +223,7 @@ DECLARE_INTERFACE_IID_(tableModel, IUnknown, 8f361d46-caab-489f-8d20-aeaaeaa9104
 	) PURE;
 
 	// TODO document
+	// TODO limit to just strings; change the name to either tableSetCellText or tableSetStringCellText (or something else)?
 	STDMETHOD(tableSetCellValue)(THIS_
 		intmax_t row,
 		intmax_t column,
@@ -230,6 +231,7 @@ DECLARE_INTERFACE_IID_(tableModel, IUnknown, 8f361d46-caab-489f-8d20-aeaaeaa9104
 	) PURE;
 
 	// TODO document
+	// TODO rename tableToggleBoolCell or tableToggleCellBool (or something else) or keep current name?
 	STDMETHOD(tableCellToggleBool)(THIS_
 		intmax_t row,
 		intmax_t column

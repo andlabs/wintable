@@ -3,6 +3,17 @@
 
 // TODO merge with some other files?
 
+// TODO which WM_xBUTTONDOWNs?
+// TODO move to the end of the file?
+EVENTHANDLER(mouseDownFocusHandler)
+{
+	// TODO other mouse buttons?
+	// don't check SetFocus()'s error (http://stackoverflow.com/questions/24073695/winapi-can-setfocus-return-null-without-an-error-because-thats-what-im-see)
+	// TODO will this generate WM_SETFOCUS?
+	SetFocus(t->hwnd);
+	return TRUE;
+}
+
 // TODO what happens if any of these functions fail?
 HANDLER(enableFocusHandlers)
 {

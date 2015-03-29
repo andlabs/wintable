@@ -1,10 +1,6 @@
 // 8 december 2014
 #include "tablepriv.h"
 
-// TODO make the API return error codes directly
-// TODO and adjust all the below functions to boot
-// TODO migrate in general
-
 static HRESULT addColumn(struct table *t, tableColumn *tc)
 {
 	tableColumn *newc;

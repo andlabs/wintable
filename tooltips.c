@@ -96,6 +96,7 @@ HANDLER(tooltipNotifyHandler)
 	HFONT newfont, prevfont;
 	SIZE extents;
 	HRESULT hr;
+	DWORD le;
 
 	if (nmhdr->hwndFrom != t->tooltip)
 		return FALSE;
@@ -162,10 +163,13 @@ HANDLER(tooltipNotifyHandler)
 	// now that we have the right rect, we can check if the text fits
 	if (extents.cx < (r.right - r.left))
 		;	// TODO does fit; no tooltip needed
-	// TODO ClientToScreen() instead?
-	// TODO this error handling is wrong
-	if (MapWindowRect(t->hwnd, NULL, &r) == 0)
-		;	// TODO
+	SetLastError(0);
+	if (MapWindowRect(t->hwnd, NULL, &r) == 0) {
+		le = GetLastError();
+		SetLastError(le);		// just to be safe
+		if (le != 0)
+			;	// TODO
+	}
 	if (SendMessageW(t->tooltip, TTM_ADJUSTRECT, (WPARAM) TRUE, (LPARAM) (&r)) == 0)
 		;	// TODO
 	if (SetWindowPos(t->tooltip, NULL, r.left, r.top, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOZORDER) == 0)

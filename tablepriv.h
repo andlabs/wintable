@@ -158,7 +158,6 @@ extern HRESULT headerAddColumn(struct table *, WCHAR *);
 extern HANDLER(headerNotifyHandler);
 
 // events.c
-extern EVENTHANDLER(mouseDownFocusHandler);
 extern HANDLER(eventHandlers);
 
 // select.c
@@ -211,6 +210,7 @@ extern const tableModel nullModel;
 extern HANDLER(modelNotificationHandler);
 
 // enablefocus.c
+extern EVENTHANDLER(mouseDownFocusHandler);
 extern HANDLER(enableFocusHandlers);
 
 // tooltips.c

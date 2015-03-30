@@ -58,7 +58,7 @@ TODO on mouse leave?
 
 // TODO make sure this matches the above behavior
 // TODO rename t->tooltipMouseMoved to t->tooltipShown? and change its being set accordingly?
-// TODO how do we handle captures? and mouse leaves?
+// TODO how do we handle captures? and mouse leaves? and scrolls?
 EVENTHANDLER(tooltipMouseMoveHandler)
 {
 	BOOL lastMouseMoved;
@@ -116,6 +116,7 @@ HANDLER(tooltipNotifyHandler)
 
 	// figure out which cell we're on and whether it has text
 	// TODO just use t->tooltipMouseMoveRowColumn?
+	// TODO would doing so break with scrolling?
 	hr = lParamToRowColumn(t, &m, t->tooltipMouseMoveLPARAM, &rc);
 	if (hr != S_OK && hr != S_FALSE)
 		;	// TODO

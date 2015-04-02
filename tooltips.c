@@ -43,8 +43,9 @@ HRESULT makeTooltip(struct table *t, HINSTANCE hInstance)
 // TODO really error out here? it's cleanup...
 HRESULT destroyTooltip(struct table *t)
 {
-	if (DestroyWindow(t->tooltip) == 0)
-		return logLastError("error destroying Table tooltip");
+	// the tooltip is already destroyed by this point
+	// seemingly, anyway (TODO)
+	// see http://stackoverflow.com/questions/29419291/is-my-subclassing-common-controls-tooltip-destroying-itself-in-wm-destroy-before
 	return S_OK;
 }
 

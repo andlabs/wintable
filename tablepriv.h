@@ -67,6 +67,7 @@ struct table {
 	BOOL tooltipMouseMoved;
 	LPARAM tooltipMouseMoveLPARAM;
 	struct rowcol tooltipMouseMoveRowColumn;
+	BOOL cancelTooltip;
 	struct tableAcc *firstAcc;
 };
 

@@ -28,3 +28,4 @@ TODO
 - extern "C" table.h
 - handle WS_EX_LAYOUTRTL, WS_EX_RTLREADING?
 - use uxtheme APIs to draw the control in a list view style?
+- comctl6 manifest

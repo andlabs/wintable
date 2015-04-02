@@ -12,6 +12,32 @@ static void initTOOLINFOW(struct table *t, TOOLINFOW *ti)
 	ti->hinst = t->tooltipHINSTANCE;
 }
 
+// we need to handle WM_WINDOWPOSCHANGED to forcibly hide unwanted tooltips
+// this is because the system indiscriminately shows tooltips after a TTN_SHOW (all we can do is change the tooltip size, position, text, etc.)
+// as for what we're doing, this is what .net does! see http://referencesource.microsoft.com/#System.Windows.Forms/winforms/Managed/System/WinForms/ToolTip.cs,2137
+// (note that NativeWindow.DefWndProc() is really DefSubclassProc(), not DefWindowProc(); the .net tooltip is really just a wrapper around the comctl32 tooltip)
+static LRESULT CALLBACK tooltipSubclassProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam, UINT_PTR uIdSubclass, DWORD_PTR data)
+{
+	struct table *t = (struct table *) data;
+
+	switch (uMsg) {
+	case WM_WINDOWPOSCHANGED:
+		if (t->cancelTooltip) {
+			t->cancelTooltip = FALSE;
+			ShowWindow(t->tooltip, SW_HIDE);
+			return 0;
+		}
+		// otherwise defer to DefSubclassProc()
+		break;
+	case WM_NCDESTROY:
+		// TODO what to return here?
+		if (RemoveWindowSubclass(hwnd, tooltipSubclassProc, uIdSubclass) == FALSE)
+			logLastError("error removing Table tooltip subclass in tooltipSubclassProc()");
+		// fall out to DefSubclassProc()
+	}
+	return DefSubclassProc(hwnd, uMsg, wParam, lParam);
+}
+
 // TODO set font
 HRESULT makeTooltip(struct table *t, HINSTANCE hInstance)
 {
@@ -37,6 +63,8 @@ HRESULT makeTooltip(struct table *t, HINSTANCE hInstance)
 	ti.lpszText = L"initial text that you should not see";
 	if (SendMessageW(t->tooltip, TTM_ADDTOOL, 0, (LPARAM) (&ti)) == FALSE)
 		return logLastError("error setting up Table tooltip");
+	if (SetWindowSubclass(t->tooltip, tooltipSubclassProc, 0, (DWORD_PTR) t) == FALSE)
+		return logLastError("error subclassing Table tooltip");
 	return S_OK;
 }
 

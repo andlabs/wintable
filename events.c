@@ -22,6 +22,10 @@ static const eventhandlerfunc mouseMoveHandlers[] = {
 	NULL,
 };
 
+static const eventhandlerfunc mouseLeaveHandlers[] = {
+	NULL,
+};
+
 static const eventhandlerfunc lbuttonDownHandlers[] = {
 	mouseDownFocusHandler,
 	mouseDownSelectHandler,
@@ -65,6 +69,7 @@ HANDLER(eventHandlers)
 	eventHandler(WM_KEYUP, keyUpHandlers, 0)
 	eventHandler(WM_CHAR, charHandlers, 0)
 	eventHandler(WM_MOUSEMOVE, mouseMoveHandlers, 0)
+	eventHandler(WM_MOUSELEAVE, mouseLeaveHandlers, 0)
 	eventHandler(WM_LBUTTONDOWN, lbuttonDownHandlers, 0)
 	eventHandler(WM_LBUTTONUP, lbuttonUpHandlers, 0)
 	eventHandler(WM_CAPTURECHANGED, captureChangedHandlers, 0)

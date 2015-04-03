@@ -2,6 +2,9 @@
 #include "tablepriv.h"
 
 // TODO rename to tooltip.c?
+// TODO janky behavior:
+// - XP, 7 - weird growing/shrinking behavior involving the size of the previous tooltip
+// - 7 - cancelling code doesn't work anymore?
 
 static void initTOOLINFOW(struct table *t, TOOLINFOW *ti)
 {
@@ -147,15 +150,17 @@ HANDLER(tooltipNotifyHandler)
 	// TODO just use t->tooltipMouseMoveRowColumn?
 	// TODO would doing so break with scrolling?
 	hr = lParamToRowColumn(t, &m, t->tooltipMouseMoveLPARAM, &rc);
-	if (hr != S_OK && hr != S_FALSE)
+	if (hr != S_OK)
 		;	// TODO
-	if (hr != S_FALSE)	// not in a cell
-		;	// TODO not in a cell
+	if (rc.row == -1 || rc.column == -1)
+		// not in a cell; no tooltip needed
+		goto cancel;
 	hr = tableModel_tableColumnType(t->model, rc.column, &coltype);
 	if (hr != S_OK)
 		;	// TODO
 	if (coltype != tableModelColumnString)
-		;	// TODO not a text cell
+		// not a text cell; no tooltip needed
+		goto cancel;
 
 	// get the cell's text
 	hr = tableModel_tableCellValue(t->model, rc.row, rc.column, &value);
@@ -186,26 +191,46 @@ HANDLER(tooltipNotifyHandler)
 	// TODO S_FALSE?
 	// don't crop to the visible area; we want the tooltip to hang off the edge if we're scrolled to the right (the real listview acts like this)
 	hr = rowColumnToClientRect(t, &m, rc, &r);
-	if (hr != S_OK)
-		;	// TODO
+	if (hr != S_OK) {
+		logHRESULT("error getting cell rect for positioning Table tooltip; will show in default place instead", hr);
+		goto giveUpPos;
+	}
 	// TODO split into its own function
 	toCellContentRect(t, &r, 0, 0, m.textHeight);
 	// now that we have the right rect, we can check if the text fits
+	// TODO how does this respond to scrolling?
 	if (extents.cx < (r.right - r.left))
-		;	// TODO does fit; no tooltip needed
+		// does fit; no tooltip needed
+		goto cancel;
 	SetLastError(0);
 	if (MapWindowRect(t->hwnd, NULL, &r) == 0) {
 		le = GetLastError();
 		SetLastError(le);		// just to be safe
-		if (le != 0)
-			;	// TODO
+		if (le != 0) {
+			logLastError("error figuring out where on screen the Table tooltip text's top left corner is; will show in default place instead");
+			goto giveUpPos;
+		}
 	}
 	if (SendMessageW(t->tooltip, TTM_ADJUSTRECT, (WPARAM) TRUE, (LPARAM) (&r)) == 0)
-		;	// TODO
-	if (SetWindowPos(t->tooltip, NULL, r.left, r.top, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOZORDER) == 0)
-		;	// TODO
+		;	// TODO wait for wine bug
+	if (SetWindowPos(t->tooltip, NULL, r.left, r.top, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOZORDER) == 0) {
+		logLastError("error setting inline tooltip window position; will show in default place instead");
+		goto giveUpPos;
+	}
 
 	// and we're done
 	*lResult = (LRESULT) TRUE;
 	return TRUE;
+
+cancel:
+	// don't show the tooltip
+	t->cancelTooltip = TRUE;
+	*lResult = (LRESULT) TRUE;
+	return TRUE;
+
+giveUpPos:
+	// handle positioning errors robustly by not bothering
+	// show the tooltip in the default position
+	// it'll look wrong but it's sensible!
+	return FALSE;
 }

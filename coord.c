@@ -158,8 +158,6 @@ invisible:
 	return S_FALSE;
 }
 
-// TODO idealCoordToRowColumn/rowColumnToIdealCoord?
-
 void toCellContentRect(struct table *t, RECT *r, LRESULT xoff, intmax_t width, intmax_t height)
 {
 	if (xoff == 0)

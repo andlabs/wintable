@@ -22,10 +22,9 @@ static HRESULT drawTextCell(struct table *t, HDC dc, struct drawCellParams *p, R
 		return logLastError("error setting Table cell text color");
 	if (SetBkMode(dc, TRANSPARENT) == 0)
 		return logLastError("error setting transparent text drawing mode for Table cell");
-	hr = tableModel_tableCellValue(t->model, p->row, p->column, &value);
+	hr = tableModel_tableCellValue(t->model, p->row, p->column, tableModelColumnString, &value);
 	if (hr != S_OK)
 		return logHRESULT("error getting Table cell text in drawTextCell()", hr);
-	// TODO verify cell type
 	if (DrawTextExW(dc, value.stringVal, -1, r, DT_END_ELLIPSIS | DT_LEFT | DT_NOPREFIX | DT_SINGLELINE, NULL) == 0)
 		return logLastError("error drawing Table cell text");
 	SysFreeString(value.stringVal);
@@ -55,10 +54,9 @@ static HRESULT drawCheckboxCell(struct table *t, HDC dc, struct drawCellParams *
 
 	toCellContentRect(t, r, p->xoff, p->m->checkboxWidth, p->m->checkboxHeight);
 	cbState = 0;
-	hr = tableModel_tableCellValue(t->model, p->row, p->column, &value);
+	hr = tableModel_tableCellValue(t->model, p->row, p->column, tableModelColumnBool, &value);
 	if (hr != S_OK)
 		return logHRESULT("error getting Table cell text in drawCheckboxCell()", hr);
-	// TODO verify value type
 	hr = tableModel_tableIsColumnMutable(t->model, p->column);
 	if (hr != S_OK && hr != S_FALSE)
 		return logHRESULT("error determining whether Table model column is mutable in drawCheckboxCell()", hr);

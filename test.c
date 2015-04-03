@@ -284,7 +284,7 @@ intmax_t STDMETHODCALLTYPE testmodeltableRowCount(tableModel *this)
 	return rowcount;
 }
 
-HRESULT STDMETHODCALLTYPE testmodeltableCellValue(tableModel *this, intmax_t row, intmax_t column, tableCellValue *value)
+HRESULT STDMETHODCALLTYPE testmodeltableCellValue(tableModel *this, intmax_t row, intmax_t column, int expectedColumnType, tableCellValue *value)
 {
 	WCHAR str[100];
 
@@ -297,6 +297,8 @@ HRESULT STDMETHODCALLTYPE testmodeltableCellValue(tableModel *this, intmax_t row
 		return E_INVALIDARG;
 	switch (column) {
 	case 0:
+		if (expectedColumnType != tableModelColumnString)
+			return tableModelErrorWrongColumnType;
 		_snwprintf(str, 100, L"mainwin (%d,%d)", (int) row, (int) column);
 		value->stringVal = SysAllocString(str);
 		if (value->stringVal == NULL)
@@ -306,10 +308,14 @@ HRESULT STDMETHODCALLTYPE testmodeltableCellValue(tableModel *this, intmax_t row
 	case 1:
 		// TODO
 	case 2:
+		if (expectedColumnType != tableModelColumnBool)
+			return tableModelErrorWrongColumnType;
 		value->type = tableModelColumnBool;
 		value->boolVal = checkboxstates[row];
 		return S_OK;
 	case 3:
+		if (expectedColumnType != tableModelColumnBool)
+			return tableModelErrorWrongColumnType;
 		value->type = tableModelColumnBool;
 		value->boolVal = ((row / 3) % 2) == 1;
 		return S_OK;

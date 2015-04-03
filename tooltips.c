@@ -5,6 +5,7 @@
 // TODO janky behavior:
 // - XP, 7 - weird growing/shrinking behavior involving the size of the previous tooltip
 // - 7 - cancelling code doesn't work anymore?
+// - wine - "fully visible" test seems to always fail (tooltip always shown)
 
 static void initTOOLINFOW(struct table *t, TOOLINFOW *ti)
 {
@@ -120,7 +121,6 @@ HANDLER(tooltipNotifyHandler)
 	NMHDR *nmhdr = (NMHDR *) lParam;
 	struct metrics m;
 	struct rowcol rc;
-	int coltype;
 	RECT r;
 	tableCellValue value;
 	TOOLINFOW ti;
@@ -155,18 +155,14 @@ HANDLER(tooltipNotifyHandler)
 	if (rc.row == -1 || rc.column == -1)
 		// not in a cell; no tooltip needed
 		goto cancel;
-	hr = tableModel_tableColumnType(t->model, rc.column, &coltype);
-	if (hr != S_OK)
-		;	// TODO
-	if (coltype != tableModelColumnString)
-		// not a text cell; no tooltip needed
-		goto cancel;
 
 	// get the cell's text
-	hr = tableModel_tableCellValue(t->model, rc.row, rc.column, &value);
+	hr = tableModel_tableCellValue(t->model, rc.row, rc.column, tableModelColumnString, &value);
+	if (hr == tableModelErrorWrongColumnType)
+		// not a text cell; no tooltip needed
+		goto cancel;
 	if (hr != S_OK)
 		;	// TODO
-	// TODO verify cell type
 
 	// get the size of the text now; we'll check it later
 	// TODO find a way to use the same method DrawTextExW() uses (and doesn't require SysStringLen())

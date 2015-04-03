@@ -57,7 +57,7 @@ static intmax_t STDMETHODCALLTYPE nullModeltableRowCount(tableModel *this)
 	return 0;
 }
 
-static HRESULT STDMETHODCALLTYPE nullModeltableCellValue(tableModel *this, intmax_t row, intmax_t column, tableCellValue *value)
+static HRESULT STDMETHODCALLTYPE nullModeltableCellValue(tableModel *this, intmax_t row, intmax_t column, int expectedColumnType, tableCellValue *value)
 {
 	return E_NOTIMPL;
 }

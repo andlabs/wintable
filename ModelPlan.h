@@ -171,18 +171,24 @@ DECLARE_INTERFACE_IID_(tableModel, IUnknown, 8f361d46-caab-489f-8d20-aeaaeaa9104
 	STDMETHOD_(intmax_t, tableRowCount)(THIS) PURE;
 
 	// tableCellValue() returns the value of a given tableModel cell.
+	// It also doubles as cell type checking by allowing you to
+	// pass in the cell type you expect to recceive bak.
 	// It should return S_OK on success or a COM error code
 	// on failure; in particular, it should return:
 	// - E_POINTER if value is NULL
 	// - E_INVALIDARG if row or column is out of range
+	// - tableModelErrorWrongColumnType if the given column
+	//     type doesn't match the cell's actual column type
 	// On failure, value->type will be set to tableModelColumnInvalid.
 	// On success, value->type will be set to the column
 	// type and the appropriate field for that type will be
 	// set to the actual value.
 	// TODO image cells
+	// TODO provide a way to say "don't care what the type is"?
 	STDMETHOD(tableCellValue)(THIS_
 		intmax_t row,
 		intmax_t column,
+		int expectedColumnType,
 		tableCellValue *value
 	) PURE;
 
@@ -272,8 +278,8 @@ DECLARE_INTERFACE_IID_(tableModel, IUnknown, 8f361d46-caab-489f-8d20-aeaaeaa9104
 #define tableModel_tableRowCount(This)	\
     ( (This)->lpVtbl -> tableRowCount(This) ) 
 
-#define tableModel_tableCellValue(This,row,column,value)	\
-    ( (This)->lpVtbl -> tableCellValue(This,row,column,value) ) 
+#define tableModel_tableCellValue(This,row,column,expected,value)	\
+    ( (This)->lpVtbl -> tableCellValue(This,row,column,expected,value) ) 
 
 #define tableModel_tableDrawImageCell(This,row,column,hdc,rDest)	\
     ( (This)->lpVtbl -> tableDrawImageCell(This,row,column,hdc,rDest) ) 

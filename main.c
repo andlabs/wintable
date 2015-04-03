@@ -71,13 +71,27 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 // TODO is this the best way to store the DLL hInstance?
 static HINSTANCE hInstance;
 
+#define wantedICCClasses ( \
+	ICC_LISTVIEW_CLASSES |		/* table headers */		\
+	ICC_BAR_CLASSES |			/* tooltips */			\
+	0)
+
 // TODO WINAPI or some equivalent instead of __stdcall?
-// TODO initialize common controls here?
+// TODO return HRESULT and store the ATOM in a parameter
+// TODO provide a reserved parameter for configuration
 __declspec(dllexport) ATOM __stdcall tableInit(void)
 {
+	INITCOMMONCONTROLSEX icc;
 	WNDCLASSW wc;
 	ATOM a;
 
+	ZeroMemory(&icc, sizeof (INITCOMMONCONTROLSEX));
+	icc.dwSize = sizeof (INITCOMMONCONTROLSEX);
+	icc.dwICC = wantedICCClasses;
+	if (InitCommonControlsEx(&icc) == 0) {
+		logLastError("error initializing Common Controls library for Table");
+		return 0;
+	}
 	ZeroMemory(&wc, sizeof (WNDCLASSW));
 	wc.lpszClassName = tableWindowClass;
 	wc.lpfnWndProc = tableWndProc;

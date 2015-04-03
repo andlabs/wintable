@@ -147,7 +147,6 @@ static HRESULT drawCell(struct table *t, HDC dc, struct drawCellParams *p)
 	return S_OK;
 }
 
-// TODO use cliprect
 // TODO abort whole drawing if one cell fails?
 static HRESULT draw(struct table *t, HDC dc, RECT cliprect)
 {

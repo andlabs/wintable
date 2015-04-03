@@ -11,7 +11,6 @@ static HRESULT lParamToCheckbox(struct table *t, struct metrics *m, LPARAM lPara
 	int coltype;
 	HRESULT hr;
 
-	// TODO does this make sure we're not in the client rect?
 	hr = lParamToRowColumn(t, m, lParam, rc);
 	if (hr != S_OK)
 		return hr;
@@ -41,7 +40,6 @@ static HRESULT lParamToCheckbox(struct table *t, struct metrics *m, LPARAM lPara
 EVENTHANDLER(checkboxMouseMoveHandler)
 {
 	// TODO see http://stackoverflow.com/a/28731761/3408572
-	// TODO when rewriting, handle captures/the possibility that the mouse may not be in the client rect
 
 	struct rowcol rc;
 	RECT rCell, rCheckbox;
@@ -73,7 +71,7 @@ EVENTHANDLER(checkboxMouseMoveHandler)
 	return TRUE;
 }
 
-// TODO if we click on a partially invisible checkbox, should the mouse be moved up along with the scroll?
+// TODO if we click on a partially invisible checkbox, should the mouse be moved along with the scroll? otherwise the mouse will fall out of the checkbox before we ever get here
 // TODO what happens if any of these fail?
 EVENTHANDLER(checkboxMouseDownHandler)
 {

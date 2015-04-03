@@ -4,8 +4,9 @@
 // TODO rename to tooltip.c?
 // TODO janky behavior:
 // - XP, 7 - weird growing/shrinking behavior involving the size of the previous tooltip
-// - 7 - cancelling code doesn't work anymore?
-// - wine - "fully visible" test seems to always fail (tooltip always shown)
+// - XP, 7 - still a flash of a tooltip when cancelling
+// - wine - cancelling code doesn't work
+// TODO do we need to move the resizing logic into WM_WINDOWPOSCHANGING like the .net one does?
 
 static void initTOOLINFOW(struct table *t, TOOLINFOW *ti)
 {
@@ -26,11 +27,16 @@ static LRESULT CALLBACK tooltipSubclassProc(HWND hwnd, UINT uMsg, WPARAM wParam,
 
 	switch (uMsg) {
 	case WM_WINDOWPOSCHANGED:
+printf("in windowposchanged: %d\n", t->cancelTooltip);
 		if (t->cancelTooltip) {
-			t->cancelTooltip = FALSE;
+printf("cancelling tooltip\n");
+			// don't reset t->cancelTooltip here
+			// some systems (Windows 7, for instance), will send multiple WM_WINDOWPOSCHANGED, so our code is rendered useless there
+			// instead, only set t->cancelTooltip in the TTN_SHOW handler
 			ShowWindow(t->tooltip, SW_HIDE);
 			return 0;
 		}
+printf("not cancelling tooltip\n");
 		// otherwise defer to DefSubclassProc()
 		break;
 	case WM_NCDESTROY:
@@ -215,6 +221,7 @@ HANDLER(tooltipNotifyHandler)
 	}
 
 	// and we're done
+	t->cancelTooltip = FALSE;
 	*lResult = (LRESULT) TRUE;
 	return TRUE;
 
@@ -228,5 +235,6 @@ giveUpPos:
 	// handle positioning errors robustly by not bothering
 	// show the tooltip in the default position
 	// it'll look wrong but it's sensible!
+	t->cancelTooltip = FALSE;
 	return FALSE;
 }

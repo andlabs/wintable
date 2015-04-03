@@ -34,15 +34,17 @@ static HRESULT addColumn(struct table *t, tableColumn *tc)
 	// (TODO when — if — adding autoresize, figure this one out)
 }
 
-// TODO what if m is NULL?
 // TODO what happens if unsubscribing fails?
 // TODO should we QueryInterface() or just assume this is a tableModel?
 // TODO (related to unsubscribing fails, but not entirely covered by it) what should the model be set to on failure?
 // TODO update selection
+// TODO ...actually should failure to do anything other than set the model return some sort of error value? in fact, should table unsubscribe even be allowed to fail?
 static HRESULT setModel(struct table *t, tableModel *m)
 {
 	HRESULT hr;
 
+	if (m == NULL)
+		return E_INVALIDARG;
 	if (t->model != &nullModel) {
 		hr = tableModel_tableUnsubscribe(t->model, t->hwnd);
 		if (hr != S_OK)
@@ -56,8 +58,7 @@ static HRESULT setModel(struct table *t, tableModel *m)
 		tableModel_Release(t->model);
 		return logHRESULT("error subscribing to new Table model in setModel()", hr);
 	}
-	// TODO updateAll()
-	return S_OK;
+	return updateAll(t);
 }
 
 // TODO what happens if any of these fail?
@@ -100,7 +101,6 @@ LRESULT notify(struct table *t, UINT code, intmax_t row, intmax_t column, uintpt
 	nm.nmhdr.code = code;
 	nm.row = row;
 	nm.column = column;
-//TODO	nm.columnType = t->columnTypes[nm.column];
 	nm.data = data;
 	// TODO check for error from GetParent()?
 	return SendMessageW(GetParent(t->hwnd), WM_NOTIFY, (WPARAM) (nm.nmhdr.idFrom), (LPARAM) (&nm));

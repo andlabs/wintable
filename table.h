@@ -18,6 +18,7 @@ enum {
 	// wParam - 0
 	// lParam - pointer to tableModel to set model
 	// return - HRESULT error code cast to LRESULT; S_OK on success
+	// if the new model is NULL, E_INVALIDARG is returned and the model is not changed
 	tableSetModel,
 	// wParam - 0
 	// lParam - pointer to tableModelNotificationParams struct
@@ -38,7 +39,6 @@ struct tableNM {
 	NMHDR nmhdr;
 	intmax_t row;
 	intmax_t column;
-	int columnType;
 	uintptr_t data;
 };
 

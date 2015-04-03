@@ -187,7 +187,6 @@ static HRESULT draw(struct table *t, HDC dc, RECT cliprect)
 
 	// see http://blogs.msdn.com/b/oldnewthing/archive/2003/07/29/54591.aspx
 	// TODO figure out why the t->headerHeight stuff still works here
-	// TODO see how we can adapt this into a firstVisible()
 	startRow = cliprect.top / p.height;
 	if (startRow < 0)
 		startRow = 0;

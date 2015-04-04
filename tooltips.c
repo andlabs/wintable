@@ -6,6 +6,7 @@
 // - XP, 7 - weird growing/shrinking behavior involving the size of the previous tooltip
 // - XP, 7 - still a flash of a tooltip when cancelling
 // - wine - cancelling code doesn't work
+// - XP - moving outt o a non-text column sometimes has weird fade outs; moving back from a non-text column (but not from outside) does nothing
 // TODO do we need to move the resizing logic into WM_WINDOWPOSCHANGING like the .net one does?
 // TODO tooltips are supposed to be popped when:
 // - vertically scrolling

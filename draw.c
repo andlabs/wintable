@@ -67,12 +67,10 @@ static HRESULT drawCheckboxCell(struct table *t, HDC dc, struct drawCellParams *
 	if (t->checkboxMouseDown)
 		if (p->row == t->checkboxMouseDownRowColumn.row && p->column == t->checkboxMouseDownRowColumn.column)
 			cbState |= checkboxStatePushed;
-	if (t->checkboxMouseMoved) {
+	if (t->mouseMoved) {
 		// t->checkboxMouseMoveLPARAM is unadjusted
-		// TODO do it in the WM_MOUSEMOVE handler instead?
-		// TODO just do the cbState logic there instead?
-		pt.x = GET_X_LPARAM(t->checkboxMouseMoveLPARAM);
-		pt.y = GET_Y_LPARAM(t->checkboxMouseMoveLPARAM);
+		pt.x = GET_X_LPARAM(t->mouseMoveLPARAM);
+		pt.y = GET_Y_LPARAM(t->mouseMoveLPARAM);
 		hr = adjustPoint(t, p->m, &pt);
 		if (hr != S_OK)
 			return hr;

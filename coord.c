@@ -53,6 +53,7 @@ HRESULT adjustPoint(struct table *t, struct metrics *m, POINT *pt)
 	return S_OK;
 }
 
+// TODO return S_FALSE if not in a cell instead of setting row and column to -1?
 HRESULT clientCoordToRowColumn(struct table *t, struct metrics *m, POINT pt, struct rowcol *rc)
 {
 	RECT client;		// don't change m

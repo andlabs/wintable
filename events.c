@@ -8,9 +8,10 @@
 // or should we? it'd make some calculations later easier, and we're not going to update the hover state when scrolling anyway (real list view doesn't) TODO
 // TODO actually no, hot labels aren't affeted when scrolling, but tooltips are popped when scrolling
 
-EVENTHANDLER(generalMouseMoveHandler)
+// TODO rename to generalXxx everywhere
+EVENTHANDLER(globalMouseMoveHandler)
 {
-	POINT pt;
+	HRESULT hr;
 
 	t->lastMouseMoved = t->mouseMoved;
 	t->lastMouseMoveLPARAM = t->mouseMoveLPARAM;
@@ -20,9 +21,7 @@ EVENTHANDLER(generalMouseMoveHandler)
 	// when we capture the mouse, _TrackMouseEvent() won't work
 	// (see http://blogs.msdn.com/b/oldnewthing/archive/2010/12/06/10100644.aspx)
 	// for this case, we have to do the check ourselves
-	pt.x = GET_X_LPARAM(t->mouseMoveLPARAM);
-	pt.y = GET_Y_LPARAM(t->mouseMoveLPARAM);
-	if (PtInRect(&(m->client), pt) == 0)
+	if (lParamInRect(&(m->client), t->mouseMoveLPARAM) == 0)
 		t->mouseMoved = FALSE;
 
 	if (!t->lastMouseMoved) {
@@ -34,7 +33,18 @@ EVENTHANDLER(generalMouseMoveHandler)
 		tm.hwndTrack = t->hwnd;
 		if (_TrackMouseEvent(&tm) == 0)
 			;	// TODO
+	} else {
+		// redraw the old cell unconditionally
+		hr = redrawCellAtLPARAM(t, m, t->lastMouseMoveLPARAM);
+		if (hr != S_OK)
+			;	// TODO
 	}
+
+	// redraw the new cell unconditionally
+	// TODO optimize the redrawing somehow?
+	hr = redrawCellAtLPARAM(t, m, t->mouseMoveLPARAM);
+	if (hr != S_OK)
+		;	// TODO
 
 	// TODO really?
 	return TRUE;
@@ -65,8 +75,7 @@ static const eventhandlerfunc charHandlers[] = {
 };
 
 static const eventhandlerfunc mouseMoveHandlers[] = {
-	globalMosueMoveHandler,
-	checkboxMouseMoveHandler,
+	globalMouseMoveHandler,
 	tooltipMouseMoveHandler,
 	NULL,
 };

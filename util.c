@@ -61,3 +61,25 @@ BOOL lParamInRect(const RECT *r, LPARAM lParam)
 	pt.y = GET_Y_LPARAM(lParam);
 	return PtInRect(r, pt);
 }
+
+// TODO find a better place for this
+HRESULT redrawCellAtLPARAM(struct table *t, struct metrics *m, LPARAM lParam)
+{
+	struct rowcol rc;
+	RECT r;
+	HRESULT hr;
+
+	hr = lParamToRowColumn(t, m, lParam, &rc);
+	if (hr != S_OK)
+		return hr;
+	if (rc.row == -1 || rc.column == -1)		// not in a cell
+		return S_OK;
+	hr = rowColumnToClientRect(t, m, rc, &r);
+	if (hr != S_OK && hr != S_FALSE)
+		return hr;
+	if (hr == S_FALSE)					// nothing to draw
+		return S_OK;
+	if (InvalidateRect(t->hwnd, &r, TRUE) == 0)
+		return logLastError("error redrawing Table cell in redrawCellAtLPARAM()");
+	return S_OK;
+}

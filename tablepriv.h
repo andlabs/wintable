@@ -65,8 +65,6 @@ struct table {
 	BOOL lastMouseMoved;
 	LPARAM lastMouseMoveLPARAM;
 
-	BOOL checkboxMouseMoved;
-	LPARAM checkboxMouseMoveLPARAM;
 	BOOL checkboxMouseDown;
 	struct rowcol checkboxMouseDownRowColumn;
 	HINSTANCE tooltipHINSTANCE;
@@ -101,6 +99,7 @@ extern BOOL runEventHandlers(const eventhandlerfunc[], struct table *, struct me
 extern HRESULT selectFont(struct table *, HDC, HFONT *, HFONT *);
 extern HRESULT deselectFont(HDC, HFONT, HFONT);
 extern BOOL lParamInRect(const RECT *, LPARAM);
+extern HRESULT redrawCellAtLPARAM(struct table *, struct metrics *, LPARAM);
 
 // metrics.c
 struct metrics {

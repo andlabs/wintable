@@ -36,40 +36,9 @@ static HRESULT lParamToCheckbox(struct table *t, struct metrics *m, LPARAM lPara
 	return S_OK;
 }
 
-// TODO what happens if any of these functions fail?
-EVENTHANDLER(checkboxMouseMoveHandler)
-{
-	// TODO see http://stackoverflow.com/a/28731761/3408572
-
-	struct rowcol rc;
-	RECT rCell, rCheckbox;
-	HRESULT hr;
-
-	// we don't need to do any sort of logic to figure out what specifically to draw here
-	// the drawing code will figure that out
-	// we simply need to mark the old and new cells for redraw
-	if (t->checkboxMouseMoved) {		// mark the previous cell in case we've changed cells
-		// TODO mutable only?
-		hr = lParamToCheckbox(t, m, t->checkboxMouseMoveLPARAM, &rc, &rCell, &rCheckbox, FALSE);
-		if (hr != S_OK && hr != S_FALSE)
-			;	// TODO
-		if (hr != S_FALSE)
-			if (InvalidateRect(t->hwnd, &rCell, TRUE) == 0)
-				;	// TODO
-	}
-	t->checkboxMouseMoved = TRUE;
-	t->checkboxMouseMoveLPARAM = lParam;
-	// TODO see if we need to get rid of code duplication here
-	// TODO mutable only?
-	hr = lParamToCheckbox(t, m, t->checkboxMouseMoveLPARAM, &rc, &rCell, &rCheckbox, FALSE);
-	if (hr != S_OK && hr != S_FALSE)
-		;	// TODO
-	if (hr != S_FALSE)
-		if (InvalidateRect(t->hwnd, &rCell, TRUE) == 0)
-			;	// TODO
-	// TODO return FALSE if hr == S_FALSE for both?
-	return TRUE;
-}
+// no need to handle checkbox mouse move specially
+// the stuff in the global mouse move handler is enough
+// the logic to figure out how to draw the hovered checkbox is in the drawing code itself (drawCheckboxCell() in draw.c)
 
 // TODO if we click on a partially invisible checkbox, should the mouse be moved along with the scroll? otherwise the mouse will fall out of the checkbox before we ever get here
 // TODO what happens if any of these fail?

@@ -46,6 +46,12 @@ printf("cancelling tooltip\n");
 printf("not cancelling tooltip\n");
 		// otherwise defer to DefSubclassProc()
 		break;
+	// for whatever reason, even with TTF_TRANSPARENT, hovering the mouse over the tooltip triggers WM_MOUSELEAVE
+	// blindly ignore all tooltip mouse action to fix that
+	// TODO there needs to be a better way; the .net one doesn't do this (or doesn't seem to, at least not directly)
+	// TODO why isn't TTF_TRANSPARENT doing this?
+	case WM_NCHITTEST:
+		return HTTRANSPARENT;
 	case WM_NCDESTROY:
 		// TODO what to return here?
 		if (RemoveWindowSubclass(hwnd, tooltipSubclassProc, uIdSubclass) == FALSE)

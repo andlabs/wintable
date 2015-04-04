@@ -94,12 +94,16 @@ HRESULT destroyTooltip(struct table *t)
 	return S_OK;
 }
 
+void popTooltip(struct table *t)
+{
+	SendMessageW(t->tooltip, TTM_POP, 0, 0);
+}
+
 /* comctl32 listview behavior notes
 when the mouse hoves over a cell, the tooltip should show
 when the mouse hovers over another cell, the tooltip should hide [TODO? and the tooltip counter should restart]
 it doesn't matter if the tooltip is wider than the cell; once the mouse leaves the cell, the tooltip hides
 TODO xoff?
-TODO on mouse leave?
 */
 
 // TODO make sure this matches the above behavior
@@ -120,8 +124,14 @@ EVENTHANDLER(tooltipMouseMoveHandler)
 	if (lastMouseMoved)
 		if (!rowcolEqual(rc, t->tooltipMouseMoveRowColumn))
 			// TODO will this reset the tooltip timer, if needed?
-			SendMessageW(t->tooltip, TTM_POP, 0, 0);
+			popTooltip(t);
 	t->tooltipMouseMoveRowColumn = rc;
+	return TRUE;
+}
+
+EVENTHANDLER(tooltipMouseLeaveHandler)
+{
+	popTooltip(t);
 	return TRUE;
 }
 

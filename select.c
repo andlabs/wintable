@@ -35,6 +35,11 @@ HRESULT doselect(struct table *t, struct metrics *m, intmax_t row, intmax_t colu
 			return hr;
 	}
 
+	// always pop tooltips on selection change, regardless of what caused it
+	// TODO pop at the beginning?
+	// TODO pop on mouse selection?
+	popTooltip(t);
+
 	return S_OK;
 }
 

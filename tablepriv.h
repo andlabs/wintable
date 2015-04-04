@@ -222,5 +222,7 @@ extern HANDLER(enableFocusHandlers);
 // tooltips.c
 extern HRESULT makeTooltip(struct table *, HINSTANCE);
 extern HRESULT destroyTooltip(struct table *);
+extern void popTooltip(struct table *);
 extern EVENTHANDLER(tooltipMouseMoveHandler);
+extern EVENTHANDLER(tooltipMouseLeaveHandler);
 extern HANDLER(tooltipNotifyHandler);

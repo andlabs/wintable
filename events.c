@@ -82,6 +82,7 @@ static const eventhandlerfunc mouseMoveHandlers[] = {
 
 static const eventhandlerfunc mouseLeaveHandlers[] = {
 	globalMouseLeaveHandler,
+	tooltipMouseLeaveHandler,
 	NULL,
 };
 

@@ -9,10 +9,11 @@
 // TODO do we need to move the resizing logic into WM_WINDOWPOSCHANGING like the .net one does?
 // TODO tooltips are supposed to be popped when:
 // - vertically scrolling
-// - keyboard navigating
-// - TODO toggling checkboxes?
-// - TODO any keypress?
+// - keyboard selecting/navigating (only, no other keypresses affect tooltips, not even checkbox toggles)
+// 	- and after that, tooltips don't come back if we don't move the mouse
 // - TODO horizontally scrolling?
+// - mouse leave
+// TODO tooltips are INHIBITED during capture
 
 static void initTOOLINFOW(struct table *t, TOOLINFOW *ti)
 {

@@ -59,6 +59,12 @@ struct table {
 	intmax_t selectedRow;
 	intmax_t selectedColumn;
 	HTHEME theme;
+
+	BOOL mouseMoved;
+	LPARAM mouseMoveLPARAM;
+	BOOL lastMouseMoved;
+	LPARAM lastMouseMoveLPARAM;
+
 	BOOL checkboxMouseMoved;
 	LPARAM checkboxMouseMoveLPARAM;
 	BOOL checkboxMouseDown;

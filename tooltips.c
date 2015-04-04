@@ -7,6 +7,12 @@
 // - XP, 7 - still a flash of a tooltip when cancelling
 // - wine - cancelling code doesn't work
 // TODO do we need to move the resizing logic into WM_WINDOWPOSCHANGING like the .net one does?
+// TODO tooltips are supposed to be popped when:
+// - vertically scrolling
+// - keyboard navigating
+// - TODO toggling checkboxes?
+// - TODO any keypress?
+// - TODO horizontally scrolling?
 
 static void initTOOLINFOW(struct table *t, TOOLINFOW *ti)
 {

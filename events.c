@@ -1,6 +1,54 @@
 // 5 december 2014
 #include "tablepriv.h"
 
+// general handlers for mouse events
+// these run before the other mouse events, which use their results
+// they also handle mouse tracking
+// we DON'T go from LPARAM to row/column here because scrolling will change that
+// or should we? it'd make some calculations later easier, and we're not going to update the hover state when scrolling anyway (real list view doesn't) TODO
+// TODO actually no, hot labels aren't affeted when scrolling, but tooltips are popped when scrolling
+
+EVENTHANDLER(generalMouseMoveHandler)
+{
+	POINT pt;
+
+	t->lastMouseMoved = t->mouseMoved;
+	t->lastMouseMoveLPARAM = t->mouseMoveLPARAM;
+	t->mouseMoved = TRUE;
+	t->mouseMoveLPARAM = lParam;
+
+	// when we capture the mouse, _TrackMouseEvent() won't work
+	// (see http://blogs.msdn.com/b/oldnewthing/archive/2010/12/06/10100644.aspx)
+	// for this case, we have to do the check ourselves
+	pt.x = GET_X_LPARAM(t->mouseMoveLPARAM);
+	pt.y = GET_Y_LPARAM(t->mouseMoveLPARAM);
+	if (PtInRect(&(m->client), pt) == 0)
+		t->mouseMoved = FALSE;
+
+	if (!t->lastMouseMoved) {
+		TRACKMOUSEEVENT tm;
+
+		ZeroMemory(&tm, sizeof (TRACKMOUSEEVENT));
+		tm.cbSize = sizeof (TRACKMOUSEEVENT);
+		tm.dwFlags = TME_LEAVE;
+		tm.hwndTrack = t->hwnd;
+		if (_TrackMouseEvent(&tm) == 0)
+			;	// TODO
+	}
+
+	// TODO really?
+	return TRUE;
+}
+
+EVENTHANDLER(globalMouseLeaveHandler)
+{
+	t->lastMouseMoved = t->mouseMoved;
+	t->lastMouseMoveLPARAM = t->mouseMoveLPARAM;
+	t->mouseMoved = FALSE;
+	// TODO really?
+	return TRUE;
+}
+
 // TODO make these function names consistent
 
 static const eventhandlerfunc keyDownHandlers[] = {
@@ -17,12 +65,14 @@ static const eventhandlerfunc charHandlers[] = {
 };
 
 static const eventhandlerfunc mouseMoveHandlers[] = {
+	globalMosueMoveHandler,
 	checkboxMouseMoveHandler,
 	tooltipMouseMoveHandler,
 	NULL,
 };
 
 static const eventhandlerfunc mouseLeaveHandlers[] = {
+	globalMouseLeaveHandler,
 	NULL,
 };
 

@@ -67,11 +67,10 @@ struct table {
 
 	BOOL checkboxMouseDown;
 	struct rowcol checkboxMouseDownRowColumn;
+
 	HINSTANCE tooltipHINSTANCE;
-	BOOL tooltipMouseMoved;
-	LPARAM tooltipMouseMoveLPARAM;
-	struct rowcol tooltipMouseMoveRowColumn;
-	BOOL cancelTooltip;
+	BOOL tooltipVisible;
+	struct rowcol tooltipCurrentRowColumn;
 	struct tableAcc *firstAcc;
 };
 

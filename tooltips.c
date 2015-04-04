@@ -34,12 +34,12 @@ static LRESULT CALLBACK tooltipSubclassProc(HWND hwnd, UINT uMsg, WPARAM wParam,
 
 	switch (uMsg) {
 	case WM_WINDOWPOSCHANGED:
-printf("in windowposchanged: %d\n", t->cancelTooltip);
-		if (t->cancelTooltip) {
+printf("in windowposchanged: %d\n", t->tooltipVisible);
+		if (!t->tooltipVisible) {
 printf("cancelling tooltip\n");
-			// don't reset t->cancelTooltip here
+			// don't reset t->tooltipVisible here
 			// some systems (Windows 7, for instance), will send multiple WM_WINDOWPOSCHANGED, so our code is rendered useless there
-			// instead, only set t->cancelTooltip in the TTN_SHOW handler
+			// instead, only set t->tooltipVisible in the TTN_SHOW handler
 			ShowWindow(t->tooltip, SW_HIDE);
 			return 0;
 		}
@@ -96,7 +96,9 @@ HRESULT destroyTooltip(struct table *t)
 
 void popTooltip(struct table *t)
 {
+	// TODO will this reset the tooltip timer, if needed?
 	SendMessageW(t->tooltip, TTM_POP, 0, 0);
+	t->tooltipVisible = FALSE;
 }
 
 /* comctl32 listview behavior notes
@@ -111,26 +113,29 @@ TODO xoff?
 // TODO how do we handle captures? and mouse leaves? and scrolls?
 EVENTHANDLER(tooltipMouseMoveHandler)
 {
-	BOOL lastMouseMoved;
 	struct rowcol rc;
 	HRESULT hr;
 
-	lastMouseMoved = t->tooltipMouseMoved;
-	t->tooltipMouseMoved = TRUE;
-	t->tooltipMouseMoveLPARAM = lParam;
-	hr = lParamToRowColumn(t, m, t->tooltipMouseMoveLPARAM, &rc);
+printf("in WM_MOUSEMOVE %d %d\n", (int) WM_MOUSEMOVE, (int) uMsg);
+	if (!t->tooltipVisible)
+		return FALSE;
+	if (!t->mouseMoved) {		// fell out of the client area
+printf("popping due to out of client area\n");
+		popTooltip(t);
+		return TRUE;
+	}
+	hr = lParamToRowColumn(t, m, t->mouseMoveLPARAM, &rc);
 	if (hr != S_OK)
 		;	// TODO
-	if (lastMouseMoved)
-		if (!rowcolEqual(rc, t->tooltipMouseMoveRowColumn))
-			// TODO will this reset the tooltip timer, if needed?
-			popTooltip(t);
-	t->tooltipMouseMoveRowColumn = rc;
+	if (!rowcolEqual(rc, t->tooltipCurrentRowColumn))
+{		popTooltip(t);
+printf("popping due to different row/col\n");}
 	return TRUE;
 }
 
 EVENTHANDLER(tooltipMouseLeaveHandler)
 {
+printf("popping due to mouse leaving client area %d %d\n", (int) WM_MOUSELEAVE, (int) uMsg);
 	popTooltip(t);
 	return TRUE;
 }
@@ -170,9 +175,9 @@ HANDLER(tooltipNotifyHandler)
 		;	// TODO
 
 	// figure out which cell we're on and whether it has text
-	// TODO just use t->tooltipMouseMoveRowColumn?
-	// TODO would doing so break with scrolling?
-	hr = lParamToRowColumn(t, &m, t->tooltipMouseMoveLPARAM, &rc);
+	if (!t->mouseMoved)		// not in the client area; nothing to show
+		goto cancel;		// TODO really?
+	hr = lParamToRowColumn(t, &m, t->mouseMoveLPARAM, &rc);
 	if (hr != S_OK)
 		;	// TODO
 	if (rc.row == -1 || rc.column == -1)
@@ -238,13 +243,16 @@ HANDLER(tooltipNotifyHandler)
 	}
 
 	// and we're done
-	t->cancelTooltip = FALSE;
+	t->tooltipVisible = TRUE;
+	t->tooltipCurrentRowColumn = rc;
+printf("tooltip visible, in-place\n");
 	*lResult = (LRESULT) TRUE;
 	return TRUE;
 
 cancel:
 	// don't show the tooltip
-	t->cancelTooltip = TRUE;
+	t->tooltipVisible = FALSE;
+printf("tooltip not visible\n");
 	*lResult = (LRESULT) TRUE;
 	return TRUE;
 
@@ -252,6 +260,9 @@ giveUpPos:
 	// handle positioning errors robustly by not bothering
 	// show the tooltip in the default position
 	// it'll look wrong but it's sensible!
-	t->cancelTooltip = FALSE;
+	t->tooltipVisible = TRUE;
+	t->tooltipCurrentRowColumn = rc;
+printf("tooltip visible, default position\n");
+	// TODO really?
 	return FALSE;
 }

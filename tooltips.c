@@ -122,11 +122,9 @@ EVENTHANDLER(tooltipMouseMoveHandler)
 	struct rowcol rc;
 	HRESULT hr;
 
-printf("in WM_MOUSEMOVE %d %d\n", (int) WM_MOUSEMOVE, (int) uMsg);
 	if (!t->tooltipVisible)
 		return FALSE;
 	if (!t->mouseMoved) {		// fell out of the client area
-printf("popping due to out of client area\n");
 		popTooltip(t);
 		return TRUE;
 	}
@@ -134,14 +132,12 @@ printf("popping due to out of client area\n");
 	if (hr != S_OK)
 		;	// TODO
 	if (!rowcolEqual(rc, t->tooltipCurrentRowColumn))
-{		popTooltip(t);
-printf("popping due to different row/col\n");}
+		popTooltip(t);
 	return TRUE;
 }
 
 EVENTHANDLER(tooltipMouseLeaveHandler)
 {
-printf("popping due to mouse leaving client area %d %d\n", (int) WM_MOUSELEAVE, (int) uMsg);
 	popTooltip(t);
 	return TRUE;
 }
@@ -251,14 +247,12 @@ HANDLER(tooltipNotifyHandler)
 	// and we're done
 	t->tooltipVisible = TRUE;
 	t->tooltipCurrentRowColumn = rc;
-printf("tooltip visible, in-place\n");
 	*lResult = (LRESULT) TRUE;
 	return TRUE;
 
 cancel:
 	// don't show the tooltip
 	t->tooltipVisible = FALSE;
-printf("tooltip not visible\n");
 	*lResult = (LRESULT) TRUE;
 	return TRUE;
 
@@ -268,7 +262,6 @@ giveUpPos:
 	// it'll look wrong but it's sensible!
 	t->tooltipVisible = TRUE;
 	t->tooltipCurrentRowColumn = rc;
-printf("tooltip visible, default position\n");
 	// TODO really?
 	return FALSE;
 }

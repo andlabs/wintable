@@ -76,6 +76,12 @@ struct table {
 
 struct metrics;		// needed for below; TODO make this unnecessary
 
+// timer IDs
+// TODO move somewhere else in this file?
+enum {
+	tooltipTimer = 1,
+};
+
 // TODO move into the appropriate sections below
 typedef BOOL (*handlerfunc)(struct table *, UINT, WPARAM, LPARAM, LRESULT *);
 #define HANDLER(name) BOOL name(struct table *t, UINT uMsg, WPARAM wParam, LPARAM lParam, LRESULT *lResult)
@@ -219,9 +225,7 @@ extern EVENTHANDLER(mouseDownFocusHandler);
 extern HANDLER(enableFocusHandlers);
 
 // tooltips.c
-extern HRESULT makeTooltip(struct table *, HINSTANCE);
-extern HRESULT destroyTooltip(struct table *);
-extern void popTooltip(struct table *);
+extern HRESULT popTooltip(struct table *, BOOL);
 extern EVENTHANDLER(tooltipMouseMoveHandler);
 extern EVENTHANDLER(tooltipMouseLeaveHandler);
 extern HANDLER(tooltipNotifyHandler);

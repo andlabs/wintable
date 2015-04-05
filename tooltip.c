@@ -28,4 +28,70 @@
 - tooltips have popping fade
 
 TODO what are the timings for each popup?
+TODO is the double-click rectangle used to determine if the mouse has moved?
 */
+
+extern HRESULT makeTooltip(struct table *, HINSTANCE);
+extern HRESULT destroyTooltip(struct table *);
+
+static HRESULT rescheduleTooltip(struct table *t)
+{
+	// default tooltip show time according to https://msdn.microsoft.com/en-us/library/windows/desktop/bb760404%28v=vs.85%29.aspx
+	if (SetTimer(t->hwnd, tooltipTimer, GetDoubleClickTime(), NULL) == 0)
+		return logLastError("error rescheduling Table tooltip in rescheduleTooltip()");
+	return S_OK;
+}
+
+HRESULT popTooltip(struct table *t, BOOL reschedule)
+{
+	HRESULT hr;
+
+	if (t->tooltip != NULL) {
+		SendMessageW(t->tooltip, TTM_POP, 0, 0);
+		// TODO check for error here? it is cleanup
+		if (DestroyWindow(t->tooltip) != 0)
+			return logLastError("error destroying existing Table tooltip in popTooltip()");
+		t->tooltip = NULL;
+		if (reschedule) {
+			hr = rescheduleTooltip(t);
+			if (hr != S_OK)
+				return hr;
+		}
+	}
+	return S_OK;
+}
+
+EVENTHANDLER(tooltipMouseMoveHandler)
+{
+	struct rowcol rc;
+	HRESULT hr;
+
+	if (t->tooltip != NULL && t->mouseMoved) {
+		hr = lParamToRowColumn(t, m, t->mouseMoveLPARAM, &rc);
+		if (hr != S_OK)
+			;	// TODO
+		if (!rowcolEqual(rc, t->tooltipCurrentRowColumn)) {
+			popTooltip(t, TRUE);
+			return TRUE;
+		}
+	}
+	if (t->tooltip == NULL) {
+		hr = rescheduleTooltip(t);
+		if (hr != S_OK)
+			;	// TODO
+		return TRUE;
+	}
+	return FALSE;
+}
+
+EVENTHANDLER(tooltipMouseLeaveHandler)
+{
+	// TODO
+	return FALSE;
+}
+
+HANDLER(tooltipNotifyHandler)
+{
+	// TODO
+	return FALSE;
+}

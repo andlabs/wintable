@@ -44,7 +44,6 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 			t->selectedColumn = -1;
 			loadCheckboxThemeData(t);
 			t->model = &nullModel;
-			makeTooltip(t, cs->hInstance);
 			SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR) t);
 		}
 		// even if we did the above, fall through
@@ -53,7 +52,6 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 	if (uMsg == WM_DESTROY) {
 		// TODO free appropriate (after figuring this part out) components of t
 //TODO		invalidateTableAccs(t);
-		destroyTooltip(t);
 		// TODO what if any of this fails?
 		if (t->model != &nullModel)
 			tableModel_tableUnsubscribe(t->model, t->hwnd);
@@ -65,6 +63,7 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 	}
 	if (runHandlers(handlers, t, uMsg, wParam, lParam, &lResult))
 		return lResult;
+if(uMsg==WM_TIMER)MessageBeep(-1);
 	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 }
 

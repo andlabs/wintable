@@ -56,7 +56,9 @@ HRESULT scrollto(struct table *t, int which, struct scrollParams *p, intmax_t po
 	// always pop tooltips on scroll, regardless of what caused it
 	// TODO pop at the beginning?
 	// TODO pop on horizontal scroll?
-	popTooltip(t);
+	hr = popTooltip(t, TRUE);
+	if (hr != S_OK)
+		return hr;
 
 	return S_OK;
 }

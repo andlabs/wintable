@@ -39,6 +39,8 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 				return FALSE;
 			}
 			t->hwnd = hwnd;
+			t->hInstance = hInstance;
+			// TODO use t->hInstance here
 			makeHeader(t, cs->hInstance);
 			t->selectedRow = -1;
 			t->selectedColumn = -1;

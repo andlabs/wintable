@@ -31,8 +31,48 @@ TODO what are the timings for each popup?
 TODO is the double-click rectangle used to determine if the mouse has moved?
 */
 
-extern HRESULT makeTooltip(struct table *, HINSTANCE);
-extern HRESULT destroyTooltip(struct table *);
+static HRESULT makeTooltip(struct table *t, BSTR text)
+{
+	TOOLINFOW ti;
+
+	t->tooltipHINSTANCE = hInstance;
+	// TODO verify extended styles and WS_POPUP
+	// TODO TTS_NOANIMATE and TTS_NOFADE? check list view control after changing transition animation
+	// TODO TTS_ALWAYSTIP? check list view control
+	t->tooltip = CreateWindowExW(WS_EX_TOOLWINDOW,
+		TOOLTIPS_CLASSW, L"",
+		WS_POPUP | TTS_NOPREFIX,
+		0, 0,
+		0, 0,		// TODO really?
+		// TODO really NULL control ID?
+		t->hwnd, NULL, t->hInstance, NULL);
+	if (t->tooltip == NULL)
+		return logLastError("error creating Table tooltip");
+
+	ZeroMemory(ti, sizeof (TOOLINFOW));
+	ti->cbSize = sizeof (TOOLINFOW);
+	// TODO figure out and explain why TTF_TRANSPARENT is necessary (if it is, anyway; it seems to be)
+	ti.uFlags = TTF_IDISHWND | TTF_SUBCLASS | TTF_TRANSPARENT;
+	ti->hwnd = t->hwnd;
+	ti->uId = (UINT_PTR) (t->hwnd);
+	ti->hinst = t->hInstance;
+	ti.lpszText = text;
+	if (SendMessageW(t->tooltip, TTM_ADDTOOL, 0, (LPARAM) (&ti)) == FALSE)
+		return logLastError("error setting up Table tooltip");
+
+//TODO	if (SetWindowSubclass(t->tooltip, tooltipSubclassProc, 0, (DWORD_PTR) t) == FALSE)
+//TODO		return logLastError("error subclassing Table tooltip");
+
+	return S_OK;
+}
+
+HRESULT destroyTooltip(struct table *t)
+{
+	// TODO check for error here? it is cleanup
+	if (DestroyWindow(t->tooltip) != 0)
+		return logLastError("error destroying existing Table tooltip in destroyTooltip()");
+	return S_OK;
+}
 
 static HRESULT rescheduleTooltip(struct table *t)
 {
@@ -48,10 +88,6 @@ HRESULT popTooltip(struct table *t, BOOL reschedule)
 
 	if (t->tooltip != NULL) {
 		SendMessageW(t->tooltip, TTM_POP, 0, 0);
-		// TODO check for error here? it is cleanup
-		if (DestroyWindow(t->tooltip) != 0)
-			return logLastError("error destroying existing Table tooltip in popTooltip()");
-		t->tooltip = NULL;
 		if (reschedule) {
 			hr = rescheduleTooltip(t);
 			if (hr != S_OK)
@@ -85,6 +121,12 @@ EVENTHANDLER(tooltipMouseMoveHandler)
 }
 
 EVENTHANDLER(tooltipMouseLeaveHandler)
+{
+	// TODO
+	return FALSE;
+}
+
+EVENTHANDLER(tooltipTimerHandler)
 {
 	// TODO
 	return FALSE;

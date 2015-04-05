@@ -102,6 +102,11 @@ static const eventhandlerfunc captureChangedHandlers[] = {
 	NULL,
 };
 
+static const eventhandlerfunc timerHandlers[] = {
+	tooltipTimerHandler,
+	NULL,
+};
+
 // TODO remove or something? depends on if we implement combobox and how
 static const eventhandlerfunc mouseWheelHandlers[] = {
 	NULL,
@@ -133,6 +138,7 @@ HANDLER(eventHandlers)
 	eventHandler(WM_LBUTTONUP, lbuttonUpHandlers, 0)
 	eventHandler(WM_CAPTURECHANGED, captureChangedHandlers, 0)
 	eventHandler(WM_MOUSEWHEEL, mouseWheelHandlers, 0)
+	eventHandler(WM_TIMER, timerHandlers, 0)
 #undef eventHandler
 	}
 	return FALSE;

@@ -43,7 +43,7 @@ struct rowcol {
 struct table {
 	HWND hwnd;
 	HWND header;
-	HWND tooltip;			// TODO move to the end of the structure?
+	HINSTANCE hInstance;
 	tableModel *model;		// TODO move to the end of the structure?
 	HFONT font;
 	intmax_t nColumns;
@@ -68,7 +68,7 @@ struct table {
 	BOOL checkboxMouseDown;
 	struct rowcol checkboxMouseDownRowColumn;
 
-	HINSTANCE tooltipHINSTANCE;
+	HWND tooltip;
 	BOOL tooltipVisible;
 	struct rowcol tooltipCurrentRowColumn;
 	struct tableAcc *firstAcc;
@@ -228,4 +228,5 @@ extern HANDLER(enableFocusHandlers);
 extern HRESULT popTooltip(struct table *, BOOL);
 extern EVENTHANDLER(tooltipMouseMoveHandler);
 extern EVENTHANDLER(tooltipMouseLeaveHandler);
+extern EVENTHANDLER(tooltipTimerHandler);
 extern HANDLER(tooltipNotifyHandler);

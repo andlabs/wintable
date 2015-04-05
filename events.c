@@ -6,7 +6,6 @@
 // they also handle mouse tracking
 // we DON'T go from LPARAM to row/column here because scrolling will change that
 // or should we? it'd make some calculations later easier, and we're not going to update the hover state when scrolling anyway (real list view doesn't) TODO
-// TODO actually no, hot labels aren't affeted when scrolling, but tooltips are popped when scrolling
 
 // TODO rename to generalXxx everywhere
 EVENTHANDLER(globalMouseMoveHandler)

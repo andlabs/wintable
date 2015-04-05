@@ -105,7 +105,6 @@ void popTooltip(struct table *t)
 {
 	// TODO will this reset the tooltip timer, if needed?
 	SendMessageW(t->tooltip, TTM_POP, 0, 0);
-	t->tooltipVisible = FALSE;
 }
 
 /* comctl32 listview behavior notes
@@ -163,6 +162,11 @@ HANDLER(tooltipNotifyHandler)
 
 	if (nmhdr->hwndFrom != t->tooltip)
 		return FALSE;
+	if (nmhdr->code == TTN_POP) {
+		t->tooltipVisible = FALSE;
+		// TODO no return value
+		return TRUE;
+	}
 	if (nmhdr->code != TTN_SHOW)
 		return FALSE;
 

@@ -26,4 +26,6 @@
 	- [TODO] multi-word labels
 - [TODO] tooltips have starting animations
 - tooltips have popping fade
+
+TODO what are the timings for each popup?
 */

@@ -39,7 +39,7 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 				return FALSE;
 			}
 			t->hwnd = hwnd;
-			t->hInstance = hInstance;
+			t->hInstance = cs->hInstance;
 			// TODO use t->hInstance here
 			makeHeader(t, cs->hInstance);
 			t->selectedRow = -1;
@@ -65,7 +65,6 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 	}
 	if (runHandlers(handlers, t, uMsg, wParam, lParam, &lResult))
 		return lResult;
-if(uMsg==WM_TIMER)MessageBeep(-1);
 	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 }
 

@@ -169,6 +169,7 @@ extern HRESULT headerAddColumn(struct table *, WCHAR *);
 extern HANDLER(headerNotifyHandler);
 
 // events.c
+extern BOOL mouseHovering(struct table *);
 extern HANDLER(eventHandlers);
 
 // select.c

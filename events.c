@@ -8,7 +8,7 @@
 // or should we? it'd make some calculations later easier, and we're not going to update the hover state when scrolling anyway (real list view doesn't) TODO
 
 // TODO rename to generalXxx everywhere
-EVENTHANDLER(globalMouseMoveHandler)
+static EVENTHANDLER(globalMouseMoveHandler)
 {
 	HRESULT hr;
 
@@ -49,13 +49,30 @@ EVENTHANDLER(globalMouseMoveHandler)
 	return TRUE;
 }
 
-EVENTHANDLER(globalMouseLeaveHandler)
+static EVENTHANDLER(globalMouseLeaveHandler)
 {
 	t->lastMouseMoved = t->mouseMoved;
 	t->lastMouseMoveLPARAM = t->mouseMoveLPARAM;
 	t->mouseMoved = FALSE;
 	// TODO really?
 	return TRUE;
+}
+
+// and a helper function to go with it
+BOOL mouseHovering(struct table *t)
+{
+	// change in movement state counts as not hovering
+	if (t->lastMouseMoved && !t->mouseMoved)
+		return FALSE;
+	if (!t->lastMouseMoved && t->mouseMoved)
+		return FALSE;
+	// if we're still not in, we're hovering
+	// TODO really?
+	if (!t->lastMouseMoved && !t->mouseMoved)
+		return TRUE;
+	// otherwise, make sure we didn't actually move
+	// TODO use the double-click rect?
+	return t->lastMouseMoveLPARAM == t->mouseMoveLPARAM;
 }
 
 // TODO make these function names consistent

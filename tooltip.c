@@ -35,7 +35,7 @@ static HRESULT makeTooltip(struct table *t, BSTR text)
 {
 	TOOLINFOW ti;
 
-	t->tooltipHINSTANCE = hInstance;
+printf("makeTooltip()\n");
 	// TODO verify extended styles and WS_POPUP
 	// TODO TTS_NOANIMATE and TTS_NOFADE? check list view control after changing transition animation
 	// TODO TTS_ALWAYSTIP? check list view control
@@ -49,13 +49,13 @@ static HRESULT makeTooltip(struct table *t, BSTR text)
 	if (t->tooltip == NULL)
 		return logLastError("error creating Table tooltip");
 
-	ZeroMemory(ti, sizeof (TOOLINFOW));
-	ti->cbSize = sizeof (TOOLINFOW);
+	ZeroMemory(&ti, sizeof (TOOLINFOW));
+	ti.cbSize = sizeof (TOOLINFOW);
 	// TODO figure out and explain why TTF_TRANSPARENT is necessary (if it is, anyway; it seems to be)
 	ti.uFlags = TTF_IDISHWND | TTF_SUBCLASS | TTF_TRANSPARENT;
-	ti->hwnd = t->hwnd;
-	ti->uId = (UINT_PTR) (t->hwnd);
-	ti->hinst = t->hInstance;
+	ti.hwnd = t->hwnd;
+	ti.uId = (UINT_PTR) (t->hwnd);
+	ti.hinst = t->hInstance;
 	ti.lpszText = text;
 	if (SendMessageW(t->tooltip, TTM_ADDTOOL, 0, (LPARAM) (&ti)) == FALSE)
 		return logLastError("error setting up Table tooltip");
@@ -66,16 +66,18 @@ static HRESULT makeTooltip(struct table *t, BSTR text)
 	return S_OK;
 }
 
-HRESULT destroyTooltip(struct table *t)
+static HRESULT destroyTooltip(struct table *t)
 {
+printf("destroyTooltip()\n");
 	// TODO check for error here? it is cleanup
-	if (DestroyWindow(t->tooltip) != 0)
+	if (DestroyWindow(t->tooltip) == 0)
 		return logLastError("error destroying existing Table tooltip in destroyTooltip()");
 	return S_OK;
 }
 
 static HRESULT rescheduleTooltip(struct table *t)
 {
+printf("rescheduleTooltip()\n");
 	// default tooltip show time according to https://msdn.microsoft.com/en-us/library/windows/desktop/bb760404%28v=vs.85%29.aspx
 	if (SetTimer(t->hwnd, tooltipTimer, GetDoubleClickTime(), NULL) == 0)
 		return logLastError("error rescheduling Table tooltip in rescheduleTooltip()");
@@ -86,6 +88,7 @@ HRESULT popTooltip(struct table *t, BOOL reschedule)
 {
 	HRESULT hr;
 
+printf("popTooltip()\n");
 	if (t->tooltip != NULL) {
 		SendMessageW(t->tooltip, TTM_POP, 0, 0);
 		if (reschedule) {
@@ -102,7 +105,11 @@ EVENTHANDLER(tooltipMouseMoveHandler)
 	struct rowcol rc;
 	HRESULT hr;
 
-	if (t->tooltip != NULL && t->mouseMoved) {
+printf("tooltipMouseMoveHandler() %d %I32X %d %I32X\n",
+t->mouseMoved, t->mouseMoveLPARAM,
+t->lastMouseMoved, t->lastMouseMoveLPARAM);
+	// TODO if we decide that mouseHovering() should return FALSE if the mouse isn't in the client area, the second part of that && won't be needed
+	if (t->tooltip != NULL && t->mouseMoved && !mouseHovering(t)) {
 		hr = lParamToRowColumn(t, m, t->mouseMoveLPARAM, &rc);
 		if (hr != S_OK)
 			;	// TODO
@@ -128,12 +135,71 @@ EVENTHANDLER(tooltipMouseLeaveHandler)
 
 EVENTHANDLER(tooltipTimerHandler)
 {
-	// TODO
-	return FALSE;
+	struct rowcol rc;
+	RECT r;
+	tableCellValue value;
+	HRESULT hr;
+
+printf("tooltipTimerHandler()\n");
+	if (wParam != tooltipTimer)
+		return FALSE;
+	// TODO does this count as a cleanup function?
+	if (KillTimer(t->hwnd, tooltipTimer) == 0)
+		;	// TODO
+
+	if (!t->mouseMoved)	// not in client area; nothing to do
+		return FALSE;
+	hr = lParamToRowColumn(t, m, t->mouseMoveLPARAM, &rc);
+	if (hr != S_OK)
+		;	// TODO
+	hr = rowColumnToClientRect(t, m, rc, &r);
+	if (hr != S_OK && hr != S_FALSE)
+		;	// TODO
+	if (hr == S_FALSE)		// still not in client area
+		return FALSE;
+
+	hr = tableModel_tableCellValue(t->model, rc.row, rc.column, tableModelColumnString, &value);
+	if (hr == tableModelErrorWrongColumnType)		// not a string column; no tooltips needed
+		return FALSE;
+	if (hr != S_OK)
+		;	// TODO
+
+	// TODO measure the width of value.stringVal
+
+	// if there's already a tooltip, we need to get rid of it
+	hr = popTooltip(t, FALSE);
+	if (hr != S_OK)
+		;	// TODO
+	hr = makeTooltip(t, value.stringVal);
+	if (hr != S_OK)
+		;	// TODO
+	SysFreeString(value.stringVal);
+
+	// TODO position r
+
+	SendMessage(t->tooltip, TTM_POPUP, 0, 0);
+	return TRUE;
 }
 
 HANDLER(tooltipNotifyHandler)
 {
-	// TODO
+	NMHDR *nm = (NMHDR *) lParam;
+	HRESULT hr;
+
+printf("tooltipNotifyHandler() %d %d %d\n", nm->code, TTN_SHOW, TTN_POP);
+	if (nm->hwndFrom != t->tooltip)
+		return FALSE;
+	switch (nm->code) {
+	case TTN_SHOW:
+		// TODO show at given rectangle
+		return FALSE;
+	case TTN_POP:
+printf("ALREADY POPPING\n");
+//		hr = destroyTooltip(t);
+//		if (hr != S_OK)
+			;	// TODO
+		// TODO
+		return TRUE;
+	}
 	return FALSE;
 }

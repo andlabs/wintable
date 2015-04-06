@@ -29,6 +29,7 @@
 
 TODO what are the timings for each popup?
 TODO is the double-click rectangle used to determine if the mouse has moved?
+TODO TTS_ALWAYSTIP?
 */
 
 static HRESULT makeTooltip(struct table *t, BSTR text)
@@ -69,9 +70,10 @@ printf("makeTooltip()\n");
 static HRESULT destroyTooltip(struct table *t)
 {
 printf("destroyTooltip()\n");
-	// TODO check for error here? it is cleanup
-	if (DestroyWindow(t->tooltip) == 0)
-		return logLastError("error destroying existing Table tooltip in destroyTooltip()");
+	if (t->tooltip != NULL)
+		// TODO check for error here? it is cleanup
+		if (DestroyWindow(t->tooltip) == 0)
+			return logLastError("error destroying existing Table tooltip in destroyTooltip()");
 	return S_OK;
 }
 
@@ -102,29 +104,23 @@ printf("popTooltip()\n");
 
 EVENTHANDLER(tooltipMouseMoveHandler)
 {
+	BOOL handled = FALSE;
 	struct rowcol rc;
 	HRESULT hr;
 
 printf("tooltipMouseMoveHandler() %d %I32X %d %I32X\n",
 t->mouseMoved, t->mouseMoveLPARAM,
 t->lastMouseMoved, t->lastMouseMoveLPARAM);
-	// TODO if we decide that mouseHovering() should return FALSE if the mouse isn't in the client area, the second part of that && won't be needed
-	if (t->tooltip != NULL && t->mouseMoved && !mouseHovering(t)) {
-		hr = lParamToRowColumn(t, m, t->mouseMoveLPARAM, &rc);
-		if (hr != S_OK)
-			;	// TODO
-		if (!rowcolEqual(rc, t->tooltipCurrentRowColumn)) {
-			popTooltip(t, TRUE);
-			return TRUE;
-		}
-	}
-	if (t->tooltip == NULL) {
+
+if (t->tooltip == NULL)
+	if (!mouseHovering(t)) {
 		hr = rescheduleTooltip(t);
 		if (hr != S_OK)
 			;	// TODO
-		return TRUE;
+		handled = TRUE;
 	}
-	return FALSE;
+
+	return TRUE;
 }
 
 EVENTHANDLER(tooltipMouseLeaveHandler)
@@ -167,7 +163,8 @@ printf("tooltipTimerHandler()\n");
 	// TODO measure the width of value.stringVal
 
 	// if there's already a tooltip, we need to get rid of it
-	hr = popTooltip(t, FALSE);
+	// TODO fade out?
+	hr = destroyTooltip(t);
 	if (hr != S_OK)
 		;	// TODO
 	hr = makeTooltip(t, value.stringVal);
@@ -194,12 +191,8 @@ printf("tooltipNotifyHandler() %d %d %d\n", nm->code, TTN_SHOW, TTN_POP);
 		// TODO show at given rectangle
 		return FALSE;
 	case TTN_POP:
-printf("ALREADY POPPING\n");
-//		hr = destroyTooltip(t);
-//		if (hr != S_OK)
-			;	// TODO
-		// TODO
-		return TRUE;
+		// TODO remove tool
+		;
 	}
 	return FALSE;
 }

@@ -30,6 +30,7 @@ static HRESULT getFrameControlCheckboxSize(HDC dc, int *width, int *height)
 {
 	// there's no real metric around
 	// let's use SM_CX/YSMICON and hope for the best
+	// TODO use SM_CX/YMENUCHECK instead? http://stackoverflow.com/questions/1164868/how-to-get-size-of-check-and-gap-in-check-box
 	*width = GetSystemMetrics(SM_CXSMICON);
 	*height = GetSystemMetrics(SM_CYSMICON);
 	return S_OK;

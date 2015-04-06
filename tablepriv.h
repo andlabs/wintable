@@ -71,6 +71,8 @@ struct table {
 	HWND tooltip;
 	BOOL tooltipVisible;
 	struct rowcol tooltipCurrentRowColumn;
+	RECT tooltipAdjustedRect;
+
 	struct tableAcc *firstAcc;
 };
 

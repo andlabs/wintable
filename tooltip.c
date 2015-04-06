@@ -172,7 +172,9 @@ printf("tooltipTimerHandler()\n");
 		;	// TODO
 	SysFreeString(value.stringVal);
 
-	// TODO position r
+	if (SendMessageW(t->tooltip, TTM_ADJUSTRECT, (WPARAM) TRUE, (LPARAM) (&r)) == 0)
+		;	// TODO
+	t->tooltipAdjustedRect = r;
 
 	SendMessage(t->tooltip, TTM_POPUP, 0, 0);
 	return TRUE;

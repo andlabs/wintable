@@ -29,3 +29,5 @@ TODO
 - handle WS_EX_LAYOUTRTL, WS_EX_RTLREADING?
 - use uxtheme APIs to draw the control in a list view style?
 - comctl6 manifest
+- find out if this affects this too
+	- [18:19] <ZeroOne> Though, if you minimise it and bring it back up, the buttons disappear until you resize the window. Not sure if you care about that or not.

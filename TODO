@@ -29,3 +29,4 @@ TODO
 - handle WS_EX_LAYOUTRTL, WS_EX_RTLREADING?
 - use uxtheme APIs to draw the control in a list view style?
 - comctl6 manifest
+- https://msdn.microsoft.com/en-us/library/windows/desktop/dn312083%28v=vs.85%29.aspx

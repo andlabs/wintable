@@ -68,7 +68,6 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 }
 
-// TODO is this the best way to store the DLL hInstance?
 static HINSTANCE hInstance;
 
 #define wantedICCClasses ( \
@@ -119,16 +118,12 @@ __declspec(dllexport) HINSTANCE __stdcall tableHINSTANCE(void)
 	return hInstance;
 }
 
-// TODO consider DisableThreadLibraryCalls() (will require removing ALL C runtime calls)
-// TODO make sure this is the correct name for C runtime initialization (CHECK MSDN OR THE HEADERS)
-// TODO can hinstDLL ever change? (see above about hInstance)
-// TODO handle DLL_PROCESS_DETACH?
-// TODO __declspec(dllexport)?
+// TODO consider DisableThreadLibraryCalls() (will require removing ALL C runtime calls); if we do so we will also need to fix the signature below
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
 	if (fdwReason == DLL_PROCESS_ATTACH)
 		hInstance = hinstDLL;
-	// TODO unregister window class on process detach?
+	// TODO provide cleanup function
 	return TRUE;
 }
 

@@ -139,6 +139,7 @@ static HRESULT drawCell(struct table *t, HDC dc, struct drawCellParams *p)
 
 	// TODO in front of or behind the cell contents?
 	if (t->selectedRow == p->row && t->selectedColumn == p->column)
+	// TODO http://www.guyswithtowels.com/blog/10-things-i-hate-about-win32.html#DrawFocusRect really?
 		if (DrawFocusRect(dc, &cellrect) == 0)
 			return logLastError("error drawing focus rect on current Table cell");
 

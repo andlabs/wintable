@@ -23,6 +23,7 @@ LIBFILE = $(OUTDIR)/$(BASENAME).lib
 TESTEXEFILE = $(OUTDIR)/$(BASENAME).exe
 
 CFILES = \
+	acctable.c \
 	alloc.c \
 	api.c \
 	checkboxdraw.c \
@@ -69,7 +70,7 @@ xCFLAGS = \
 
 xLDFLAGS = \
 	-static-libgcc \
-	-luser32 -lkernel32 -lgdi32 -lcomctl32 -luxtheme -lole32 -loleaut32 -loleacc -luuid -lmsimg32 \
+	-luser32 -lkernel32 -lgdi32 -lcomctl32 -luxtheme -lole32 -loleaut32 -luiautomationcore -luuid -lmsimg32 \
 	$(mflag) \
 	$(LDFLAGS)
 

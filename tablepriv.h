@@ -27,7 +27,7 @@
 #include <vsstyle.h>
 #include <vssym32.h>
 #include <stdarg.h>
-#include <oleacc.h>
+#include <uiautomation.h>
 
 #include "table.h"
 
@@ -233,3 +233,6 @@ extern EVENTHANDLER(tooltipMouseMoveHandler);
 extern EVENTHANDLER(tooltipMouseLeaveHandler);
 extern EVENTHANDLER(tooltipTimerHandler);
 extern HANDLER(tooltipNotifyHandler);
+
+// acctable.c
+extern HANDLER(accessibilityHandler);

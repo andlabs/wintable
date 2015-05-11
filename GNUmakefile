@@ -90,7 +90,7 @@ test: $(TESTEXEFILE)
 $(TESTEXEFILE): $(DLLFILE) $(TESTOFILES)
 	$(CC) -g -o $(TESTEXEFILE) $(TESTOFILES) $(LIBFILE) $(xLDFLAGS)
 
-$(OBJDIR)/%.o: %.c $(HFILES) dirs
+$(OBJDIR)/%.o: %.c $(HFILES) | dirs
 	$(CC) -g -o $@ -c $< $(xCFLAGS)
 
 dirs:

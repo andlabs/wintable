@@ -33,7 +33,7 @@ HRESULT scrollto(struct table *t, int which, struct scrollParams *p, intmax_t po
 	if (ScrollWindowEx(t->hwnd, xamount, yamount,
 		&scrollArea, &scrollArea, NULL, NULL,
 		SW_ERASE | SW_INVALIDATE) == ERROR)
-;//TODO		return logLastError("error scrolling Table");
+		return logLastError("error scrolling Table");
 
 	*(p->pos) = pos;
 

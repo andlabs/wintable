@@ -94,7 +94,7 @@ static HRESULT drawCell(struct table *t, HDC dc, struct drawCellParams *p)
 	background = (HBRUSH) (COLOR_WINDOW + 1);
 	textColor = COLOR_WINDOWTEXT;
 	if (t->selectedRow == p->row) {
-		// these are the colors wine uses (http://source.winehq.org/source/dlls/comctl32/listview.c)
+		// TODO get a source for these colors
 		// the two for unfocused are also suggested by http://stackoverflow.com/questions/10428710/windows-forms-inactive-highlight-color
 		background = (HBRUSH) (COLOR_HIGHLIGHT + 1);
 		textColor = COLOR_HIGHLIGHTTEXT;

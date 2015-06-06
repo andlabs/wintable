@@ -5,7 +5,6 @@
 // TODO janky behavior:
 // - XP, 7 - weird growing/shrinking behavior involving the size of the previous tooltip
 // - XP, 7 - still a flash of a tooltip when cancelling
-// - wine - cancelling code doesn't work
 // - XP - moving outt o a non-text column sometimes has weird fade outs; moving back from a non-text column (but not from outside) does nothing
 // TODO do we need to move the resizing logic into WM_WINDOWPOSCHANGING like the .net one does?
 // TODO tooltips are supposed to be popped when:
@@ -83,7 +82,7 @@ HRESULT makeTooltip(struct table *t, HINSTANCE hInstance)
 	initTOOLINFOW(t, &ti);
 	// TODO figure out and explain why TTF_TRANSPARENT is necessary (if it is, anyway; it seems to be)
 	ti.uFlags = TTF_IDISHWND | TTF_SUBCLASS | TTF_TRANSPARENT;
-	// TODO only needed on wine?
+	// TODO needed?
 	ti.lpszText = L"initial text that you should not see";
 	if (SendMessageW(t->tooltip, TTM_ADDTOOL, 0, (LPARAM) (&ti)) == FALSE)
 		return logLastError("error setting up Table tooltip");
@@ -242,8 +241,11 @@ HANDLER(tooltipNotifyHandler)
 			goto giveUpPos;
 		}
 	}
-	if (SendMessageW(t->tooltip, TTM_ADJUSTRECT, (WPARAM) TRUE, (LPARAM) (&r)) == 0)
-		;	// TODO wait for wine bug
+	if (SendMessageW(t->tooltip, TTM_ADJUSTRECT, (WPARAM) TRUE, (LPARAM) (&r)) == 0) {
+		logLastError("error getting tooltip rect");
+		// TODO where do we go?
+		goto cancel;
+	}
 	if (SetWindowPos(t->tooltip, NULL, r.left, r.top, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOZORDER) == 0) {
 		logLastError("error setting inline tooltip window position; will show in default place instead");
 		goto giveUpPos;

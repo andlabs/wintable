@@ -2,6 +2,7 @@
 #include "tablepriv.h"
 
 // TODO verify header events (double-clicking on a divider, for example)
+// - http://blogs.msdn.com/b/oldnewthing/archive/2012/10/30/10363822.aspx - header or listview?
 
 // TODO set font
 HRESULT makeHeader(struct table *t, HINSTANCE hInstance)

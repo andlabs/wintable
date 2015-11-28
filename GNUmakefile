@@ -1,26 +1,14 @@
 # TODOs so I don't forget:
 # - make debugging an option
-# - make 64 below an actual option
-# - figure out why make test seems to rebuild the DLL
+# - add MinGW-w64 building when they add UI Automation and isolation awareness
 # - __declspec(dllimport)
-
-ifeq ($(MAKECMDGOALS),64)
-	CC = x86_64-w64-mingw32-gcc
-	RC = x86_64-w64-mingw32-windres
-	mflag = -m64
-else
-	CC = i686-w64-mingw32-gcc
-	RC = i686-w64-mingw32-windres
-	mflag = -m32
-endif
+# - subsystem versions
 
 OBJDIR = .objs
 OUTDIR = out
 
 BASENAME = wintable
-DLLFILE = $(OUTDIR)/$(BASENAME).dll
-LIBFILE = $(OUTDIR)/$(BASENAME).lib
-TESTEXEFILE = $(OUTDIR)/$(BASENAME).exe
+OUT = $(OUTDIR)/$(BASENAME).dll
 
 CFILES = \
 	acctable.c \
@@ -54,48 +42,45 @@ HFILES = \
 	table.h \
 	tablepriv.h
 
-TESTCFILES = \
-	test.c
-
 OFILES = $(CFILES:%.c=$(OBJDIR)/%.o)
-TESTOFILES = $(TESTCFILES:%.c=$(OBJDIR)/%.o)
 
-xCFLAGS = \
-	--std=c99 \
-	-Wall \
-	-Wextra \
-	-Wno-unused-parameter \
-	$(mflag) \
-	$(CFLAGS)
+# TODO /Wall does too much
+# TODO -Wno-switch equivalent
+# TODO /sdl turns C4996 into an ERROR
+# TODO loads of warnings in the system header files
+# TODO /analyze requires us to write annotations everywhere
+CFLAGS += \
+	/Zi \
+	/W4 \
+	/wd4100 \
+	/TC \
+	/bigobj /nologo \
+	/RTC1 /RTCc /RTCs /RTCu \
 
-xLDFLAGS = \
-	-static-libgcc \
-	-luser32 -lkernel32 -lgdi32 -lcomctl32 -luxtheme -lole32 -loleaut32 -luiautomationcore -luuid -lmsimg32 \
-	$(mflag) \
-	$(LDFLAGS)
+# TODO warnings on undefined symbols
+LDFLAGS += \
+	/debug \
+	/largeaddressaware /nologo /incremental:no
 
-default:
-	$(MAKE) clean
-	$(MAKE) it
-	$(MAKE) test
+DLLLIBS = \
+	user32.lib kernel32.lib gdi32.lib comctl32.lib uxtheme.lib ole32.lib oleaut32.lib uiautomationcore.lib uuid.lib msimg32.lib
 
-it: $(DLLFILE)
+$(OUT): $(OFILES) | $(OUTDIR)
+	@link /out:$(OUT) $(OFILES) /dll $(LDFLAGS) $(DLLLIBS)
+	@echo ====== Linked $(OUT)
 
-$(DLLFILE): $(OFILES)
-	$(CC) -g -o $(DLLFILE) -shared -Wl,--out-implib,$(LIBFILE) $(OFILES) $(xLDFLAGS)
+$(OBJDIR)/%.o: %.c $(HFILES) | $(OBJDIR)
+	@cl /Fo:$@ /c $< $(CFLAGS) /Fd$@.pdb
+	@echo ====== Compiled $<
 
-test: $(TESTEXEFILE)
-# see http://stackoverflow.com/a/29021641/3408572
-.PHONY: test
-
-$(TESTEXEFILE): $(DLLFILE) $(TESTOFILES)
-	$(CC) -g -o $(TESTEXEFILE) $(TESTOFILES) $(LIBFILE) $(xLDFLAGS)
-
-$(OBJDIR)/%.o: %.c $(HFILES) | dirs
-	$(CC) -g -o $@ -c $< $(xCFLAGS)
-
-dirs:
-	mkdir -p $(OBJDIR) $(OUTDIR)
+$(OBJDIR) $(OUTDIR):
+	@mkdir $@
 
 clean:
 	rm -rf $(OBJDIR) $(OUTDIR)
+
+test: $(OUT) test.c
+	@cl /Fo:$(OBJDIR)/test.o /c $< $(CFLAGS) /Fd$(OBJDIR)/test.o.pdb
+	@echo ====== Compiled test.c
+	@link /out:$(OUTDIR)/test.exe $(OBJDIR)/test.o $(LDFLAGS) $(OUTDIR)/wintable.lib
+	@echo ====== Linked test.exe

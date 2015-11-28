@@ -1,0 +1,9 @@
+// 30 may 2015
+#include "winapi.h"
+
+// this is a UTF-8 file
+#pragma code_page(65001)
+
+// this is the Common Controls 6 manifest
+// TODO adjust the strings here appropriately
+ISOLATIONAWARE_MANIFEST_RESOURCE_ID RT_MANIFEST "wintable.manifest"

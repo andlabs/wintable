@@ -45,9 +45,13 @@ HFILES = \
 	tablepriv.h \
 	winapi.h
 
+RCFILES = \
+	resources.rc
+
 OFILES = \
 	$(CFILES:%.c=$(OBJDIR)/%.o) \
-	$(CXXFILES:%.cpp=$(OBJDIR)/%.o)
+	$(CXXFILES:%.cpp=$(OBJDIR)/%.o) \
+	$(RCFILES:%.rc=$(OBJDIR)/%.o)
 
 # TODO /Wall does too much
 # TODO -Wno-switch equivalent
@@ -85,6 +89,11 @@ $(OBJDIR)/%.o: %.cpp $(HFILES) | $(OBJDIR)
 	@cl /Fo:$@ /c $< $(CXXFLAGS) /Fd$@.pdb
 	@echo ====== Compiled $<
 
+$(OBJDIR)/%.o: %.rc $(HFILES) | $(OBJDIR)
+	@rc /nologo /v /fo $@.res $<
+	@cvtres /nologo /out:$@ $@.res
+	@echo ====== Compiled $<
+
 $(OBJDIR) $(OUTDIR):
 	@mkdir $@
 
@@ -95,4 +104,4 @@ test: $(OUT) test.c
 	@cl /Fo:$(OBJDIR)/test.o /c test.c $(CFLAGS) /Fd$(OBJDIR)/test.o.pdb
 	@echo ====== Compiled test.c
 	@link /out:$(OUTDIR)/test.exe $(OBJDIR)/test.o $(LDFLAGS) $(OUTDIR)/wintable.lib user32.lib kernel32.lib gdi32.lib ole32.lib comctl32.lib oleaut32.lib
-	@echo ====== Linked test.exe
+	@echo ====== Linked $(OUTDIR)/test.exe

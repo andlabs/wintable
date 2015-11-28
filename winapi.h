@@ -8,6 +8,8 @@
 #define COBJMACROS
 // see https://github.com/golang/go/issues/9916#issuecomment-74812211
 //TODO#define INITGUID
+// for the manifest
+#define ISOLATION_AWARE_ENABLED 1
 // get Windows version right; right now Windows XP
 #define WINVER 0x0501
 #define _WIN32_WINNT 0x0501
@@ -15,6 +17,8 @@
 #define _WIN32_IE 0x0600			/* according to Microsoft's sdkddkver.h */
 #define NTDDI_VERSION 0x05010000	/* according to Microsoft's sdkddkver.h */
 #include <windows.h>
+// Microsoft's resource compiler will segfault if we feed it headers it was not designed to handle
+#ifndef RC_INVOKED
 #include <commctrl.h>
 #include <stdint.h>
 #include <uxtheme.h>
@@ -24,3 +28,4 @@
 #include <vsstyle.h>
 #include <vssym32.h>
 #include <stdarg.h>
+#endif

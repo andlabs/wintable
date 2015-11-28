@@ -1,9 +1,10 @@
 // 19 october 2014
-// this is a shortcut for including the windows stuff; TODO remove
-#include "tablepriv.h"
-
+#include "winapi.h"
 #include <stdio.h>
+// TODO
+#define dllexport dllimport
 #include "table.h"
+#undef dllexport
 
 // #qo LIBS: user32 kernel32 gdi32 comctl32 uxtheme ole32 oleaut32 oleacc uuid msimg32
 

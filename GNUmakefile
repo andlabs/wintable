@@ -42,7 +42,8 @@ CXXFILES += \
 
 HFILES = \
 	table.h \
-	tablepriv.h
+	tablepriv.h \
+	winapi.h
 
 OFILES = \
 	$(CFILES:%.c=$(OBJDIR)/%.o) \

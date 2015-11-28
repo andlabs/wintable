@@ -27,9 +27,12 @@
 #include <vsstyle.h>
 #include <vssym32.h>
 #include <stdarg.h>
-#include <uiautomation.h>
 
 #include "table.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // forward declaration
 struct tableAcc;
@@ -236,3 +239,7 @@ extern HANDLER(tooltipNotifyHandler);
 
 // acctable.c
 extern HANDLER(accessibilityHandler);
+
+#ifdef __cplusplus
+}
+#endif

@@ -11,7 +11,6 @@ BASENAME = wintable
 OUT = $(OUTDIR)/$(BASENAME).dll
 
 CFILES = \
-	acctable.c \
 	alloc.c \
 	api.c \
 	checkboxdraw.c \
@@ -38,11 +37,16 @@ CFILES = \
 	visibility.c \
 	vscroll.c
 
+CXXFILES += \
+	acctable.cpp
+
 HFILES = \
 	table.h \
 	tablepriv.h
 
-OFILES = $(CFILES:%.c=$(OBJDIR)/%.o)
+OFILES = \
+	$(CFILES:%.c=$(OBJDIR)/%.o) \
+	$(CXXFILES:%.cpp=$(OBJDIR)/%.o)
 
 # TODO /Wall does too much
 # TODO -Wno-switch equivalent
@@ -56,6 +60,9 @@ CFLAGS += \
 	/TC \
 	/bigobj /nologo \
 	/RTC1 /RTCc /RTCs /RTCu \
+
+# TODO fine tune this
+CXXFLAGS += $(subst /TC,/TP,$(CFLAGS))
 
 # TODO warnings on undefined symbols
 LDFLAGS += \
@@ -71,6 +78,10 @@ $(OUT): $(OFILES) | $(OUTDIR)
 
 $(OBJDIR)/%.o: %.c $(HFILES) | $(OBJDIR)
 	@cl /Fo:$@ /c $< $(CFLAGS) /Fd$@.pdb
+	@echo ====== Compiled $<
+
+$(OBJDIR)/%.o: %.cpp $(HFILES) | $(OBJDIR)
+	@cl /Fo:$@ /c $< $(CXXFLAGS) /Fd$@.pdb
 	@echo ====== Compiled $<
 
 $(OBJDIR) $(OUTDIR):

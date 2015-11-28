@@ -3,6 +3,10 @@
 #ifndef __WINTABLE_INCLUDETHIS_H__
 #define __WINTABLE_INCLUDETHIS_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define tableWindowClass L"andlabs_wintable"
 
 // start at WM_USER + 20 just in case for whatever reason we ever get the various dialog manager messages (see also http://blogs.msdn.com/b/oldnewthing/archive/2003/10/21/55384.aspx)
@@ -69,5 +73,9 @@ extern __declspec(dllexport) HRESULT tableSubscriptionsUnsubscribe(tableSubscrip
 extern __declspec(dllexport) void tableSubscriptionsNotify(tableSubscriptions *, tableModelNotificationParams *);
 
 extern __declspec(dllexport) HRESULT __stdcall tableDrawImageCell(HDC, HBITMAP, RECT *);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

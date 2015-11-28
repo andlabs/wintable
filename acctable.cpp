@@ -1,5 +1,13 @@
 // 11 may 2015
+// TODO split out winapi includes
 #include "tablepriv.h"
+// before we start, why is this file C++? because the following is not a valid C header file!
+// namely, UIAutomationCoreApi.h forgets to typedef enum xxx xxx; and typedef struct xxx xxx; so it just uses xxx incorrectly
+// thanks, Microsoft!
+#include <uiautomation.h>
+
+// well if we're stuck with C++, we might as well make the most of it
+// TODO make struct tableAcc hold a C++ class or something
 
 struct tableAcc {
 	IRawElementProviderSimpleVtbl *lpVtbl;

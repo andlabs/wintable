@@ -189,7 +189,8 @@ DECLARE_INTERFACE_IID_(tableModel, IUnknown, 8f361d46-caab-489f-8d20-aeaaeaa9104
 		intmax_t row,
 		intmax_t column,
 		int expectedColumnType,
-		tableCellValue *value
+		// TODO C++ is stupid
+		struct tableCellValue *value
 	) PURE;
 
 	// tableDrawImageCell() draws the image belonging to the
@@ -233,7 +234,8 @@ DECLARE_INTERFACE_IID_(tableModel, IUnknown, 8f361d46-caab-489f-8d20-aeaaeaa9104
 	STDMETHOD(tableSetCellValue)(THIS_
 		intmax_t row,
 		intmax_t column,
-		tableCellValue data
+		// TODO C++ is stupid
+		struct tableCellValue data
 	) PURE;
 
 	// TODO document

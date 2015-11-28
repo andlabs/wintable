@@ -91,7 +91,7 @@ clean:
 	rm -rf $(OBJDIR) $(OUTDIR)
 
 test: $(OUT) test.c
-	@cl /Fo:$(OBJDIR)/test.o /c $< $(CFLAGS) /Fd$(OBJDIR)/test.o.pdb
+	@cl /Fo:$(OBJDIR)/test.o /c test.c $(CFLAGS) /Fd$(OBJDIR)/test.o.pdb
 	@echo ====== Compiled test.c
-	@link /out:$(OUTDIR)/test.exe $(OBJDIR)/test.o $(LDFLAGS) $(OUTDIR)/wintable.lib
+	@link /out:$(OUTDIR)/test.exe $(OBJDIR)/test.o $(LDFLAGS) $(OUTDIR)/wintable.lib user32.lib kernel32.lib gdi32.lib ole32.lib comctl32.lib oleaut32.lib
 	@echo ====== Linked test.exe

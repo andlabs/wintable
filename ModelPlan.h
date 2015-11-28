@@ -47,13 +47,13 @@ struct tableModelNotificationParams {
 	intmax_t column;
 };
 
+// TODO convert everything (including the below) to libui's naming conventions
+
 struct tableCellValue {
 	int type;
-	union {
-		BSTR stringVal;
-		BOOL boolVal;
-		tableARGBColor color;
-	};
+	BSTR stringVal;
+	BOOL boolVal;
+	tableARGBColor color;
 };
 
 // tableModel errors

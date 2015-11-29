@@ -4,8 +4,10 @@
 #define _UNICODE
 #define STRICT
 #define STRICT_TYPED_ITEMIDS
+#ifndef __cplusplus
 #define CINTERFACE
 #define COBJMACROS
+#endif
 // see https://github.com/golang/go/issues/9916#issuecomment-74812211
 //TODO#define INITGUID
 // for the manifest

@@ -45,7 +45,7 @@ static HRESULT setModel(struct table *t, tableModel *m)
 
 	if (m == NULL)
 		return E_INVALIDARG;
-	if (t->model != &nullModel) {
+	if (t->model != nullModel) {
 		hr = tableModel_tableUnsubscribe(t->model, t->hwnd);
 		if (hr != S_OK)
 			return logHRESULT("error unsubscribing old Table model in setModel()", hr);

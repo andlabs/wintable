@@ -7,9 +7,6 @@
 extern "C" {
 #endif
 
-// forward declaration
-struct tableAcc;
-
 // TODO make this unnecessary here
 struct rowcol {
 	intmax_t row;
@@ -49,7 +46,7 @@ struct table {
 	struct rowcol tooltipCurrentRowColumn;
 	RECT tooltipAdjustedRect;
 
-	struct tableAcc *firstAcc;
+	void *tableAcc;
 };
 
 struct metrics;		// needed for below; TODO make this unnecessary
@@ -194,7 +191,7 @@ extern HRESULT ensureVisible(struct table *, struct metrics *, struct rowcol);
 extern HRESULT queueRedrawRow(struct table *, struct metrics *, intmax_t);
 
 // nullmodel.c
-extern const tableModel nullModel;
+extern tableModel *nullModel;
 
 // modelnotify.c
 extern HANDLER(modelNotificationHandler);
@@ -210,7 +207,9 @@ extern EVENTHANDLER(tooltipMouseLeaveHandler);
 extern EVENTHANDLER(tooltipTimerHandler);
 extern HANDLER(tooltipNotifyHandler);
 
-// acctable.c
+// acctable.cpp
+extern void initTableAcc(struct table *);
+extern void uninitTableAcc(struct table *);
 extern HANDLER(accessibilityHandler);
 
 #ifdef __cplusplus

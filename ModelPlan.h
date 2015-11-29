@@ -71,7 +71,7 @@ struct tableCellValue {
 // Table itself assumes the model is an in-process, STA object.
 #undef INTERFACE
 #define INTERFACE tableModel
-DECLARE_INTERFACE_IID_(tableModel, IUnknown, 8f361d46-caab-489f-8d20-aeaaeaa9104f) {
+DECLARE_INTERFACE_IID_(tableModel, IUnknown, "8f361d46-caab-489f-8d20-aeaaeaa9104f") {
 	BEGIN_INTERFACE
 
 	// IUnknown methods

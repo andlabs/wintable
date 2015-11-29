@@ -99,6 +99,9 @@ static const tableModelVtbl nullModelVtbl = {
 	.tableCellToggleBool = nullModeltableCellToggleBool,
 };
 
-const tableModel nullModel = {
+static tableModel xnullModel = {
 	.lpVtbl = &nullModelVtbl,
 };
+
+// TODO make a function?
+tableModel *nullModel = &xnullModel;

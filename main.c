@@ -45,7 +45,7 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 			t->selectedRow = -1;
 			t->selectedColumn = -1;
 			loadCheckboxThemeData(t);
-			t->model = &nullModel;
+			t->model = nullModel;
 			initTableAcc(t);
 			SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR) t);
 		}
@@ -56,7 +56,7 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 		// TODO free appropriate (after figuring this part out) components of t
 		uninitTableAcc(t);
 		// TODO what if any of this fails?
-		if (t->model != &nullModel)
+		if (t->model != nullModel)
 			tableModel_tableUnsubscribe(t->model, t->hwnd);
 		tableModel_Release(t->model);
 		freeCheckboxThemeData(t);

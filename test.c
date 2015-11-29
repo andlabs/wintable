@@ -1,5 +1,21 @@
 // 19 october 2014
-#include "winapi.h"
+#define UNICODE
+#define _UNICODE
+#define STRICT
+#define STRICT_TYPED_ITEMIDS
+#define CINTERFACE
+#define COBJMACROS
+// see https://github.com/golang/go/issues/9916#issuecomment-74812211
+//TODO#define INITGUID
+#define WINVER 0x0600
+#define _WIN32_WINNT 0x0600
+#define _WIN32_WINDOWS 0x0600		/* according to Microsoft's winperf.h */
+#define _WIN32_IE 0x0700			/* according to Microsoft's sdkddkver.h */
+#define NTDDI_VERSION 0x06000000	/* according to Microsoft's sdkddkver.h */
+#include <windows.h>
+#include <commctrl.h>
+#include <stdint.h>
+#include <windowsx.h>
 #include <stdio.h>
 // TODO
 #define dllexport dllimport
@@ -120,6 +136,17 @@ int main(int argc, char *argv[])
 			rowcount = 6;
 		else
 			msgfont = TRUE;
+{
+HRESULT hr;
+hr = CoInitialize(NULL);
+if (hr != S_OK && hr != S_FALSE) panic("(test program) failed to initialize COM");
+    IGlobalOptions *pGlobalOptions;
+    hr =  CoCreateInstance(&CLSID_GlobalOptions, NULL, CLSCTX_INPROC_SERVER, &IID_IGlobalOptions, &pGlobalOptions);
+    if (hr != S_OK) panic("(test program) error creating IGlobalOptions");
+        hr = IGlobalOptions_Set(pGlobalOptions, COMGLB_EXCEPTION_HANDLING, COMGLB_EXCEPTION_DONOT_HANDLE_ANY);
+	if (hr != S_OK) panic("(test program) error disabling COM's exception handling");
+	IGlobalOptions_Release(pGlobalOptions);
+}
 	bitmap = mkbitmap();
 	ZeroMemory(&icc, sizeof (INITCOMMONCONTROLSEX));
 	icc.dwSize = sizeof (INITCOMMONCONTROLSEX);

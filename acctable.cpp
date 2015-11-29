@@ -17,7 +17,7 @@ extern "C" int printf(const char *,...);
 // - make sure E_POINTER is correct
 
 // well if we're stuck with C++, we might as well make the most of it
-class tableAcc : public IRawElementProviderSimple {
+class tableAcc : public IRawElementProviderSimple/*TODO, public ITableProvider, public IGridProvider*/ {
 	struct table *t;
 	ULONG refcount;
 public:
@@ -36,6 +36,13 @@ public:
 	STDMETHODIMP GetPropertyValue(PROPERTYID propertyId, VARIANT *pRetVal);
 	STDMETHODIMP get_HostRawElementProvider(IRawElementProviderSimple **pRetVal);
 	STDMETHODIMP get_ProviderOptions(ProviderOptions *pRetVal);
+
+#if 0
+	// ITableProvider
+	STDMETHODIMP GetColumnHeaders(SAFEARRAY **pRetVal);
+	STDMETHODIMP GetRowHeaders(SAFEARRAY **pRetVal);
+	STDMETHODIMP get_RowOrColumnMajor(RowOrColumnMajor *pRetVal);
+#endif
 };
 
 tableAcc::tableAcc(struct table *t)
@@ -93,10 +100,14 @@ STDMETHODIMP tableAcc::GetPatternProvider(PATTERNID patternId, IUnknown **pRetVa
 printf("get pattern provider\n");
 	if (pRetVal == NULL)
 		return E_POINTER;
-	// TODO
-	*pRetVal = NULL;
-//	return S_OK;
-	return E_NOTIMPL;
+//TODO	if (patternId != UIA_TablePatternId) {
+		*pRetVal = NULL;
+		return S_OK;
+#if 0
+	}
+	*pRetVal = xxxxx;
+	return S_OK;
+#endif
 }
 
 STDMETHODIMP tableAcc::GetPropertyValue(PROPERTYID propertyId, VARIANT *pRetVal)
@@ -109,6 +120,7 @@ printf("get property value\n");
 	pRetVal->vt = VT_EMPTY;		// behavior on unknown property is to keep it VT_EMPTY and return S_OK
 	switch (propertyId) {
 	case UIA_NamePropertyId:
+		// TODO this doesn't show up
 		bstr = SysAllocString(L"test string");
 		if (bstr == NULL)
 			return E_OUTOFMEMORY;
@@ -129,7 +141,10 @@ printf("get host raw element provider\n");
 		*pRetVal = NULL;
 		return RPC_E_DISCONNECTED;
 	}
-	return UiaHostProviderFromHwnd(this->t->hwnd, pRetVal);
+	// TODO wait should we?
+//	return UiaHostProviderFromHwnd(this->t->hwnd, pRetVal);
+	*pRetVal = NULL;
+	return S_OK;
 }
 
 STDMETHODIMP tableAcc::get_ProviderOptions(ProviderOptions *pRetVal)
@@ -141,6 +156,32 @@ printf("get provider options\n");
 	*pRetVal = ProviderOptions_ServerSideProvider;
 	return S_OK;
 }
+
+#if 0
+STDMETHODIMP tableAcc::GetColumnHeaders(SAFEARRAY **pRetVal)
+{
+	if (pRetVal == NULL)
+		return E_POINTER;
+	*pRetVal = NULL;
+	return E_NOTIMPL;
+}
+
+STDMETHODIMP tableAcc::GetRowHeaders(SAFEARRAY **pRetVal)
+{
+	if (pRetVal == NULL)
+		return E_POINTER;
+	*pRetVal = NULL;
+	return E_NOTIMPL;
+}
+
+STDMETHODIMP tableAcc::get_RowOrColumnMajor(RowOrColumnMajor *pRetVal)
+{
+	if (pRetVal == NULL)
+		return E_POINTER;
+	*pRetVal = RowOrColumnMajor_RowMajor;
+	return S_OK;
+}
+#endif
 
 void initTableAcc(struct table *t)
 {

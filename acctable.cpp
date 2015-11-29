@@ -17,7 +17,8 @@ extern "C" int printf(const char *,...);
 // - make sure E_POINTER is correct
 
 // well if we're stuck with C++, we might as well make the most of it
-class tableAcc : public IRawElementProviderSimple/*TODO, public ITableProvider, public IGridProvider*/ {
+// TODO do we want to be a table or something else?
+class tableAcc : public IRawElementProviderSimple, public ITableProvider, public IGridProvider {
 	struct table *t;
 	ULONG refcount;
 public:
@@ -37,12 +38,15 @@ public:
 	STDMETHODIMP get_HostRawElementProvider(IRawElementProviderSimple **pRetVal);
 	STDMETHODIMP get_ProviderOptions(ProviderOptions *pRetVal);
 
-#if 0
 	// ITableProvider
 	STDMETHODIMP GetColumnHeaders(SAFEARRAY **pRetVal);
 	STDMETHODIMP GetRowHeaders(SAFEARRAY **pRetVal);
 	STDMETHODIMP get_RowOrColumnMajor(RowOrColumnMajor *pRetVal);
-#endif
+
+	// IGridProvider
+	STDMETHODIMP GetItem(int row, int column, IRawElementProviderSimple **pRetVal);
+	STDMETHODIMP get_ColumnCount(int *pRetVal);
+	STDMETHODIMP get_RowCount(int *pRetVal);
 };
 
 tableAcc::tableAcc(struct table *t)
@@ -59,15 +63,30 @@ printf("invalidate\n");
 	this->t = NULL;
 }
 
+// TODO are the static_casts necessary or will a good old C cast do?
 STDMETHODIMP tableAcc::QueryInterface(REFIID riid, void **ppvObject)
 {
 printf("query interface\n");
 	if (ppvObject == NULL)
 		return E_POINTER;
-	if (IsEqualIID(riid, IID_IUnknown) ||
-		IsEqualIID(riid, IID_IRawElementProviderSimple)) {
+	if (IsEqualIID(riid, IID_IUnknown)) {
 		this->AddRef();
-		*ppvObject = this;
+		*ppvObject = static_cast<tableAcc *>(this);
+		return S_OK;
+	}
+	if (IsEqualIID(riid, IID_IRawElementProviderSimple)) {
+		this->AddRef();
+		*ppvObject = static_cast<IRawElementProviderSimple *>(this);
+		return S_OK;
+	}
+	if (IsEqualIID(riid, IID_ITableProvider)) {
+		this->AddRef();
+		*ppvObject = static_cast<ITableProvider *>(this);
+		return S_OK;
+	}
+	if (IsEqualIID(riid, IID_IGridProvider)) {
+		this->AddRef();
+		*ppvObject = static_cast<IGridProvider *>(this);
 		return S_OK;
 	}
 	return E_NOINTERFACE;
@@ -95,19 +114,20 @@ printf("destroy\n");
 	return this->refcount;
 }
 
+// TODO again with static_casts
 STDMETHODIMP tableAcc::GetPatternProvider(PATTERNID patternId, IUnknown **pRetVal)
 {
 printf("get pattern provider\n");
 	if (pRetVal == NULL)
 		return E_POINTER;
-//TODO	if (patternId != UIA_TablePatternId) {
-		*pRetVal = NULL;
+	if (patternId == UIA_TablePatternId) {
+		this->AddRef();
+		*pRetVal = static_cast<ITableProvider *>(this);
 		return S_OK;
-#if 0
 	}
-	*pRetVal = xxxxx;
+	// TODO grid pattern?
+	*pRetVal = NULL;
 	return S_OK;
-#endif
 }
 
 STDMETHODIMP tableAcc::GetPropertyValue(PROPERTYID propertyId, VARIANT *pRetVal)
@@ -117,17 +137,32 @@ printf("get property value %d\n", (int)propertyId);
 
 	if (pRetVal == NULL)
 		return E_POINTER;
+	// TODO keep this on error?
 	pRetVal->vt = VT_EMPTY;		// behavior on unknown property is to keep it VT_EMPTY and return S_OK
+	if (this->t == NULL)
+		return RPC_E_DISCONNECTED;
 	switch (propertyId) {
+	case UIA_ControlTypePropertyId:
+		pRetVal->vt = VT_I4;
+		pRetVal->lVal = UIA_TableControlTypeId;
+		break;
 	case UIA_NamePropertyId:
+		// TODO do we specify this ourselves? or let the parent window provide it?
 printf("getting name\n");
-		// TODO this doesn't show up
 		bstr = SysAllocString(L"test string");
 		if (bstr == NULL)
 			return E_OUTOFMEMORY;
 		pRetVal->vt = VT_BSTR;
 		pRetVal->bstrVal = bstr;
 		break;
+#if 0
+	case UIA_NativeWindowHandlePropertyId:
+printf("getting window handle\n");
+		// TODO the docs say VT_I4
+		// a window handle is a pointer
+		// 64-bit issue?
+		break;
+#endif
 	}
 	return S_OK;
 }
@@ -158,7 +193,6 @@ printf("get provider options\n");
 	return S_OK;
 }
 
-#if 0
 STDMETHODIMP tableAcc::GetColumnHeaders(SAFEARRAY **pRetVal)
 {
 	if (pRetVal == NULL)
@@ -182,7 +216,31 @@ STDMETHODIMP tableAcc::get_RowOrColumnMajor(RowOrColumnMajor *pRetVal)
 	*pRetVal = RowOrColumnMajor_RowMajor;
 	return S_OK;
 }
-#endif
+
+STDMETHODIMP tableAcc::GetItem(int row, int column, IRawElementProviderSimple **pRetVal)
+{
+	return E_NOTIMPL;
+}
+
+STDMETHODIMP tableAcc::get_ColumnCount(int *pRetVal)
+{
+	if (pRetVal == NULL)
+		return E_POINTER;
+	if (this->t == NULL)
+		return RPC_E_DISCONNECTED;
+	*pRetVal = this->t->nColumns;
+	return S_OK;
+}
+
+STDMETHODIMP tableAcc::get_RowCount(int *pRetVal)
+{
+	if (pRetVal == NULL)
+		return E_POINTER;
+	if (this->t == NULL)
+		return RPC_E_DISCONNECTED;
+	*pRetVal = t->model->tableRowCount();
+	return S_OK;
+}
 
 void initTableAcc(struct table *t)
 {

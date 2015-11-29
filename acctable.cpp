@@ -8,18 +8,12 @@
 // (if it was just structs I would just typedef them here but even that's not really futureproof)
 #include <uiautomation.h>
 
-// TODO
-//#include <stdio.h>
-extern "C" int printf(const char *,...);
-
-// We are implementing a replacement for the standard list-view control, which uses the List model, even in report mode.
-
 // TODOs
 // - make sure RPC_E_DISCONNECTED is correct; source it
 // - make sure E_POINTER is correct
 
 // well if we're stuck with C++, we might as well make the most of it
-class tableAcc : public IRawElementProviderSimple, public IGridProvider {
+class tableAcc : public IRawElementProviderSimple {
 	struct table *t;
 	ULONG refcount;
 public:
@@ -38,23 +32,16 @@ public:
 	STDMETHODIMP GetPropertyValue(PROPERTYID propertyId, VARIANT *pRetVal);
 	STDMETHODIMP get_HostRawElementProvider(IRawElementProviderSimple **pRetVal);
 	STDMETHODIMP get_ProviderOptions(ProviderOptions *pRetVal);
-
-	// IGridProvider
-	STDMETHODIMP GetItem(int row, int column, IRawElementProviderSimple **pRetVal);
-	STDMETHODIMP get_ColumnCount(int *pRetVal);
-	STDMETHODIMP get_RowCount(int *pRetVal);
 };
 
 tableAcc::tableAcc(struct table *t)
 {
-printf("construct\n");
 	this->t = t;
 	this->refcount = 1;		// first instance goes to the table
 }
 
 void tableAcc::Invalidate(void)
 {
-printf("invalidate\n");
 	// this will always be called before the tableAcc is destroyed because there's one ref given to the table itself
 	this->t = NULL;
 }
@@ -62,7 +49,6 @@ printf("invalidate\n");
 // TODO are the static_casts necessary or will a good old C cast do?
 STDMETHODIMP tableAcc::QueryInterface(REFIID riid, void **ppvObject)
 {
-printf("query interface\n");
 	if (ppvObject == NULL)
 		return E_POINTER;
 	if (IsEqualIID(riid, IID_IUnknown)) {
@@ -85,7 +71,6 @@ printf("query interface\n");
 
 STDMETHODIMP_(ULONG) tableAcc::AddRef(void)
 {
-printf("add ref\n");
 	// http://blogs.msdn.com/b/oldnewthing/archive/2005/09/27/474384.aspx
 	if (this->refcount == 0)
 		logLastError("tableAcc::AddRef() called during destruction");
@@ -95,10 +80,8 @@ printf("add ref\n");
 
 STDMETHODIMP_(ULONG) tableAcc::Release(void)
 {
-printf("release\n");
 	this->refcount--;
 	if (this->refcount == 0) {
-printf("destroy\n");
 		delete this;
 		return 0;
 	}
@@ -108,7 +91,6 @@ printf("destroy\n");
 // TODO again with static_casts
 STDMETHODIMP tableAcc::GetPatternProvider(PATTERNID patternId, IUnknown **pRetVal)
 {
-printf("get pattern provider\n");
 	if (pRetVal == NULL)
 		return E_POINTER;
 #if 0
@@ -126,7 +108,6 @@ printf("get pattern provider\n");
 
 STDMETHODIMP tableAcc::GetPropertyValue(PROPERTYID propertyId, VARIANT *pRetVal)
 {
-printf("get property value %d\n", (int)propertyId);
 	BSTR bstr;
 
 	if (pRetVal == NULL)
@@ -142,7 +123,6 @@ printf("get property value %d\n", (int)propertyId);
 		break;
 	case UIA_NamePropertyId:
 		// TODO do we specify this ourselves? or let the parent window provide it?
-printf("getting name\n");
 		bstr = SysAllocString(L"test string");
 		if (bstr == NULL)
 			return E_OUTOFMEMORY;
@@ -151,7 +131,6 @@ printf("getting name\n");
 		break;
 #if 0
 	case UIA_NativeWindowHandlePropertyId:
-printf("getting window handle\n");
 		// TODO the docs say VT_I4
 		// a window handle is a pointer
 		// 64-bit issue?
@@ -163,7 +142,6 @@ printf("getting window handle\n");
 
 STDMETHODIMP tableAcc::get_HostRawElementProvider(IRawElementProviderSimple **pRetVal)
 {
-printf("get host raw element provider\n");
 	if (this->t == NULL) {
 		if (pRetVal == NULL)
 			return E_POINTER;
@@ -171,44 +149,16 @@ printf("get host raw element provider\n");
 		*pRetVal = NULL;
 		return RPC_E_DISCONNECTED;
 	}
-	// TODO wait should we?
-//	return UiaHostProviderFromHwnd(this->t->hwnd, pRetVal);
-	*pRetVal = NULL;
-	return S_OK;
+	// according to https://msdn.microsoft.com/en-us/library/windows/desktop/ee671597%28v=vs.85%29.aspx this is correct for the top-level provider
+	return UiaHostProviderFromHwnd(this->t->hwnd, pRetVal);
 }
 
 STDMETHODIMP tableAcc::get_ProviderOptions(ProviderOptions *pRetVal)
 {
-printf("get provider options\n");
 	if (pRetVal == NULL)
 		return E_POINTER;
 	// TODO ProviderOptions_UseClientCoordinates?
 	*pRetVal = ProviderOptions_ServerSideProvider;
-	return S_OK;
-}
-
-STDMETHODIMP tableAcc::GetItem(int row, int column, IRawElementProviderSimple **pRetVal)
-{
-	return E_NOTIMPL;
-}
-
-STDMETHODIMP tableAcc::get_ColumnCount(int *pRetVal)
-{
-	if (pRetVal == NULL)
-		return E_POINTER;
-	if (this->t == NULL)
-		return RPC_E_DISCONNECTED;
-	*pRetVal = this->t->nColumns;
-	return S_OK;
-}
-
-STDMETHODIMP tableAcc::get_RowCount(int *pRetVal)
-{
-	if (pRetVal == NULL)
-		return E_POINTER;
-	if (this->t == NULL)
-		return RPC_E_DISCONNECTED;
-	*pRetVal = t->model->tableRowCount();
 	return S_OK;
 }
 

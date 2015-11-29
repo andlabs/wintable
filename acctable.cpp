@@ -112,7 +112,7 @@ printf("get pattern provider\n");
 
 STDMETHODIMP tableAcc::GetPropertyValue(PROPERTYID propertyId, VARIANT *pRetVal)
 {
-printf("get property value\n");
+printf("get property value %d\n", (int)propertyId);
 	BSTR bstr;
 
 	if (pRetVal == NULL)
@@ -120,6 +120,7 @@ printf("get property value\n");
 	pRetVal->vt = VT_EMPTY;		// behavior on unknown property is to keep it VT_EMPTY and return S_OK
 	switch (propertyId) {
 	case UIA_NamePropertyId:
+printf("getting name\n");
 		// TODO this doesn't show up
 		bstr = SysAllocString(L"test string");
 		if (bstr == NULL)
@@ -134,7 +135,7 @@ printf("get property value\n");
 STDMETHODIMP tableAcc::get_HostRawElementProvider(IRawElementProviderSimple **pRetVal)
 {
 printf("get host raw element provider\n");
-	if (this->t != NULL) {
+	if (this->t == NULL) {
 		if (pRetVal == NULL)
 			return E_POINTER;
 		// TODO correct?

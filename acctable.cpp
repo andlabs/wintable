@@ -12,13 +12,14 @@
 //#include <stdio.h>
 extern "C" int printf(const char *,...);
 
+// We are implementing a replacement for the standard list-view control, which uses the List model, even in report mode.
+
 // TODOs
 // - make sure RPC_E_DISCONNECTED is correct; source it
 // - make sure E_POINTER is correct
 
 // well if we're stuck with C++, we might as well make the most of it
-// TODO do we want to be a table or something else?
-class tableAcc : public IRawElementProviderSimple, public ITableProvider, public IGridProvider {
+class tableAcc : public IRawElementProviderSimple, public IGridProvider {
 	struct table *t;
 	ULONG refcount;
 public:
@@ -37,11 +38,6 @@ public:
 	STDMETHODIMP GetPropertyValue(PROPERTYID propertyId, VARIANT *pRetVal);
 	STDMETHODIMP get_HostRawElementProvider(IRawElementProviderSimple **pRetVal);
 	STDMETHODIMP get_ProviderOptions(ProviderOptions *pRetVal);
-
-	// ITableProvider
-	STDMETHODIMP GetColumnHeaders(SAFEARRAY **pRetVal);
-	STDMETHODIMP GetRowHeaders(SAFEARRAY **pRetVal);
-	STDMETHODIMP get_RowOrColumnMajor(RowOrColumnMajor *pRetVal);
 
 	// IGridProvider
 	STDMETHODIMP GetItem(int row, int column, IRawElementProviderSimple **pRetVal);
@@ -77,11 +73,6 @@ printf("query interface\n");
 	if (IsEqualIID(riid, IID_IRawElementProviderSimple)) {
 		this->AddRef();
 		*ppvObject = static_cast<IRawElementProviderSimple *>(this);
-		return S_OK;
-	}
-	if (IsEqualIID(riid, IID_ITableProvider)) {
-		this->AddRef();
-		*ppvObject = static_cast<ITableProvider *>(this);
 		return S_OK;
 	}
 	if (IsEqualIID(riid, IID_IGridProvider)) {
@@ -120,12 +111,15 @@ STDMETHODIMP tableAcc::GetPatternProvider(PATTERNID patternId, IUnknown **pRetVa
 printf("get pattern provider\n");
 	if (pRetVal == NULL)
 		return E_POINTER;
-	if (patternId == UIA_TablePatternId) {
+#if 0
+// TODO
+	if (patternId == UIA_ListPatternId) {
 		this->AddRef();
-		*pRetVal = static_cast<ITableProvider *>(this);
+		*pRetVal = static_cast<IRawElementProviderSimple *>(this);
 		return S_OK;
 	}
-	// TODO grid pattern?
+#endif
+	// TODO datagrid pattern?
 	*pRetVal = NULL;
 	return S_OK;
 }
@@ -144,7 +138,7 @@ printf("get property value %d\n", (int)propertyId);
 	switch (propertyId) {
 	case UIA_ControlTypePropertyId:
 		pRetVal->vt = VT_I4;
-		pRetVal->lVal = UIA_TableControlTypeId;
+		pRetVal->lVal = UIA_ListControlTypeId;
 		break;
 	case UIA_NamePropertyId:
 		// TODO do we specify this ourselves? or let the parent window provide it?
@@ -190,30 +184,6 @@ printf("get provider options\n");
 		return E_POINTER;
 	// TODO ProviderOptions_UseClientCoordinates?
 	*pRetVal = ProviderOptions_ServerSideProvider;
-	return S_OK;
-}
-
-STDMETHODIMP tableAcc::GetColumnHeaders(SAFEARRAY **pRetVal)
-{
-	if (pRetVal == NULL)
-		return E_POINTER;
-	*pRetVal = NULL;
-	return E_NOTIMPL;
-}
-
-STDMETHODIMP tableAcc::GetRowHeaders(SAFEARRAY **pRetVal)
-{
-	if (pRetVal == NULL)
-		return E_POINTER;
-	*pRetVal = NULL;
-	return E_NOTIMPL;
-}
-
-STDMETHODIMP tableAcc::get_RowOrColumnMajor(RowOrColumnMajor *pRetVal)
-{
-	if (pRetVal == NULL)
-		return E_POINTER;
-	*pRetVal = RowOrColumnMajor_RowMajor;
 	return S_OK;
 }
 

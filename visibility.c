@@ -89,7 +89,7 @@ HRESULT queueRedrawRow(struct table *t, struct metrics *m, intmax_t row)
 		return S_OK;
 	// TODO check too low
 	row -= t->yOrigin;
-	r.top = row * m->rowHeight + t->headerHeight;
+	r.top = (LONG) (row * m->rowHeight + t->headerHeight);
 	r.bottom = r.top + m->rowHeight;
 	r.left = m->client.left;
 	r.right = m->client.right;

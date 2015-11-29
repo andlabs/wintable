@@ -45,7 +45,7 @@ HRESULT update(struct table *t, BOOL redraw)
 
 	// now that we have the new height of the header, we can fix up vertical scrolling
 	// so let's take the header height away from the client area
-	m.client.top += t->headerHeight;
+	m.client.top += (LONG) (t->headerHeight);
 	// and update our page size appropriately
 	height = m.client.bottom - m.client.top;
 	t->vpagesize = height / m.rowHeight;

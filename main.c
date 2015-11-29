@@ -46,6 +46,7 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 			t->selectedColumn = -1;
 			loadCheckboxThemeData(t);
 			t->model = &nullModel;
+			initTableAcc(t);
 			SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR) t);
 		}
 		// even if we did the above, fall through
@@ -53,7 +54,7 @@ static LRESULT CALLBACK tableWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM
 	}
 	if (uMsg == WM_DESTROY) {
 		// TODO free appropriate (after figuring this part out) components of t
-//TODO		invalidateTableAccs(t);
+		uninitTableAcc(t);
 		// TODO what if any of this fails?
 		if (t->model != &nullModel)
 			tableModel_tableUnsubscribe(t->model, t->hwnd);

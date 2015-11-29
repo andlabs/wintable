@@ -8,68 +8,105 @@
 // (if it was just structs I would just typedef them here but even that's not really futureproof)
 #include <uiautomation.h>
 
-// well if we're stuck with C++, we might as well make the most of it
-// TODO make struct tableAcc hold a C++ class or something
+// TODO
+//#include <stdio.h>
+extern "C" int printf(const char *,...);
 
-struct tableAcc {
-	IRawElementProviderSimpleVtbl *lpVtbl;
+// TODOs
+// - make sure RPC_E_DISCONNECTED is correct; source it
+// - make sure E_POINTER is correct
+
+// well if we're stuck with C++, we might as well make the most of it
+class tableAcc : public IRawElementProviderSimple {
+	struct table *t;
 	ULONG refcount;
+public:
+	tableAcc(struct table *);
+
+	// internal methods
+	void Invalidate(void);
+
+	// IUnknown
+	STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject);
+	STDMETHODIMP_(ULONG) AddRef(void);
+	STDMETHODIMP_(ULONG) Release(void);
+
+	// IRawElementProviderSimple
+	STDMETHODIMP GetPatternProvider(PATTERNID patternId, IUnknown **pRetVal);
+	STDMETHODIMP GetPropertyValue(PROPERTYID propertyId, VARIANT *pRetVal);
+	STDMETHODIMP get_HostRawElementProvider(IRawElementProviderSimple **pRetVal);
+	STDMETHODIMP get_ProviderOptions(ProviderOptions *pRetVal);
 };
 
-// TODO
-#define this hthis
-
-static HRESULT STDMETHODCALLTYPE tableAccQueryInterface(IRawElementProviderSimple *this, REFIID riid, void **ppvObject)
+tableAcc::tableAcc(struct table *t)
 {
+printf("construct\n");
+	this->t = t;
+	this->refcount = 1;		// first instance goes to the table
+}
+
+void tableAcc::Invalidate(void)
+{
+printf("invalidate\n");
+	// this will always be called before the tableAcc is destroyed because there's one ref given to the table itself
+	this->t = NULL;
+}
+
+STDMETHODIMP tableAcc::QueryInterface(REFIID riid, void **ppvObject)
+{
+printf("query interface\n");
 	if (ppvObject == NULL)
 		return E_POINTER;
 	if (IsEqualIID(riid, IID_IUnknown) ||
 		IsEqualIID(riid, IID_IRawElementProviderSimple)) {
-		IRawElementProviderSimple_AddRef(this);
+		this->AddRef();
 		*ppvObject = this;
 		return S_OK;
 	}
 	return E_NOINTERFACE;
 }
 
-#define tableAcc(x) ((struct tableAcc *) (x))
-
-static ULONG STDMETHODCALLTYPE tableAccAddRef(IRawElementProviderSimple *this)
+STDMETHODIMP_(ULONG) tableAcc::AddRef(void)
 {
-	struct tableAcc *t = tableAcc(this);
-
-	t->refcount++;
-	return t->refcount;
+printf("add ref\n");
+	// http://blogs.msdn.com/b/oldnewthing/archive/2005/09/27/474384.aspx
+	if (this->refcount == 0)
+		logLastError("tableAcc::AddRef() called during destruction");
+	this->refcount++;
+	return this->refcount;
 }
 
-static ULONG STDMETHODCALLTYPE tableAccRelease(IRawElementProviderSimple *this)
+STDMETHODIMP_(ULONG) tableAcc::Release(void)
 {
-	struct tableAcc *t = tableAcc(this);
-
-	t->refcount--;
-	if (t->refcount == 0) {
-		// TODO
+printf("release\n");
+	this->refcount--;
+	if (this->refcount == 0) {
+printf("destroy\n");
+		delete this;
 		return 0;
 	}
-	return t->refcount;
+	return this->refcount;
 }
 
-static HRESULT STDMETHODCALLTYPE tableAccGetPatternProvider(IRawElementProviderSimple *this, PATTERNID patternId, IUnknown **pRetVal)
+STDMETHODIMP tableAcc::GetPatternProvider(PATTERNID patternId, IUnknown **pRetVal)
 {
+printf("get pattern provider\n");
 	if (pRetVal == NULL)
 		return E_POINTER;
 	// TODO
 	*pRetVal = NULL;
-	return S_OK;
+//	return S_OK;
+	return E_NOTIMPL;
 }
 
-static HRESULT STDMETHODCALLTYPE tableAccGetPropertyValue(IRawElementProviderSimple *this, PROPERTYID propertyId, VARIANT *pRetVal)
+STDMETHODIMP tableAcc::GetPropertyValue(PROPERTYID propertyId, VARIANT *pRetVal)
 {
+printf("get property value\n");
 	BSTR bstr;
 
 	if (pRetVal == NULL)
 		return E_POINTER;
-	pRetVal->vt = VT_EMPTY;		// default behavior
+	pRetVal->vt = VT_EMPTY;		// behavior on unknown property is to keep it VT_EMPTY and return S_OK
 	switch (propertyId) {
 	case UIA_NamePropertyId:
 		bstr = SysAllocString(L"test string");
@@ -82,18 +119,46 @@ static HRESULT STDMETHODCALLTYPE tableAccGetPropertyValue(IRawElementProviderSim
 	return S_OK;
 }
 
-static IRawElementProviderSimpleVtbl vtbl = {
-// TOOD msvc
-#if 0
-	.QueryInterface = tableAccQueryInterface,
-	.AddRef = tableAccAddRef,
-	.Release = tableAccRelease,
-	.GetPatternProvider = tableAccGetPatternProvider,
-	.GetPropertyValue = tableAccGetPropertyValue,
-#endif
-};
+STDMETHODIMP tableAcc::get_HostRawElementProvider(IRawElementProviderSimple **pRetVal)
+{
+printf("get host raw element provider\n");
+	if (this->t != NULL) {
+		if (pRetVal == NULL)
+			return E_POINTER;
+		// TODO correct?
+		*pRetVal = NULL;
+		return RPC_E_DISCONNECTED;
+	}
+	return UiaHostProviderFromHwnd(this->t->hwnd, pRetVal);
+}
 
-static struct tableAcc ta;
+STDMETHODIMP tableAcc::get_ProviderOptions(ProviderOptions *pRetVal)
+{
+printf("get provider options\n");
+	if (pRetVal == NULL)
+		return E_POINTER;
+	// TODO ProviderOptions_UseClientCoordinates?
+	*pRetVal = ProviderOptions_ServerSideProvider;
+	return S_OK;
+}
+
+void initTableAcc(struct table *t)
+{
+	tableAcc *a;
+
+	a = new tableAcc(t);
+	t->tableAcc = a;
+}
+
+void uninitTableAcc(struct table *t)
+{
+	tableAcc *a;
+
+	a = (tableAcc *) (t->tableAcc);
+	a->Invalidate();
+	a->Release();
+	t->tableAcc = NULL;
+}
 
 HANDLER(accessibilityHandler)
 {
@@ -107,9 +172,9 @@ HANDLER(accessibilityHandler)
 	// Microsoft's MSAA sample casts lParam to LONG instead!
 	// (As you can probably tell, the biggest problem with MSAA is that its documentation is ambiguous and/or self-contradictory...)
 	// and https://msdn.microsoft.com/en-us/library/windows/desktop/ff625912%28v=vs.85%29.aspx casts them both to long!
+	// Note that we're not using Active Accessibility, but the above applies even more, because UiaRootObjectId is *NEGATIVE*!
 	if (((DWORD) lParam) != ((DWORD) UiaRootObjectId))
 		return FALSE;
-	ta.lpVtbl = &vtbl;
-	*lResult = UiaReturnRawElementProvider(t->hwnd, wParam, lParam, (IRawElementProviderSimple *) (&ta));
+	*lResult = UiaReturnRawElementProvider(t->hwnd, wParam, lParam, (IRawElementProviderSimple *) (t->tableAcc));
 	return TRUE;
 }

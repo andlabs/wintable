@@ -7,20 +7,28 @@
 // thanks, Microsoft!
 // (if it was just structs I would just typedef them here but even that's not really futureproof)
 #include <uiautomation.h>
+// well if we're stuck with C++, we might as well make the most of it
+
+// For the top-level table, we implement the List control type because the standard Windows list view does so.
 
 // TODOs
-// - make sure RPC_E_DISCONNECTED is correct; source it
-// - make sure E_POINTER is correct
+// - make sure E_POINTER is correct; examples use E_INVALIDARG
+// - children must implement IRawElementProviderFragment
 
-// well if we're stuck with C++, we might as well make the most of it
-class tableAcc : public IRawElementProviderSimple {
+#define eDisconnected UIA_E_ELEMENTNOTAVAILABLE
+#define ePointer E_POINTER
+
+class tableAcc :
+	public IRawElementProviderSimple,
+	public IRawElementProviderFragmentRoot {
 	struct table *t;
 	ULONG refcount;
 public:
 	tableAcc(struct table *);
 
 	// internal methods
-	void Invalidate(void);
+	void tDisconnect(void);
+	// TODDO event support - see what events the host provider provides for us (from the same link that shows host properties?)
 
 	// IUnknown
 	STDMETHODIMP QueryInterface(REFIID riid, void **ppvObject);
@@ -32,6 +40,10 @@ public:
 	STDMETHODIMP GetPropertyValue(PROPERTYID propertyId, VARIANT *pRetVal);
 	STDMETHODIMP get_HostRawElementProvider(IRawElementProviderSimple **pRetVal);
 	STDMETHODIMP get_ProviderOptions(ProviderOptions *pRetVal);
+
+	// IRawElementProviderFragmentRoot
+	STDMETHODIMP ElementProviderFromPoint(double x, double y, IRawElementProviderFragment **pRetVal);
+	STDMETHODIMP GetFocus(IRawElementProviderFragment **pRetVal);
 };
 
 tableAcc::tableAcc(struct table *t)
@@ -40,30 +52,40 @@ tableAcc::tableAcc(struct table *t)
 	this->refcount = 1;		// first instance goes to the table
 }
 
-void tableAcc::Invalidate(void)
+// TODO are the static_casts necessary or will a good old C cast do?
+// note that this first one is not to IUnknown, as QueryInterface() requires us to always return the same pointer to IUnknown
+#define IU(x) (static_cast<tableAcc *>(x))
+#define IREPS(x) (static_cast<IRawElementProviderSimple *>(x))
+#define IREPFR(x) (static_cast<IRawElementProviderFragmentRoot *>(x))
+
+// this will always be called before the tableAcc is destroyed because there's one ref given to the table itself
+void tableAcc::tDisconnect(void)
 {
-	// this will always be called before the tableAcc is destroyed because there's one ref given to the table itself
+	HRESULT hr;
+
+	hr = UiaDisconnectProvider(IREPS(this));
+	if (hr != S_OK)
+		logHRESULT("error disconnecting UI Automation root provider for table in tableAcc::tDisconnect()", hr);
 	this->t = NULL;
 }
 
-// TODO are the static_casts necessary or will a good old C cast do?
 STDMETHODIMP tableAcc::QueryInterface(REFIID riid, void **ppvObject)
 {
 	if (ppvObject == NULL)
-		return E_POINTER;
+		return ePointer;
 	if (IsEqualIID(riid, IID_IUnknown)) {
 		this->AddRef();
-		*ppvObject = static_cast<tableAcc *>(this);
+		*ppvObject = IU(this);
 		return S_OK;
 	}
 	if (IsEqualIID(riid, IID_IRawElementProviderSimple)) {
 		this->AddRef();
-		*ppvObject = static_cast<IRawElementProviderSimple *>(this);
+		*ppvObject = IREPS(this);
 		return S_OK;
 	}
-	if (IsEqualIID(riid, IID_IGridProvider)) {
+	if (IsEqualIID(riid, IID_IRawElementProviderFragmentRoot)) {
 		this->AddRef();
-		*ppvObject = static_cast<IGridProvider *>(this);
+		*ppvObject = IREPFR(this);
 		return S_OK;
 	}
 	return E_NOINTERFACE;
@@ -88,41 +110,33 @@ STDMETHODIMP_(ULONG) tableAcc::Release(void)
 	return this->refcount;
 }
 
-// TODO again with static_casts
 STDMETHODIMP tableAcc::GetPatternProvider(PATTERNID patternId, IUnknown **pRetVal)
 {
 	if (pRetVal == NULL)
-		return E_POINTER;
-#if 0
-// TODO
-	if (patternId == UIA_ListPatternId) {
-		this->AddRef();
-		*pRetVal = static_cast<IRawElementProviderSimple *>(this);
-		return S_OK;
-	}
-#endif
-	// TODO datagrid pattern?
+		return ePointer;
+	// TODO which patterns should we provide? inspect the listview control to find out
 	*pRetVal = NULL;
 	return S_OK;
 }
 
+// TODO https://msdn.microsoft.com/en-us/library/windows/desktop/ee671615%28v=vs.85%29.aspx specifies which properties we can ignore
 STDMETHODIMP tableAcc::GetPropertyValue(PROPERTYID propertyId, VARIANT *pRetVal)
 {
 	BSTR bstr;
 
 	if (pRetVal == NULL)
-		return E_POINTER;
+		return ePointer;
 	// TODO keep this on error?
 	pRetVal->vt = VT_EMPTY;		// behavior on unknown property is to keep it VT_EMPTY and return S_OK
 	if (this->t == NULL)
-		return RPC_E_DISCONNECTED;
+		return eDisconnected;
 	switch (propertyId) {
 	case UIA_ControlTypePropertyId:
 		pRetVal->vt = VT_I4;
-		pRetVal->lVal = UIA_ListControlTypeId;
+//TODO		pRetVal->lVal = UIA_ListControlTypeId;
 		break;
 	case UIA_NamePropertyId:
-		// TODO do we specify this ourselves? or let the parent window provide it?
+		// TODO remove this once everything works; we only use it to test
 		bstr = SysAllocString(L"test string");
 		if (bstr == NULL)
 			return E_OUTOFMEMORY;
@@ -144,10 +158,10 @@ STDMETHODIMP tableAcc::get_HostRawElementProvider(IRawElementProviderSimple **pR
 {
 	if (this->t == NULL) {
 		if (pRetVal == NULL)
-			return E_POINTER;
+			return ePointer;
 		// TODO correct?
 		*pRetVal = NULL;
-		return RPC_E_DISCONNECTED;
+		return eDisconnected;
 	}
 	// according to https://msdn.microsoft.com/en-us/library/windows/desktop/ee671597%28v=vs.85%29.aspx this is correct for the top-level provider
 	return UiaHostProviderFromHwnd(this->t->hwnd, pRetVal);
@@ -156,10 +170,22 @@ STDMETHODIMP tableAcc::get_HostRawElementProvider(IRawElementProviderSimple **pR
 STDMETHODIMP tableAcc::get_ProviderOptions(ProviderOptions *pRetVal)
 {
 	if (pRetVal == NULL)
-		return E_POINTER;
-	// TODO ProviderOptions_UseClientCoordinates?
+		return ePointer;
 	*pRetVal = ProviderOptions_ServerSideProvider;
 	return S_OK;
+}
+
+STDMETHODIMP tableAcc::ElementProviderFromPoint(double x, double y, IRawElementProviderFragment **pRetVal)
+{
+	// TODO
+	return E_NOTIMPL;
+	// note: x and y are in screen coordinates
+}
+
+STDMETHODIMP tableAcc::GetFocus(IRawElementProviderFragment **pRetVal)
+{
+	// TODO
+	return E_NOTIMPL;
 }
 
 void initTableAcc(struct table *t)
@@ -175,7 +201,7 @@ void uninitTableAcc(struct table *t)
 	tableAcc *a;
 
 	a = (tableAcc *) (t->tableAcc);
-	a->Invalidate();
+	a->tDisconnect();
 	a->Release();
 	t->tableAcc = NULL;
 }
@@ -195,6 +221,6 @@ HANDLER(accessibilityHandler)
 	// Note that we're not using Active Accessibility, but the above applies even more, because UiaRootObjectId is *NEGATIVE*!
 	if (((DWORD) lParam) != ((DWORD) UiaRootObjectId))
 		return FALSE;
-	*lResult = UiaReturnRawElementProvider(t->hwnd, wParam, lParam, (IRawElementProviderSimple *) (t->tableAcc));
+	*lResult = UiaReturnRawElementProvider(t->hwnd, wParam, lParam, IREPS(t->tableAcc));
 	return TRUE;
 }

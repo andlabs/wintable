@@ -126,7 +126,6 @@ STDMETHODIMP tableAcc::GetPropertyValue(PROPERTYID propertyId, VARIANT *pRetVal)
 
 	if (pRetVal == NULL)
 		return ePointer;
-	// TODO keep this on error?
 	pRetVal->vt = VT_EMPTY;		// behavior on unknown property is to keep it VT_EMPTY and return S_OK
 	if (this->t == NULL)
 		return eDisconnected;
@@ -159,7 +158,6 @@ STDMETHODIMP tableAcc::get_HostRawElementProvider(IRawElementProviderSimple **pR
 	if (this->t == NULL) {
 		if (pRetVal == NULL)
 			return ePointer;
-		// TODO correct?
 		*pRetVal = NULL;
 		return eDisconnected;
 	}

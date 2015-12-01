@@ -30,3 +30,4 @@ TODO
 - use uxtheme APIs to draw the control in a list view style?
 - comctl6 manifest
 - https://msdn.microsoft.com/en-us/library/windows/desktop/dn312083%28v=vs.85%29.aspx
+- http://blogs.msdn.com/b/oldnewthing/archive/2004/01/12/57833.aspx provide a DEF file
